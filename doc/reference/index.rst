@@ -11,7 +11,6 @@ API Reference
    audio/index.rst
    misc/notify.rst
    bluetooth/index.rst
-   kconfig/index.rst
    crypto/index.rst
    devicetree/index.rst
    drivers/index.rst

@@ -437,7 +437,7 @@ endif()
 #
 # Dependencies and final targets
 #
-add_dependencies(html content doxy_real_modified_times kconfig devicetree)
+add_dependencies(html content doxy_real_modified_times devicetree)
 
 add_custom_target(
   htmldocs

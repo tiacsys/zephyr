@@ -335,7 +335,7 @@ endif()
 #
 # Dependencies and final targets
 #
-add_dependencies(html kconfig devicetree)
+add_dependencies(html devicetree)
 
 add_custom_target(
   htmldocs

@@ -43,7 +43,7 @@
 
 		ns16550_uart: uart@440000 {
 			compatible = "ns16550";
-			reg = <0x440000 0x400>;
+			reg = <0x440000 0x200>;
 			interrupts = <1>;
 			clock-frequency = <50000000>;
 			label = "UART_0";

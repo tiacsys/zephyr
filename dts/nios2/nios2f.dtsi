@@ -49,7 +49,7 @@
 			clock-frequency = <I2C_BITRATE_ULTRA>;
 			#address-cells = <1>;
 			#size-cells = <0>;
-			reg = <0x100200 0x400>;
+			reg = <0x100200 0x40>;
 			interrupts = <4 10>;
 			label = "I2C_0";
 		};

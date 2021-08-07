@@ -54,7 +54,7 @@
 			label = "I2C_0";
 		};
 
-		dma: dma@100200 {
+		dma: dma@1002c0 {
 			compatible = "altr,msgdma";
 			reg = <0x1002c0 0x30>;
 			label = "DMA_0";

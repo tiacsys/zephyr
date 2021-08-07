@@ -9,7 +9,8 @@
 	compatible = "altr,nios2-max10";
 
 	aliases {
-		uart-0 = &uart0;
+		uart-0 = &jtag_uart0;
+		uart-1 = &uart0;
 	};
 
 	chosen {
@@ -18,6 +19,11 @@
 		zephyr,console = &uart0;
 		zephyr,shell-uart = &uart0;
 	};
+};
+
+&jtag_uart0 {
+	status = "okay";
+	current-speed = <115200>;
 };
 
 &uart0 {

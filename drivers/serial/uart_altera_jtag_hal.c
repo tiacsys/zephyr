@@ -26,13 +26,49 @@
 #include "altera_avalon_jtag_uart.h"
 #include "altera_avalon_jtag_uart_regs.h"
 
-#define DEV_CFG(dev) \
-	((const struct uart_device_config * const)(dev)->config)
-
 extern int altera_avalon_jtag_uart_read(altera_avalon_jtag_uart_state *sp,
 		char *buffer, int space, int flags);
 extern int altera_avalon_jtag_uart_write(altera_avalon_jtag_uart_state *sp,
 		const char *ptr, int count, int flags);
+
+/** Device configuration structure */
+struct uart_altera_jtag_dev_config {
+	struct uart_device_config uconf;
+	uint32_t baud_rate;
+};
+
+#define DEV_CFG(dev) \
+	((const struct uart_altera_jtag_dev_config * const) \
+	 (dev)->config)
+
+static const struct uart_driver_api uart_altera_jtag_driver_api;
+
+/**
+ * @brief Poll the device for input.
+ *
+ * @param dev UART device struct
+ * @param c Pointer to character
+ *
+ * @return If a character arrived, or input buffer is empty.
+ *
+ * @retval 0  a character arrived
+ * @retval -1 input buffer if empty
+ */
+static int uart_altera_jtag_poll_in(const struct device *dev,
+					    unsigned char *c)
+{
+	const struct uart_altera_jtag_dev_config *dev_cfg = DEV_CFG(dev);
+	altera_avalon_jtag_uart_state ustate;
+
+	ustate.base = dev_cfg->uconf.regs;
+
+	if (altera_avalon_jtag_uart_read(&ustate, c, 1, 0) == 1) {
+		return 0;
+	} else {
+		return -1;
+	}
+
+}
 
 /**
  * @brief Output a character in polled mode.
@@ -46,12 +82,11 @@ extern int altera_avalon_jtag_uart_write(altera_avalon_jtag_uart_state *sp,
 static void uart_altera_jtag_poll_out(const struct device *dev,
 					       unsigned char c)
 {
-	const struct uart_device_config *config;
+	const struct uart_altera_jtag_dev_config *dev_cfg = DEV_CFG(dev);
 	altera_avalon_jtag_uart_state ustate;
 
-	config = DEV_CFG(dev);
+	ustate.base = dev_cfg->uconf.regs;
 
-	ustate.base = config->regs;
 	altera_avalon_jtag_uart_write(&ustate, &c, 1, 0);
 }
 
@@ -69,29 +104,30 @@ static void uart_altera_jtag_poll_out(const struct device *dev,
  */
 static int uart_altera_jtag_init(const struct device *dev)
 {
-	const struct uart_device_config *config;
-
-	config = DEV_CFG(dev);
+	const struct uart_altera_jtag_dev_config *dev_cfg = DEV_CFG(dev);
 
 	/*
 	 * Work around to clear interrupt enable bits
 	 * as it is not being done by HAL driver explicitly.
 	 */
-	IOWR_ALTERA_AVALON_JTAG_UART_CONTROL(config->regs, 0);
+	IOWR_ALTERA_AVALON_JTAG_UART_CONTROL(dev_cfg->uconf.regs, 0);
 
 	return 0;
 }
 
 static const struct uart_driver_api uart_altera_jtag_driver_api = {
-	.poll_in = NULL,
+	.poll_in = &uart_altera_jtag_poll_in,
 	.poll_out = &uart_altera_jtag_poll_out,
 	.err_check = NULL,
 };
 
 #define UART_ALTERA_JTAG_DEV_CFG(port) \
-static struct uart_device_config uart_altera_jtag_dev_cfg_##port = { \
-	.regs = DT_INST_REG_ADDR(port), \
-	.sys_clk_freq = 0, /* Unused */ \
+static struct uart_altera_jtag_dev_config uart_altera_jtag_dev_cfg_##port = { \
+	.uconf = { \
+		.regs = DT_INST_REG_ADDR(port), \
+		.sys_clk_freq = 0, /* Unused */ \
+	}, \
+	.baud_rate = DT_INST_PROP(port, current_speed), \
 }
 
 #define UART_ALTERA_JTAG_INIT(port) \

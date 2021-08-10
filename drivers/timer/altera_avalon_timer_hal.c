@@ -4,14 +4,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#define DT_DRV_COMPAT altr_interval_timer
+
 #include <kernel.h>
 #include <arch/cpu.h>
 #include <device.h>
 #include <drivers/timer/system_timer.h>
-#include <altera_common.h>
 
+#include <altera_common.h>
 #include "altera_avalon_timer_regs.h"
 #include "altera_avalon_timer.h"
+
+#define TIMER_NODE		DT_NODELABEL(systick)
+
+BUILD_ASSERT(DT_NODE_HAS_COMPAT_STATUS(TIMER_NODE, altr_interval_timer, okay),
+		"Configured system timer is not compatible with this driver "
+		"or disabled or has no node label systick in the device tree.");
+
+#define TIMER_IRQ		DT_IRQN(TIMER_NODE)
+#define TIMER_BASE_ADDR		DT_REG_ADDR(TIMER_NODE)
+#define TIMER_CLOCK_FREQUENCY	DT_PROP(TIMER_NODE, clock_frequency)
+
+#define TICKS_PER_SEC		CONFIG_SYS_CLOCK_TICKS_PER_SEC
+#define CYCLES_PER_SEC		TIMER_CLOCK_FREQUENCY
+#define CYCLES_PER_TICK		(CYCLES_PER_SEC / TICKS_PER_SEC)
+
+BUILD_ASSERT(TIMER_CLOCK_FREQUENCY == CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC,
+		"Configured system timer frequency does not match the timer "
+		"clock frequency in the device tree.");
+
+BUILD_ASSERT(CYCLES_PER_SEC >= TICKS_PER_SEC,
+		"Timer clock frequency must be greater than the system tick "
+		"frequency.");
+
+BUILD_ASSERT((CYCLES_PER_SEC % TICKS_PER_SEC) == 0,
+		"Timer clock frequency is not divisible by the system tick "
+		"frequency.");
 
 /* The old driver "now" API would return a full uptime value.  The new
  * one only requires the driver to track ticks since the last announce
@@ -37,7 +65,7 @@ static void timer_irq_handler(const void *unused)
 	accumulated_cycle_count += k_ticks_to_cyc_floor32(1);
 
 	/* Clear the interrupt */
-	alt_handle_irq((void *)TIMER_0_BASE, TIMER_0_IRQ);
+	alt_handle_irq((void *)TIMER_BASE_ADDR, TIMER_IRQ);
 
 	wrapped_announce(_sys_idle_elapsed_ticks);
 }
@@ -46,16 +74,16 @@ int sys_clock_driver_init(const struct device *dev)
 {
 	ARG_UNUSED(dev);
 
-	IOWR_ALTERA_AVALON_TIMER_PERIODL(TIMER_0_BASE,
+	IOWR_ALTERA_AVALON_TIMER_PERIODL(TIMER_BASE_ADDR,
 			k_ticks_to_cyc_floor32(1) & 0xFFFF);
-	IOWR_ALTERA_AVALON_TIMER_PERIODH(TIMER_0_BASE,
+	IOWR_ALTERA_AVALON_TIMER_PERIODH(TIMER_BASE_ADDR,
 			(k_ticks_to_cyc_floor32(1) >> 16) & 0xFFFF);
 
-	IRQ_CONNECT(TIMER_0_IRQ, 0, timer_irq_handler, NULL, 0);
-	irq_enable(TIMER_0_IRQ);
+	IRQ_CONNECT(TIMER_IRQ, 0, timer_irq_handler, NULL, 0);
+	irq_enable(TIMER_IRQ);
 
-	alt_avalon_timer_sc_init((void *)TIMER_0_BASE, 0,
-			TIMER_0_IRQ, k_ticks_to_cyc_floor32(1));
+	alt_avalon_timer_sc_init((void *)TIMER_BASE_ADDR, 0,
+			TIMER_IRQ, k_ticks_to_cyc_floor32(1));
 
 	return 0;
 }

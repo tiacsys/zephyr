@@ -33,6 +33,14 @@
 		interrupt-parent = <&cpu>;
 		ranges;
 
+		systick: timer@440200 {
+			compatible = "altr,interval-timer";
+			reg = <0x440200 0x20>;
+			interrupts = <2>;
+			clock-frequency = <50000000>;
+			label = "timer0";
+		};
+
 		jtag_uart: uart@201000 {
 			compatible = "altr,jtag-uart";
 			reg = <0x201000 0x8>;

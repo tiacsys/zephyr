@@ -7,18 +7,25 @@
 #include <kernel.h>
 #include <sys_clock.h>
 #include <timing/timing.h>
+
 #include "altera_avalon_timer_regs.h"
 
-#define NIOS2_SUBTRACT_CLOCK_CYCLES(val)                                       \
-	((IORD_ALTERA_AVALON_TIMER_PERIODH(TIMER_0_BASE) << 16 |               \
-	  (IORD_ALTERA_AVALON_TIMER_PERIODL(TIMER_0_BASE))) -                  \
+#define TIMER_BASE_ADDR		CONFIG_ARCH_TIMING_BASE_ADDRESS
+
+BUILD_ASSERT(TIMER_BASE_ADDR > 0,
+		"Configured system timer has incalid base address. "
+		"Check node with label systick in the device tree.");
+
+#define NIOS2_SUBTRACT_CLOCK_CYCLES(val)                                      \
+	((IORD_ALTERA_AVALON_TIMER_PERIODH(TIMER_BASE_ADDR) << 16 |           \
+	  (IORD_ALTERA_AVALON_TIMER_PERIODL(TIMER_BASE_ADDR))) -              \
 	 ((uint32_t)val))
 
-#define TIMING_INFO_OS_GET_TIME()                                              \
-	(NIOS2_SUBTRACT_CLOCK_CYCLES(                                          \
-		((uint32_t)IORD_ALTERA_AVALON_TIMER_SNAPH(TIMER_0_BASE)        \
-		 << 16) |                                                      \
-		((uint32_t)IORD_ALTERA_AVALON_TIMER_SNAPL(TIMER_0_BASE))))
+#define TIMING_INFO_OS_GET_TIME()                                             \
+	(NIOS2_SUBTRACT_CLOCK_CYCLES(                                         \
+		((uint32_t)IORD_ALTERA_AVALON_TIMER_SNAPH(TIMER_BASE_ADDR)    \
+		 << 16) |                                                     \
+		((uint32_t)IORD_ALTERA_AVALON_TIMER_SNAPL(TIMER_BASE_ADDR))))
 
 void arch_timing_init(void)
 {
@@ -34,7 +41,7 @@ void arch_timing_stop(void)
 
 timing_t arch_timing_counter_get(void)
 {
-	IOWR_ALTERA_AVALON_TIMER_SNAPL(TIMER_0_BASE, 10);
+	IOWR_ALTERA_AVALON_TIMER_SNAPL(TIMER_BASE_ADDR, 10);
 	return TIMING_INFO_OS_GET_TIME();
 }
 

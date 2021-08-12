@@ -1,0 +1,22 @@
+description: Altera Avalon System ID
+
+compatible: "altr,sysid"
+
+include: base.yaml
+
+properties:
+    reg:
+      required: true
+
+    label:
+      required: true
+
+    system-id:
+      type: int
+      required: true
+      description: Platform designer systems unique identifier
+
+    system-ts:
+      type: int
+      required: true
+      description: Platform designer systems generation time

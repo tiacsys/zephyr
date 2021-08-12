@@ -34,6 +34,14 @@
 		interrupt-parent = <&cpu>;
 		ranges;
 
+		sysid: sysid@100300 {
+			compatible = "altr,sysid";
+			reg = <0x100300 0x8>;
+			system-id = <0>;
+			system-ts = <1512455752>;
+			label = "sysid";
+		};
+
 		systick: timer@1002a0 {
 			compatible = "altr,interval-timer";
 			reg = <0x1002a0 0x20>;

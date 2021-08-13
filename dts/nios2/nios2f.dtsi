@@ -50,6 +50,23 @@
 			label = "timer0";
 		};
 
+		dma0: dma@1002c0 {
+			compatible = "altr,msgdma";
+			reg = <0x1002c0 0x20
+			       0x1002f0 0x10>;
+			reg-names = "csr", "desc";
+			label = "DMA_0";
+			interrupts = <3 3>;
+			#dma-cells = <0>;
+			desc-fifo-depth = <128>;
+			data-fifo-depth = <32>;
+			data-width = <32>;
+			max-burst-count = <2>;
+			max-xfer-byte = <1024>;
+			burst-wrapping;
+			burst;
+		};
+
 		jtag_uart0: jtag-uart@201000 {
 			compatible = "altr,jtag-uart";
 			reg = <0x201000 0x8>;
@@ -76,14 +93,6 @@
 			reg = <0x100200 0x40>;
 			interrupts = <4 10>;
 			label = "I2C_0";
-		};
-
-		dma: dma@1002c0 {
-			compatible = "altr,msgdma";
-			reg = <0x1002c0 0x30>;
-			label = "DMA_0";
-			interrupts = <3 3>;
-			#dma-cells = <0>;
 		};
 	};
 };

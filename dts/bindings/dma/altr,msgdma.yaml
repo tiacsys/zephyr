@@ -11,8 +11,155 @@ properties:
     reg:
       required: true
 
+    reg-names:
+      required: true
+
     interrupts:
       required: true
 
     "#dma-cells":
       const: 0
+
+    max-xfer-byte:
+      type: int
+      required: true
+      description: Maximum transfer length (in bytes).
+      enum:
+        - 1024
+        - 2048
+        - 4096
+        - 8192
+        - 16384
+        - 32768
+        - 65536
+        - 131072
+        - 262144
+        - 524288
+        - 1048576
+        - 2097152
+        - 4194304
+        - 8388608
+        - 16777216
+        - 33554432
+        - 67108864
+        - 134217728
+        - 268435456
+        - 536870912
+        - 1073741824
+        - 2147483648
+
+    desc-fifo-depth:
+      type: int
+      required: true
+      description: FIFO size to store descriptor count (in bytes).
+      enum:
+        - 8
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 512
+        - 1024
+
+    data-fifo-depth:
+      type: int
+      required: true
+      description: Depth of internal data path FIFO (in bytes).
+      enum:
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 512
+        - 1024
+        - 2048
+        - 4096
+
+    data-width:
+      type: int
+      required: true
+      description: Data path width (in bytes).
+      enum:
+        - 8
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 512
+        - 1024
+
+    max-burst-count:
+      type: int
+      required: true
+      description: Maximum burst count (in bytes).
+      enum:
+        - 2
+        - 4
+        - 8
+        - 16
+        - 32
+        - 64
+        - 128
+        - 256
+        - 512
+        - 1024
+
+    max-stride-words:
+      type: int
+      default: 1
+      required: false
+      description: Maximum stride amount (in words).
+
+    response-port:
+      type: int
+      default: 2
+      required: false
+      description: |
+        The response port can be set to 0 - memory-mapped,
+        1 - streaming, or 2 - disabled.
+      enum:
+        - 0
+        - 1
+        - 2
+
+    burst:
+      type: boolean
+      required: false
+      description: Enable burst transfer support.
+
+    burst-wrapping:
+      type: boolean
+      required: false
+      description: Enable burst line wrapping support.
+
+    burst-programming:
+      type: boolean
+      required: false
+      description: Enable dynamic burst programming support.
+
+    stride-addressing:
+      type: boolean
+      required: false
+      description: |
+        Stride addressing allows the mSGDMA to read or write data that
+        is interleaved in memory. Stride addressing cannot be enabled
+        if the burst transfer option is enabled.
+
+    extended-features:
+      type: boolean
+      required: false
+      description: |
+        In order to use stride addressing, programmable burst lengths,
+        64-bit addressing, or descriptor tagging the extended features
+        must be supported.
+
+    pre-fetching:
+      type: boolean
+      required: false
+      description: |
+        There is a prefetcher modules, a hardware core which fetches
+        descriptors from memory if true; otherwise, multiple blocks
+        have to configure by the firmware one by one.

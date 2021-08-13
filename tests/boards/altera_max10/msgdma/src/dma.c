@@ -44,7 +44,7 @@ void test_msgdma(void)
 	static uint32_t chan_id;
 	int i;
 
-	dma = DEVICE_DT_GET(DT_NODELABEL(dma));
+	dma = DEVICE_DT_GET(DT_ALIAS(dma_0));
 	__ASSERT_NO_MSG(device_is_ready(dma));
 
 	/* Init tx buffer */

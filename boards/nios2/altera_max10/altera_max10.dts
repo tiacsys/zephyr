@@ -11,6 +11,7 @@
 	aliases {
 		uart-0 = &jtag_uart0;
 		uart-1 = &uart0;
+		dma-0 = &dma0;
 	};
 
 	chosen {

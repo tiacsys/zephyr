@@ -409,8 +409,29 @@ class TestPlan:
                     platform = Platform()
                     platform.load(file)
                     if platform.name in [p.name for p in self.platforms]:
-                        logger.error(f"Duplicate platform {platform.name} in {file}")
-                        raise Exception(f"Duplicate platform identifier {platform.name} found")
+                        from colorama import Fore
+                        logger.info(Fore.YELLOW +
+                                    "**************************************************" +
+                                    Fore.RESET)
+                        logger.info(Fore.YELLOW +
+                                    "***** QnD : defused exception : duplicate platform" +
+                                    Fore.RESET)
+                        logger.info(Fore.YELLOW +
+                                    "**************************************************" +
+                                    Fore.RESET)
+                        logger.info(Fore.YELLOW + "Duplicate platform " +
+                                    Fore.RED + f"{platform.name}" +
+                                    Fore.YELLOW + " in " +
+                                    Fore.RED + f"{file}" +
+                                    Fore.RESET)
+                        logger.info(Fore.YELLOW +
+                                    "See: https://github.com/tiacsys/bridle/issues/93" +
+                                    Fore.RESET)
+                        logger.info(Fore.YELLOW +
+                                    "**************************************************" +
+                                    Fore.RESET)
+                        # logger.error(f"Duplicate platform {platform.name} in {file}")
+                        # raise Exception(f"Duplicate platform identifier {platform.name} found")
 
                     if not platform.twister:
                         continue

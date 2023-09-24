@@ -360,6 +360,8 @@ identifier for a chosen node.
 
 .. doxygengroup:: devicetree-generic-chosen
 
+.. _devicetree-zephyr-chosen-nodes:
+
 Zephyr-specific chosen nodes
 ****************************
 

@@ -361,6 +361,8 @@ identifier for a chosen node.
 .. doxygengroup:: devicetree-generic-chosen
    :project: Zephyr
 
+.. _devicetree-zephyr-chosen-nodes:
+
 Zephyr-specific chosen nodes
 ****************************
 

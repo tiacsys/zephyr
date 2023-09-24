@@ -494,6 +494,8 @@ following commands:
    $ lsusb -d 2fe3:0100
    Bus 007 Device 004: ID 2fe3:0100
 
+.. _usb_device_vid_pid:
+
 USB Vendor and Product identifiers
 **********************************
 

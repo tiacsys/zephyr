@@ -9,6 +9,11 @@ toolchain:
   - gnuarmemb
   - xtools
 supported:
+  - xiao_gpio
+  - xiao_i2c
+  - xiao_spi
+  - xiao_serial
+  - xiao_dac
   - dma
   - dac
   - gpio

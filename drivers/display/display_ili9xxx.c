@@ -3,6 +3,8 @@
  * Copyright (c) 2019 Nordic Semiconductor ASA
  * Copyright (c) 2020 Teslabs Engineering S.L.
  * Copyright (c) 2021 Krivorot Oleg <krivorot.oleg@gmail.com>
+ * Copyright (c) 2023 TiaC Systems
+ *
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -21,8 +23,8 @@ struct ili9xxx_data {
 	enum display_orientation orientation;
 };
 
-int ili9xxx_transmit(const struct device *dev, uint8_t cmd, const void *tx_data,
-		     size_t tx_len)
+static int ili9xxx_transmit(const struct device *dev, uint8_t cmd,
+			    const void *tx_data, size_t tx_len)
 {
 	const struct ili9xxx_config *config = dev->config;
 
@@ -57,9 +59,11 @@ int ili9xxx_transmit(const struct device *dev, uint8_t cmd, const void *tx_data,
 
 static int ili9xxx_exit_sleep(const struct device *dev)
 {
+	const struct ili9xxx_config *config = dev->config;
+
 	int r;
 
-	r = ili9xxx_transmit(dev, ILI9XXX_SLPOUT, NULL, 0);
+	r = config->reg_transmit_fn(dev, ILI9XXX_SLPOUT, NULL, 0);
 	if (r < 0) {
 		return r;
 	}
@@ -88,19 +92,21 @@ static int ili9xxx_set_mem_area(const struct device *dev, const uint16_t x,
 				const uint16_t y, const uint16_t w,
 				const uint16_t h)
 {
+	const struct ili9xxx_config *config = dev->config;
+
 	int r;
 	uint16_t spi_data[2];
 
 	spi_data[0] = sys_cpu_to_be16(x);
 	spi_data[1] = sys_cpu_to_be16(x + w - 1U);
-	r = ili9xxx_transmit(dev, ILI9XXX_CASET, &spi_data[0], 4U);
+	r = config->reg_transmit_fn(dev, ILI9XXX_CASET, &spi_data[0], 4U);
 	if (r < 0) {
 		return r;
 	}
 
 	spi_data[0] = sys_cpu_to_be16(y);
 	spi_data[1] = sys_cpu_to_be16(y + h - 1U);
-	r = ili9xxx_transmit(dev, ILI9XXX_PASET, &spi_data[0], 4U);
+	r = config->reg_transmit_fn(dev, ILI9XXX_PASET, &spi_data[0], 4U);
 	if (r < 0) {
 		return r;
 	}
@@ -144,8 +150,8 @@ static int ili9xxx_write(const struct device *dev, const uint16_t x,
 		nbr_of_writes = 1U;
 	}
 
-	r = ili9xxx_transmit(dev, ILI9XXX_RAMWR, write_data_start,
-			     desc->width * data->bytes_per_pixel * write_h);
+	r = config->mem_transmit_fn(dev, ILI9XXX_RAMWR, write_data_start,
+				desc->width * data->bytes_per_pixel * write_h);
 	if (r < 0) {
 		return r;
 	}
@@ -185,14 +191,16 @@ static void *ili9xxx_get_framebuffer(const struct device *dev)
 
 static int ili9xxx_display_blanking_off(const struct device *dev)
 {
+	const struct ili9xxx_config *config = dev->config;
 	LOG_DBG("Turning display blanking off");
-	return ili9xxx_transmit(dev, ILI9XXX_DISPON, NULL, 0);
+	return config->reg_transmit_fn(dev, ILI9XXX_DISPON, NULL, 0);
 }
 
 static int ili9xxx_display_blanking_on(const struct device *dev)
 {
+	const struct ili9xxx_config *config = dev->config;
 	LOG_DBG("Turning display blanking on");
-	return ili9xxx_transmit(dev, ILI9XXX_DISPOFF, NULL, 0);
+	return config->reg_transmit_fn(dev, ILI9XXX_DISPOFF, NULL, 0);
 }
 
 static int ili9xxx_set_brightness(const struct device *dev,
@@ -213,6 +221,7 @@ static int
 ili9xxx_set_pixel_format(const struct device *dev,
 			 const enum display_pixel_format pixel_format)
 {
+	const struct ili9xxx_config *config = dev->config;
 	struct ili9xxx_data *data = dev->data;
 
 	int r;
@@ -230,7 +239,7 @@ ili9xxx_set_pixel_format(const struct device *dev,
 		return -ENOTSUP;
 	}
 
-	r = ili9xxx_transmit(dev, ILI9XXX_PIXSET, &tx_data, 1U);
+	r = config->reg_transmit_fn(dev, ILI9XXX_PIXSET, &tx_data, 1U);
 	if (r < 0) {
 		return r;
 	}
@@ -272,7 +281,7 @@ static int ili9xxx_set_orientation(const struct device *dev,
 		}
 	}
 
-	r = ili9xxx_transmit(dev, ILI9XXX_MADCTL, &tx_data, 1U);
+	r = config->reg_transmit_fn(dev, ILI9XXX_MADCTL, &tx_data, 1U);
 	if (r < 0) {
 		return r;
 	}
@@ -343,7 +352,7 @@ static int ili9xxx_configure(const struct device *dev)
 	}
 
 	if (config->inversion) {
-		r = ili9xxx_transmit(dev, ILI9XXX_DINVON, NULL, 0U);
+		r = config->reg_transmit_fn(dev, ILI9XXX_DINVON, NULL, 0U);
 		if (r < 0) {
 			return r;
 		}
@@ -394,7 +403,7 @@ static int ili9xxx_init(const struct device *dev)
 
 	ili9xxx_hw_reset(dev);
 
-	r = ili9xxx_transmit(dev, ILI9XXX_SWRESET, NULL, 0);
+	r = config->reg_transmit_fn(dev, ILI9XXX_SWRESET, NULL, 0);
 	if (r < 0) {
 		LOG_ERR("Error transmit command Software Reset (%d)", r);
 		return r;
@@ -477,6 +486,8 @@ static const struct ili9xxx_quirks ili9488_quirks = {
 		.inversion = DT_PROP(INST_DT_ILI9XXX(n, t), display_inversion),\
 		.regs = &ili9xxx_regs_##n,                                     \
 		.regs_init_fn = ili##t##_regs_init,                            \
+		.reg_transmit_fn = ili9xxx_transmit,                           \
+		.mem_transmit_fn = ili9xxx_transmit,                           \
 	};                                                                     \
 									       \
 	static struct ili9xxx_data ili9xxx_data_##n;                           \

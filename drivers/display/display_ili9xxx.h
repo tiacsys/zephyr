@@ -3,6 +3,7 @@
  * Copyright (c) 2019 Nordic Semiconductor ASA
  * Copyright (c) 2020 Teslabs Engineering S.L.
  * Copyright (c) 2021 Krivorot Oleg <krivorot.oleg@gmail.com>
+ * Copyright (c) 2023 TiaC Systems
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -76,9 +77,10 @@ struct ili9xxx_config {
 	bool inversion;
 	const void *regs;
 	int (*regs_init_fn)(const struct device *dev);
+	int (*reg_transmit_fn)(const struct device *dev, uint8_t cmd,
+			       const void *tx_data, size_t tx_len);
+	int (*mem_transmit_fn)(const struct device *dev, uint8_t cmd,
+			       const void *tx_data, size_t tx_len);
 };
-
-int ili9xxx_transmit(const struct device *dev, uint8_t cmd,
-		     const void *tx_data, size_t tx_len);
 
 #endif /* ZEPHYR_DRIVERS_DISPLAY_DISPLAY_ILI9XXX_H_ */

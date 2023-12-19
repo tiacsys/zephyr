@@ -57,6 +57,88 @@ static int ili9xxx_transmit(const struct device *dev, uint8_t cmd,
 	return 0;
 }
 
+static int ili9xxx_transmit_reg16(const struct device *dev, uint8_t cmd,
+				  const void *tx_data, size_t tx_len)
+{
+	const struct ili9xxx_config *config = dev->config;
+
+	int r;
+	struct spi_buf tx_buf;
+	struct spi_buf_set tx_bufs = { .buffers = &tx_buf, .count = 1U };
+	uint16_t tx_data16[ILI9XXX_DATA_LOAD_MAX];
+
+	if (sizeof(tx_data16) < tx_len) {
+		LOG_ERR("Size of transfer date too high (%u > %u)",
+					tx_len, sizeof(tx_data16));
+		return -ENOTSUP;
+	}
+
+	/* send command */
+	tx_data16[0] = sys_cpu_to_be16(cmd);
+	tx_buf.buf = (void *)&tx_data16[0];
+	tx_buf.len = 2U;
+
+	gpio_pin_set_dt(&config->cmd_data, ILI9XXX_CMD);
+	r = spi_write_dt(&config->spi, &tx_bufs);
+	if (r < 0) {
+		return r;
+	}
+
+	/* send data (if any) */
+	if (tx_data != NULL) {
+		for (int i = 0; i < tx_len; i++) {
+			tx_data16[i] = sys_cpu_to_be16(((uint8_t *)tx_data)[i]);
+		}
+
+		tx_buf.buf = (void *)&tx_data16[0];
+		tx_buf.len = 2 * tx_len;
+
+		gpio_pin_set_dt(&config->cmd_data, ILI9XXX_DATA);
+		r = spi_write_dt(&config->spi, &tx_bufs);
+		if (r < 0) {
+			return r;
+		}
+	}
+
+	return 0;
+}
+
+static int ili9xxx_transmit_mem16(const struct device *dev, uint8_t cmd,
+				  const void *tx_data, size_t tx_len)
+{
+	const struct ili9xxx_config *config = dev->config;
+
+	int r;
+	struct spi_buf tx_buf;
+	struct spi_buf_set tx_bufs = { .buffers = &tx_buf, .count = 1U };
+	uint16_t cmd16;
+
+	/* send command */
+	cmd16 = sys_cpu_to_be16(cmd);
+	tx_buf.buf = (void *)&cmd16;
+	tx_buf.len = 2U;
+
+	gpio_pin_set_dt(&config->cmd_data, ILI9XXX_CMD);
+	r = spi_write_dt(&config->spi, &tx_bufs);
+	if (r < 0) {
+		return r;
+	}
+
+	/* send data (if any) */
+	if (tx_data != NULL) {
+		tx_buf.buf = (void *)tx_data;
+		tx_buf.len = tx_len;
+
+		gpio_pin_set_dt(&config->cmd_data, ILI9XXX_DATA);
+		r = spi_write_dt(&config->spi, &tx_bufs);
+		if (r < 0) {
+			return r;
+		}
+	}
+
+	return 0;
+}
+
 static int ili9xxx_exit_sleep(const struct device *dev)
 {
 	const struct ili9xxx_config *config = dev->config;
@@ -467,6 +549,16 @@ static const struct ili9xxx_quirks ili9488_quirks = {
 
 #define INST_DT_ILI9XXX(n, t) DT_INST(n, ilitek_ili##t)
 
+#define ILI9XXX_REG_TRANSMIT_FN(n, t)                                          \
+	(DT_PROP(INST_DT_ILI9XXX(n, t), spi2mcu_shift) == 16U)                 \
+		? ili9xxx_transmit_reg16                                       \
+		: ili9xxx_transmit
+
+#define ILI9XXX_MEM_TRANSMIT_FN(n, t)                                          \
+	(DT_PROP(INST_DT_ILI9XXX(n, t), spi2mcu_shift) == 16U)                 \
+		? ili9xxx_transmit_mem16                                       \
+		: ili9xxx_transmit
+
 #define ILI9XXX_INIT(n, t)                                                     \
 	ILI##t##_REGS_INIT(n);                                                 \
 									       \
@@ -486,8 +578,8 @@ static const struct ili9xxx_quirks ili9488_quirks = {
 		.inversion = DT_PROP(INST_DT_ILI9XXX(n, t), display_inversion),\
 		.regs = &ili9xxx_regs_##n,                                     \
 		.regs_init_fn = ili##t##_regs_init,                            \
-		.reg_transmit_fn = ili9xxx_transmit,                           \
-		.mem_transmit_fn = ili9xxx_transmit,                           \
+		.reg_transmit_fn = ILI9XXX_REG_TRANSMIT_FN(n, t),              \
+		.mem_transmit_fn = ILI9XXX_MEM_TRANSMIT_FN(n, t),              \
 	};                                                                     \
 									       \
 	static struct ili9xxx_data ili9xxx_data_##n;                           \

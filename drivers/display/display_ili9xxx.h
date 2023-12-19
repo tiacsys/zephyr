@@ -46,6 +46,9 @@
 /** Command/data GPIO level for data. */
 #define ILI9XXX_DATA 0U
 
+/** Maximum bytes of data load for command, ref 8.1 of ILI9XXX manual. */
+#define ILI9XXX_DATA_LOAD_MAX 15U
+
 /** Sleep out time (ms), ref. 8.2.12 of ILI9XXX manual. */
 #define ILI9XXX_SLEEP_OUT_TIME 120
 

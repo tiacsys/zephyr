@@ -21,6 +21,17 @@ LOG_MODULE_REGISTER(sample, LOG_LEVEL_INF);
 
 #include "display.h"
 
+#ifdef CONFIG_LED_STRIP_MATRIX
+#define MVAL	(0x0Fu)
+#define IVAL	(0x00u)
+#else
+#define MVAL	(0xFFu)
+#define IVAL	(0xFFu)
+#endif
+
+#define M888	(((MVAL & 0xFFu) << 16) | ((MVAL & 0xFFu) << 8) | ((MVAL & 0xFFu)))
+#define M565	(((MVAL & 0x1Fu) << 11) | ((MVAL & 0x3Fu) << 5) | ((MVAL & 0x1Fu)))
+
 enum corner {
 	TOP_LEFT,
 	TOP_RIGHT,
@@ -52,6 +63,8 @@ static void fill_buffer_argb8888(enum corner corner, uint8_t grey, uint8_t *buf,
 		break;
 	}
 
+	color &= M888;
+
 	for (size_t idx = 0; idx < buf_size; idx += 4) {
 		*((uint32_t *)(buf + idx)) = sys_cpu_to_le32(color);
 	}
@@ -76,6 +89,8 @@ static void fill_buffer_rgb888(enum corner corner, uint8_t grey, uint8_t *buf,
 		color = grey << 16 | grey << 8 | grey;
 		break;
 	}
+
+	color &= M888;
 
 	for (size_t idx = 0; idx < buf_size; idx += 3) {
 		*(buf + idx + 0) = (color >> 0) & 0xFFu;
@@ -113,6 +128,8 @@ static void fill_buffer_rgb565x(enum corner corner, uint8_t grey, uint8_t *buf,
 {
 	uint16_t color = get_rgb565_color(corner, grey);
 
+	color &= M565;
+
 	for (size_t idx = 0; idx < buf_size; idx += 2) {
 		*(buf + idx + 0) = (color >> 8) & 0xFFu;
 		*(buf + idx + 1) = (color >> 0) & 0xFFu;
@@ -123,6 +140,8 @@ static void fill_buffer_rgb565(enum corner corner, uint8_t grey, uint8_t *buf,
 			       size_t buf_size)
 {
 	uint16_t color = get_rgb565_color(corner, grey);
+
+	color &= M565;
 
 	for (size_t idx = 0; idx < buf_size; idx += 2) {
 		*(uint16_t *)(buf + idx) = color;
@@ -289,35 +308,35 @@ int sample_display_draw(void)
 	switch (capabilities.current_pixel_format) {
 	case PIXEL_FORMAT_XRGB_8888:
 	case PIXEL_FORMAT_ARGB_8888:
-		bg_color = 0xFFu;
+		bg_color = (uint8_t)(IVAL);
 		fill_buffer_fnc = fill_buffer_argb8888;
 		break;
 	case PIXEL_FORMAT_RGB_888:
-		bg_color = 0xFFu;
+		bg_color = (uint8_t)(IVAL);
 		fill_buffer_fnc = fill_buffer_rgb888;
 		break;
 	case PIXEL_FORMAT_RGB_565:
-		bg_color = 0xFFu;
+		bg_color = (uint8_t)(IVAL);
 		fill_buffer_fnc = fill_buffer_rgb565;
 		break;
 	case PIXEL_FORMAT_RGB_565X:
-		bg_color = 0xFFu;
+		bg_color = (uint8_t)(IVAL);
 		fill_buffer_fnc = fill_buffer_rgb565x;
 		break;
 	case PIXEL_FORMAT_L_8:
-		bg_color = 0xFFu;
+		bg_color = (uint8_t)(IVAL);
 		fill_buffer_fnc = fill_buffer_l_8;
 		break;
 	case PIXEL_FORMAT_AL_88:
-		bg_color = 0x00u;
+		bg_color = (uint8_t)(~IVAL);
 		fill_buffer_fnc = fill_buffer_al_88;
 		break;
 	case PIXEL_FORMAT_MONO01:
-		bg_color = 0xFFu;
+		bg_color = (uint8_t)(IVAL);
 		fill_buffer_fnc = fill_buffer_mono01;
 		break;
 	case PIXEL_FORMAT_MONO10:
-		bg_color = 0x00u;
+		bg_color = (uint8_t)(~IVAL);
 		fill_buffer_fnc = fill_buffer_mono10;
 		break;
 	default:

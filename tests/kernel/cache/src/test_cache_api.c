@@ -51,8 +51,17 @@ ZTEST(cache_api, test_data_cache_api)
 	ret = sys_cache_data_flush_all();
 	zassert_true((ret == 0) || (ret == -ENOTSUP));
 
+#if !defined(CONFIG_CPU_CORTEX_M)
+	/* With Arm Cortex-M, the blind and random invalidation of the data
+	 * cache will tend to trash any pending stack writes. Invalidation
+	 * of a cache or cache line means to clear it of data. If the cache
+	 * contains dirty data, it is generally incorrect to invalidate it.
+	 * Any updated data in the cache from writes to write-back cacheable
+	 * regions would be lost by simple invalidation.
+	 */
 	ret = sys_cache_data_invd_all();
 	zassert_true((ret == 0) || (ret == -ENOTSUP));
+#endif
 
 	ret = sys_cache_data_flush_and_invd_all();
 	zassert_true((ret == 0) || (ret == -ENOTSUP));

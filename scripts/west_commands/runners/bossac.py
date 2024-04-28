@@ -28,7 +28,7 @@ class BossacBinaryRunner(ZephyrBinaryRunner):
                  speed=DEFAULT_BOSSAC_SPEED, boot_delay=0, erase=False):
         super().__init__(cfg)
         self.bossac = bossac
-        self.port = port
+        self.port = os.path.realpath(port)
         self.speed = speed
         self.boot_delay = boot_delay
         self.erase = erase

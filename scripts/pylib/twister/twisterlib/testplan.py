@@ -407,6 +407,18 @@ class TestPlan:
         lb_args = Namespace(arch_roots=[Path(ZEPHYR_BASE)], soc_roots=[Path(ZEPHYR_BASE),
                             Path(ZEPHYR_BASE) / 'subsys' / 'testsuite'],
                             board_roots=board_roots, board=None, board_dir=None)
+        for module in parse_modules(ZEPHYR_BASE):
+            arch_root = module.meta.get('build', {}).get('settings', {}).get('arch_root')
+            if arch_root is not None:
+                lb_args.arch_roots.append(Path(module.project) / arch_root)
+        for module in parse_modules(ZEPHYR_BASE):
+            soc_root = module.meta.get('build', {}).get('settings', {}).get('soc_root')
+            if soc_root is not None:
+                lb_args.soc_roots.append(Path(module.project) / soc_root)
+        for module in parse_modules(ZEPHYR_BASE):
+            board_root = module.meta.get('build', {}).get('settings', {}).get('board_root')
+            if board_root is not None:
+                lb_args.board_roots.append(Path(module.project) / board_root)
         v1_boards = list_boards.find_boards(lb_args)
         v2_dirs = list_boards.find_v2_board_dirs(lb_args)
         for b in v1_boards:

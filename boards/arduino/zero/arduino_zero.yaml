@@ -9,6 +9,10 @@ toolchain:
   - gnuarmemb
   - xtools
 supported:
+  - arduino_gpio
+  - arduino_i2c
+  - arduino_spi
+  - arduino_serial
   - adc
   - counter
   - dac
@@ -17,6 +21,7 @@ supported:
   - hwinfo
   - pwm
   - spi
+  - i2c
   - uart
   - usb_device
   - watchdog

@@ -1011,7 +1011,7 @@ class TestPlan:
                                     if match is not None:
                                         matched_snippet_board = True
                                         break
-                                elif this_board == plat.name:
+                                elif this_board == plat.name or this_board.startswith(plat.name):
                                     matched_snippet_board = True
                                     break
 

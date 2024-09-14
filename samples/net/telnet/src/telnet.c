@@ -12,8 +12,9 @@ LOG_MODULE_REGISTER(net_telnet_sample, LOG_LEVEL_DBG);
 #include <errno.h>
 #include <stdio.h>
 
-#include <zephyr/net/net_core.h>
 #include <zephyr/net/net_if.h>
+#include <zephyr/net/net_core.h>
+#include <zephyr/net/net_context.h>
 #include <zephyr/net/net_mgmt.h>
 
 #if defined(CONFIG_NET_DHCPV4)
@@ -23,7 +24,6 @@ static void ipv4_addr_add_handler(struct net_mgmt_event_callback *cb,
 				  uint32_t mgmt_event,
 				  struct net_if *iface)
 {
-	char hr_addr[NET_IPV4_ADDR_LEN];
 	int i = 0;
 
 	if (mgmt_event != NET_EVENT_IPV4_ADDR_ADD) {
@@ -32,27 +32,28 @@ static void ipv4_addr_add_handler(struct net_mgmt_event_callback *cb,
 	}
 
 	for (i = 0; i < NET_IF_MAX_IPV4_ADDR; i++) {
-		struct net_if_addr *if_addr =
-			&iface->config.ip.ipv4->unicast[i];
+		char hr_addr[NET_IPV4_ADDR_LEN];
 
-		if (if_addr->addr_type != NET_ADDR_DHCP || !if_addr->is_used) {
+		if (iface->config.ip.ipv4->unicast[i].ipv4.addr_type !=
+							NET_ADDR_DHCP) {
 			continue;
 		}
 
-		LOG_INF("IPv4 address: %s",
+		LOG_INF("   Address[%d]: %s", net_if_get_by_iface(iface),
 			net_addr_ntop(AF_INET,
-				      &if_addr->address.in_addr,
-				      hr_addr, NET_IPV4_ADDR_LEN));
-		LOG_INF("Lease time: %u seconds",
-			 iface->config.dhcpv4.lease_time);
-		LOG_INF("Subnet: %s",
+			    &iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
+						  hr_addr, sizeof(hr_addr)));
+		LOG_INF("    Subnet[%d]: %s", net_if_get_by_iface(iface),
 			net_addr_ntop(AF_INET,
-				      &iface->config.ip.ipv4->netmask,
-				      hr_addr, NET_IPV4_ADDR_LEN));
-		LOG_INF("Router: %s",
+				       &iface->config.ip.ipv4->unicast[i].netmask,
+				       hr_addr, sizeof(hr_addr)));
+		LOG_INF("    Router[%d]: %s", net_if_get_by_iface(iface),
 			net_addr_ntop(AF_INET,
-				      &iface->config.ip.ipv4->gw,
-				      hr_addr, NET_IPV4_ADDR_LEN));
+						 &iface->config.ip.ipv4->gw,
+						 hr_addr, sizeof(hr_addr)));
+		LOG_INF("Lease time[%d]: %u seconds", net_if_get_by_iface(iface),
+			iface->config.dhcpv4.lease_time);
+
 		break;
 	}
 }

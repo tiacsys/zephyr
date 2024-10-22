@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 TiaC Systems
+# SPDX-License-Identifier: Apache-2.0
+
+config DRV8424
+	bool "TI DRV8424 stepper motor driver"
+	default y
+	depends on DT_HAS_TI_DRV8424_ENABLED
+	depends on COUNTER
+	help
+	  Enable driver for TI DRV8424 stepper motor driver.
+
+if DRV8424
+
+config HEAP_MEM_POOL_ADD_SIZE_DRV8424
+	int
+	default 128 # Enough for 5 pending events
+
+endif # DRV8424

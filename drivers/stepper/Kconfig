@@ -32,6 +32,7 @@ config STEP_DIR_STEPPER
 comment "Stepper Drivers"
 
 # zephyr-keep-sorted-start
+rsource "Kconfig.drv8424"
 rsource "Kconfig.fake"
 rsource "Kconfig.gpio"
 rsource "adi_tmc/Kconfig"

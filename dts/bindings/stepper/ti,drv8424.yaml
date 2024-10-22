@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 TiaC Systems
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  TI DRV8424 stepper motor driver.
+
+compatible: "ti,drv8424"
+
+properties:
+
+  dir-gpios:
+    required: true
+    type: phandle-array
+    description: Direction pin.
+
+  step-gpios:
+    required: true
+    type: phandle-array
+    description: Step pin, configured as gpio.
+
+  fault-gpios:
+    type: phandle-array
+    description: Fault pin.
+
+  en-gpios:
+    type: phandle-array
+    description: Enable pin.
+
+  sleep-gpios:
+    type: phandle-array
+    description: Sleep pin (active low).
+
+  m0-gpios:
+    type: phandle-array
+    description: Microstep configuration pin 0.
+
+  m1-gpios:
+    type: phandle-array
+    description: Microstep configuration pin 1.
+
+  counter:
+    required: true
+    type: phandle
+    description: Counter used for generating step-accurate pulse signals.
+
+include: stepper-controller.yaml

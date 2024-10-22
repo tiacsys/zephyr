@@ -29,5 +29,6 @@ comment "Stepper Drivers"
 rsource "adi_tmc/Kconfig"
 rsource "Kconfig.fake"
 rsource "Kconfig.gpio"
+rsource "Kconfig.drv8424"
 
 endif

@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 TiaC Systems
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Step/Dir pin based stepper motor controller.
+
+include: stepper-controller.yaml
+
+properties:
+
+  step-gpios:
+    required: true
+    type: phandle-array
+    description: Step pin.
+
+  dir-gpios:
+    required: true
+    type: phandle-array
+    description: Direction pin.

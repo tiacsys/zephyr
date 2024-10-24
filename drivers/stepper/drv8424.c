@@ -5,6 +5,8 @@
 
 #include "zephyr/sys/util.h"
 #include "zephyr/sys_clock.h"
+#include "stepper/step_dir_stepper.h"
+#include "stepper/step_dir_stepper_counter.h"
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/stepper.h>
 #include <zephyr/drivers/gpio.h>
@@ -53,7 +55,7 @@ struct drv8424_pin_states {
  * This structure contains mutable data used by a DRV8424 stepper driver.
  */
 struct drv8424_data {
-	/** Back pointer to the device, e.g. for access to config */
+	/** Back pointer to the device. */
 	const struct device *dev;
 	/** Whether the device is enabled */
 	bool enabled;
@@ -61,128 +63,11 @@ struct drv8424_data {
 	struct drv8424_pin_states pin_states;
 	/** Current microstep resolution. */
 	enum stepper_micro_step_resolution ms_res;
-	/** Maximum velocity (steps/s). */
-	uint32_t max_velocity;
-	/** Actual current position */
-	int32_t actual_position;
-	/** Target position */;
-	int32_t target_position;
-	/** Whether the motor is currently moving */
-	bool is_moving;
-	/** Whether we're in constant velocity mode */
-	bool constant_velocity;
-	/** Which direction we're going if in constat velocity mode */
-	enum stepper_direction constant_velocity_direction;
-	/** Event handler registered by user */
-	stepper_event_callback_t event_callback;
-	/** Event handler user data */
-	void *event_callback_user_data;
-	/** Whether the step signal is currently high or low. */
-	bool step_signal_high;
-	/** Struct containing counter top configuration. */
-	struct counter_top_cfg counter_top_cfg;
+	/** General Step/Dir context */
+	struct step_dir_stepper_context step_dir_ctx;
+	/** Counter-Step/Dir specific data */
+	struct step_dir_counter_data step_dir_counter_data;
 };
-
-struct drv8424_callback_work {
-	/** The work item itself. */
-	struct k_work work;
-	/** Type of event to handle. */
-	enum stepper_event event;
-	/** Driver instance data. */
-	struct drv8424_data *driver_data;
-};
-
-static void drv8424_user_callback_work_fn(struct k_work *work)
-{
-	/* Get required data from outer struct */
-	struct drv8424_callback_work *callback_work =
-		CONTAINER_OF(work, struct drv8424_callback_work, work);
-	struct drv8424_data *driver_data = callback_work->driver_data;
-	enum stepper_event event = callback_work->event;
-
-	/* Run the callback */
-	if (driver_data->event_callback != NULL) {
-		driver_data->event_callback(driver_data->dev, event,
-					    driver_data->event_callback_user_data);
-	}
-
-	/* Free the work item */
-	k_free(callback_work);
-}
-
-static int drv8424_schedule_user_callback(struct drv8424_data *data, enum stepper_event event)
-{
-	/* Create and schedule work item to run user callback */
-	struct drv8424_callback_work *callback_work =
-		k_malloc(sizeof(struct drv8424_callback_work));
-	if (callback_work == NULL) {
-		return -ENOMEM;
-	}
-
-	/* Fill out data for work item */
-	*callback_work = (struct drv8424_callback_work){
-		.driver_data = data,
-		.event = STEPPER_EVENT_STEPS_COMPLETED,
-	};
-	k_work_init(&callback_work->work, drv8424_user_callback_work_fn);
-
-	/* Try to submit the item */
-	int ret = k_work_submit(&callback_work->work);
-	/* ret == 0 shouldn't happen (it would mean we've submitted this same item before), but
-	 * there's no reason to force a segfault in case it somehow does happen. */
-	if (ret != 1 && ret != 0) {
-		/* We failed to submit the item, so we need to free it here */
-		k_free(callback_work);
-		return -ENODEV; // FIXME: What's the correct error code here?
-	}
-
-	return 0;
-}
-
-static void drv8424_positioning_top_interrupt(const struct device *dev, void *user_data)
-{
-	struct drv8424_data *data = (struct drv8424_data *)user_data;
-	const struct drv8424_config *config = (struct drv8424_config *)data->dev->config;
-
-	if (!data->constant_velocity) {
-		/* Check if target position is reached */
-		if (data->actual_position == data->target_position) {
-			counter_stop(config->counter);
-			if (data->event_callback != NULL) {
-				/* Ignore return value since we can't do anything about it anyway */
-				drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
-			}
-			data->is_moving = false;
-			return;
-		}
-	}
-
-	/* Determine direction we're going in for counting purposes */
-	enum stepper_direction direction = 0;
-	if (data->constant_velocity) {
-		direction = data->constant_velocity_direction;
-	} else {
-		direction = (data->target_position >= data->actual_position)
-				    ? STEPPER_DIRECTION_POSITIVE
-				    : STEPPER_DIRECTION_NEGATIVE;
-	}
-
-	/* Switch step pin on or off depending position in step period */
-	if (data->step_signal_high) {
-		/* Generate a falling edge and count a completed step */
-		gpio_pin_set_dt(&config->step_pin, 0);
-		if (direction == STEPPER_DIRECTION_POSITIVE) {
-			data->actual_position++;
-		} else {
-			data->actual_position--;
-		}
-	} else {
-		/* Generate a rising edge */
-		gpio_pin_set_dt(&config->step_pin, 1);
-	}
-
-	data->step_signal_high = !data->step_signal_high;
-}
 
 /*
  * If microstep setter fails, attempt to recover into previous state.
@@ -295,84 +180,19 @@ static int drv8424_enable(const struct device *dev, bool enable)
 
 	data->enabled = enable;
 	if (!enable) {
-		counter_stop(config->counter);
-		data->is_moving = false;
+		data->step_dir_ctx.is_moving = false; // FIXME: abstraction leaks here
 	}
 
 	return 0;
-}
-
-static int drv8424_set_counter_frequency(const struct device *dev, uint32_t freq_hz)
-{
-	const struct drv8424_config *config = dev->config;
-	struct drv8424_data *data = dev->data;
-	int ret = 0;
-
-	if (freq_hz == 0) {
-		return -EINVAL;
-	}
-
-	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, USEC_PER_SEC / freq_hz);
-
-	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set counter top value (error: %d)", dev->name, ret);
-		return ret;
-	}
-
-	return 0;
-}
-
-static int drv8424_start_positioning(const struct device *dev)
-{
-
-	const struct drv8424_config *config = dev->config;
-	struct drv8424_data *data = dev->data;
-	int ret = 0;
-
-	/* Unset constant velocity flag if present */
-	data->constant_velocity = false;
-
-	/* Set direction pin */
-	int dir_value = (data->target_position >= data->actual_position) ? 1 : 0;
-	ret = gpio_pin_set_dt(&config->dir_pin, dir_value);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set direction pin (error %d)", dev->name, ret);
-		return ret;
-	}
-
-	/* Lock interrupts while modifying counter settings */
-	int key = irq_lock();
-
-	/* Set counter to correct frequency */
-	ret = drv8424_set_counter_frequency(dev, data->max_velocity * 2);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set counter frequency (error %d)", dev->name, ret);
-		goto end;
-	}
-
-	data->is_moving = true;
-
-	/* Start counter */
-	ret = counter_start(config->counter);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to start counter (error: %d)", dev->name, ret);
-		data->is_moving = false;
-		goto end;
-	}
-
-end:
-	irq_unlock(key);
-	return ret;
 }
 
 static int drv8424_move(const struct device *dev, int32_t micro_steps)
 {
 	struct drv8424_data *data = dev->data;
-	int ret = 0;
 
-	if (data->max_velocity == 0) {
-		LOG_ERR("%s: Invalid max. velocity %d configured", dev->name, data->max_velocity);
+	if (data->step_dir_ctx.max_velocity == 0) {
+		LOG_ERR("%s: Invalid max. velocity %d configured", dev->name,
+			data->step_dir_ctx.max_velocity);
 		return -EINVAL;
 	}
 
@@ -380,129 +200,56 @@ static int drv8424_move(const struct device *dev, int32_t micro_steps)
 		return -ENODEV;
 	}
 
-	/* Compute target position */
-	data->target_position = data->actual_position + micro_steps;
-
-	ret = drv8424_start_positioning(dev);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to begin positioning (error %d)", dev->name, ret);
-		return ret;
-	};
-
-	return 0;
+	return step_dir_counter_move(&data->step_dir_ctx, micro_steps);
 }
 
 static int drv8424_is_moving(const struct device *dev, bool *is_moving)
 {
 	struct drv8424_data *data = dev->data;
-
-	*is_moving = data->is_moving;
-
-	return 0;
+	return step_dir_is_moving(&data->step_dir_ctx, is_moving);
 }
 
 static int drv8424_set_actual_position(const struct device *dev, int32_t position)
 {
 	struct drv8424_data *data = dev->data;
-
-	data->actual_position = position;
-
-	return 0;
+	return step_dir_set_actual_position(&data->step_dir_ctx, position);
 }
 
 static int drv8424_get_actual_position(const struct device *dev, int32_t *position)
 {
 	struct drv8424_data *data = dev->data;
-
-	*position = data->actual_position;
-
-	return 0;
+	return step_dir_get_actual_position(&data->step_dir_ctx, position);
 }
 
 static int drv8424_set_target_position(const struct device *dev, int32_t position)
 {
 	struct drv8424_data *data = dev->data;
-	int ret = 0;
 
 	if (!data->enabled) {
 		return -ENODEV;
 	}
 
-	data->target_position = position;
-
-	ret = drv8424_start_positioning(dev);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to begin positioning (error %d)", dev->name, ret);
-		return ret;
-	};
-
-	return 0;
+	return step_dir_counter_set_target_position(&data->step_dir_ctx, position);
 }
 
 static int drv8424_set_max_velocity(const struct device *dev, uint32_t velocity)
 {
 	struct drv8424_data *data = dev->data;
-	data->max_velocity = velocity;
-	return 0;
+	return step_dir_set_max_velocity(&data->step_dir_ctx, velocity);
 }
 
 static int drv8424_enable_constant_velocity_mode(const struct device *dev,
 						 const enum stepper_direction direction,
 						 const uint32_t velocity)
 {
-	const struct drv8424_config *config = dev->config;
 	struct drv8424_data *data = dev->data;
-	int ret = 0;
 
 	if (!data->enabled) {
 		return -ENODEV;
 	}
 
-	/* Set direction pin */
-	int dir_value = (direction == STEPPER_DIRECTION_POSITIVE) ? 1 : 0;
-	ret = gpio_pin_set_dt(&config->dir_pin, dir_value);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set direction pin (error %d)", dev->name, ret);
-		return ret;
-	}
-
-	/* Lock interrupts while modifying settings used by ISR */
-	int key = irq_lock();
-
-	/* Set data used in counter interrupt */
-	data->constant_velocity = true;
-	data->constant_velocity_direction = direction;
-	data->is_moving = true;
-
-	/* Treat velocity 0 by not stepping at all */
-	if (velocity == 0) {
-		ret = counter_stop(config->counter);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to stop counter (error %d)", dev->name, ret);
-			data->is_moving = false;
-			goto end;
-		}
-		data->is_moving = false;
-	} else {
-		ret = drv8424_set_counter_frequency(dev, velocity * 2);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to set counter frequency (error %d)", dev->name, ret);
-			data->is_moving = false;
-			goto end;
-		}
-
-		/* Start counter */
-		ret = counter_start(config->counter);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to start counter (error %d)", dev->name, ret);
-			data->is_moving = false;
-			goto end;
-		}
-	}
-
-end:
-	irq_unlock(key);
-	return ret;
+	return step_dir_counter_enable_constant_velocity_mode(&data->step_dir_ctx, direction,
+							      velocity);
 }
 
 static int drv8424_set_micro_step_res(const struct device *dev,
@@ -641,11 +388,7 @@ static int drv8424_set_event_callback(const struct device *dev, stepper_event_ca
 				      void *user_data)
 {
 	struct drv8424_data *data = dev->data;
-
-	data->event_callback = callback;
-	data->event_callback_user_data = user_data;
-
-	return 0;
+	return step_dir_set_event_callback(&data->step_dir_ctx, callback, user_data);
 }
 
 static int drv8424_init(const struct device *dev)
@@ -654,20 +397,10 @@ static int drv8424_init(const struct device *dev)
 	struct drv8424_data *const data = dev->data;
 	int ret = 0;
 
-	/* Set device back pointer */
-	data->dev = dev;
-
-	/* Configure direction pin */
-	ret = gpio_pin_configure_dt(&config->dir_pin, GPIO_OUTPUT_ACTIVE);
+	ret = step_dir_counter_init(&data->step_dir_ctx, &data->step_dir_counter_data, dev,
+				    &config->step_pin, &config->dir_pin, config->counter);
 	if (ret != 0) {
-		LOG_ERR("%s: Failed to configure dir_pin (error: %d)", dev->name, ret);
-		return ret;
-	}
-
-	/* Configure step pin */
-	ret = gpio_pin_configure_dt(&config->step_pin, GPIO_OUTPUT_INACTIVE);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to configure step_pin (error: %d)", dev->name, ret);
+		LOG_ERR("%s: Failed to initialize step/dir stepper (error %d)", dev->name, ret);
 		return ret;
 	}
 
@@ -707,13 +440,6 @@ static int drv8424_init(const struct device *dev)
 	}
 	data->pin_states.m1 = 0U;
 
-	/* Set initial counter configuration */
-	data->step_signal_high = false;
-	data->counter_top_cfg.callback = drv8424_positioning_top_interrupt;
-	data->counter_top_cfg.user_data = data;
-	data->counter_top_cfg.flags = 0;
-	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, 1000000);
-
 	return 0;
 }
 
@@ -745,11 +471,6 @@ const struct stepper_driver_api drv8424_stepper_api = {
                                                                                                    \
 	static struct drv8424_data drv8424_data_##inst = {                                         \
 		.ms_res = STEPPER_MICRO_STEP_1,                                                    \
-		.actual_position = 0,                                                              \
-		.target_position = 0,                                                              \
-		.is_moving = false,                                                                \
-		.event_callback = NULL,                                                            \
-		.event_callback_user_data = NULL,                                                  \
 	};                                                                                         \
                                                                                                    \
 	DEVICE_DT_INST_DEFINE(inst, &drv8424_init,          /* Init */                             \

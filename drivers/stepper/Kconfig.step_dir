@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 TiaC Systems
+# SPDX-License-Identifier: Apache-2.0
+
+config STEP_DIR_STEPPER
+	bool "Enable step/dir stepper interface"
+
+config STEP_DIR_STEPPER_COUNTER
+	bool "Enable counter based step/dir interface"
+	depends on STEP_DIR_STEPPER
+
+if STEP_DIR_STEPPER
+
+config HEAP_MEM_POOL_ADD_SIZE_STEP_DIR_STEPPER
+	int
+	default 128 # Enough for 5 pending events
+
+endif # STEP_DIR_STEPPER

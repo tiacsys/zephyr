@@ -1,0 +1,13 @@
+# Copyright (c) 2024 TiaC Systems
+# SPDX-License-Identifier: Apache-2.0
+
+tests:
+  drivers.stepper.drv8424:
+    tags:
+      - drivers
+      - stepper
+      - api
+      - drv8424
+    platform_allow:
+      - nucleo_f767zi
+      - mimxrt1060_evkb

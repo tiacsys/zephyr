@@ -106,10 +106,16 @@ def get_catalog():
         full_name = board.full_name or board.name
         doc_page = guess_doc_page(board)
 
+        try:
+            doc_page = doc_page.relative_to(ZEPHYR_BASE).as_posix() if doc_page else None
+        except ValueError as e:
+            logger.warning(f"Skip foreign board (from external, not in Zephyr): {board.name}")
+            continue
+
         board_catalog[board.name] = {
             "name": board.name,
             "full_name": full_name,
-            "doc_page": doc_page.relative_to(ZEPHYR_BASE).as_posix() if doc_page else None,
+            "doc_page": doc_page,
             "vendor": vendor,
             "archs": list(archs),
             "socs": list(socs),

@@ -373,6 +373,11 @@ def get_catalog(generate_hw_features=False, hw_features_vendor_filter=None):
             doc_page_path = doc_page.relative_to(ZEPHYR_BASE).as_posix()
         else:
             doc_page_path = None
+            if doc_page and not doc_page.is_relative_to(ZEPHYR_BASE):
+                logger.warning(f"Skip foreign board (from external, not in Zephyr): {board.name}")
+                continue
+            else:
+                logger.warning(f"Skip undocumented board in Zephyr: {board.name}")
 
         board_catalog[board.name] = {
             "name": board.name,

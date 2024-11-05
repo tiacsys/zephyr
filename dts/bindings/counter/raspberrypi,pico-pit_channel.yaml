@@ -1,0 +1,21 @@
+# Copyright (c) 2024 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: Raspberry Pi Pico PIT
+
+compatible: "raspberrypi,pico-pit-channel"
+
+include: base.yaml
+
+properties:
+  pwm_slice:
+    required: true
+    type: int
+    description: PWM Slice used by the counter (value 0-7). Using other pwm devices connected to this slice leads to undefined behavior.
+
+  pwm:
+    required: true
+    type: phandle
+    description: PWM device of the rpi pico, by default it should be "pwm".
+
+  

@@ -28,12 +28,28 @@ LOG_MODULE_REGISTER(counter_rpi_pico_pit, LOG_LEVEL);
 struct counter_rpi_pico_pit_data {
 	pwm_config config_pwm;
 	uint16_t top_value;
+	struct counter_top_cfg *top_cfg;
 };
 
 struct counter_rpi_pico_pit_config {
 	struct counter_config_info info;
 	int32_t slice;
+	void (*irq_config_func)(const struct device *dev);
 };
+
+static void counter_rpi_pico_pit_isr(const struct device *dev)
+{
+	// LOG_INF("In ISR of Driver");
+	const struct counter_rpi_pico_pit_config *config = dev->config;
+	struct counter_rpi_pico_pit_data *data = dev->data;
+
+	uint32_t inter_mask = pwm_get_irq_status_mask();
+	inter_mask = find_lsb_set(inter_mask) - 1;
+	if (inter_mask == config->slice && data->top_cfg->callback != NULL) {
+		data->top_cfg->callback(dev, data->top_cfg->user_data);
+	}
+	pwm_clear_irq(config->slice);
+}
 
 static int counter_rpi_pico_pit_start(const struct device *dev)
 {
@@ -103,6 +119,7 @@ static int counter_rpi_pico_pit_set_top_value(const struct device *dev,
 	pwm_config_set_wrap(&data->config_pwm, cfg->ticks);
 	pwm_config_set_clkdiv_int_frac(&data->config_pwm, 255, 15);
 	data->top_value = cfg->ticks;
+	data->top_cfg = cfg;
 	pwm_init(config->slice, &data->config_pwm, true);
 
 	// TODO: Interrupt handling
@@ -135,9 +152,22 @@ static int counter_rpi_pico_pit_set_guard_period(const struct device *dev, uint3
 static int counter_rpi_pico_pit_init(const struct device *dev)
 {
 	const struct counter_rpi_pico_pit_config *config = dev->config;
-	int ret;
+	// struct counter_rpi_pico_pit_config *data = dev->data;
+	// int ret;
 
 	// config->irq_config();
+	// LOG_INF("Init PIT");
+
+	pwm_set_enabled(config->slice, false);
+	pwm_set_irq_enabled(config->slice, true);
+	pwm_set_chan_level(config->slice, 1, 0);
+	pwm_set_chan_level(config->slice, 0, 0);
+	// const struct device **tmp;
+	// tmp = &dev;
+	// IRQ_CONNECT(4, 2U, counter_rpi_pico_pit_isr, tmp, 0U);
+	// irq_enable(4);
+	config->irq_config_func(dev);
+	// LOG_INF("End Init PIT");
 
 	return 0;
 }
@@ -156,6 +186,11 @@ static const struct counter_driver_api counter_rpi_pico_driver_api = {
 };
 
 #define COUNTER_RPI_PICO_PIT(inst)                                                                 \
+	static void counter_rpi_pico_pit_##inst##_irq_config(const struct device *dev)             \
+	{                                                                                          \
+		IRQ_CONNECT(4U, 2U, counter_rpi_pico_pit_isr, DEVICE_DT_INST_GET(inst), 0);        \
+		irq_enable(4U);                                                                    \
+	}                                                                                          \
 	static const struct counter_rpi_pico_pit_config counter_##inst##_config = {                \
 		.info =                                                                            \
 			{                                                                          \
@@ -165,6 +200,7 @@ static const struct counter_driver_api counter_rpi_pico_driver_api = {
 				.channels = 0,                                                     \
 			},                                                                         \
 		.slice = DT_INST_PROP(inst, pwm_slice),                                            \
+		.irq_config_func = counter_rpi_pico_pit_##inst##_irq_config,                       \
 	};                                                                                         \
 	static struct counter_rpi_pico_pit_data counter_##inst##_data = {                          \
 		.config_pwm = NULL,                                                                \

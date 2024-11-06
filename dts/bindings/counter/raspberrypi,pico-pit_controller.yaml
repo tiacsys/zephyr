@@ -1,0 +1,17 @@
+# Copyright (c) 2021, Yonatan Schachter
+# SPDX-License-Identifier: Apache-2.0
+
+description: Raspberry Pi Pico PIT
+
+compatible: "raspberrypi,pico-pit-controller"
+
+include: base.yaml
+
+properties:
+
+  pwm:
+    required: true
+    type: phandle
+    description: PWM device of the rpi pico, by default it should be "pwm".
+
+  

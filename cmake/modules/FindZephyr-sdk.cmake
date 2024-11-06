@@ -108,6 +108,14 @@ if(("zephyr" STREQUAL ${ZEPHYR_TOOLCHAIN_VARIANT}) OR
 
     list(REMOVE_DUPLICATES Zephyr-sdk_CONSIDERED_VERSIONS)
     list(SORT Zephyr-sdk_CONSIDERED_VERSIONS COMPARE NATURAL ORDER DESCENDING)
+    if("${Zephyr-sdk_FIND_VERSION_RANGE_MAX}" STREQUAL "INCLUDE")
+      set(upper_bound _EQUAL)
+    endif()
+
+    if(NOT DEFINED Zephyr-sdk_FIND_VERSION_RANGE)
+      # Range not given, max out to ensure max version is not in effect.
+      set(Zephyr-sdk_FIND_VERSION_MAX 99999999)
+    endif()
 
     if(LIST IN_LIST Zephyr-sdk_FIND_COMPONENTS)
       set(Zephyr-sdk)

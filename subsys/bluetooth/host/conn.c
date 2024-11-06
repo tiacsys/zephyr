@@ -1258,6 +1258,8 @@ void bt_conn_set_state(struct bt_conn *conn, bt_conn_state_t state)
 
 			bt_conn_reset_rx_state(conn);
 
+			bt_conn_reset_rx_state(conn);
+
 			LOG_DBG("trigger disconnect work");
 			k_work_reschedule(&conn->deferred_work, K_NO_WAIT);
 

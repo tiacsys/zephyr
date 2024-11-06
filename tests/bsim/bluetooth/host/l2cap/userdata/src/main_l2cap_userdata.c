@@ -272,6 +272,11 @@ static void test_central_main(void)
 	printk("Buffer user_data after (should've been cleared)\n");
 	print_user_data(buf);
 
+	WAIT_FOR_FLAG_SET(is_sent);
+
+	printk("Buffer user_data after (should've been cleared)\n");
+	print_user_data(buf);
+
 	printk("\n");
 
 	/* Validate that the user data has changed */

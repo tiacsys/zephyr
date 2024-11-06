@@ -137,6 +137,12 @@ void IRAM_ATTR __esp_platform_start(void)
 
 	esp_timer_early_init();
 
+	esp_mspi_pin_init();
+
+	esp_flash_app_init();
+
+	esp_mmu_map_init();
+
 #if CONFIG_SOC_ENABLE_APPCPU
 	/* start the ESP32 APP CPU */
 	esp_start_appcpu();

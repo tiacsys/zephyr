@@ -3,7 +3,7 @@
 
 description: Raspberry Pi Pico PIT
 
-compatible: "raspberrypi,pico-pit"
+compatible: "raspberrypi,pico-pit-channel"
 
 include: base.yaml
 

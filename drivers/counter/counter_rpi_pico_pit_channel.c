@@ -4,58 +4,56 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdint.h>
-// #include <cstdint>
-#include <hardware/timer.h>
 #include <hardware/pwm.h>
 #include <hardware/structs/pwm.h>
 
 #include <zephyr/drivers/counter.h>
-#include <zephyr/drivers/clock_control.h>
-#include <zephyr/drivers/reset.h>
 #include <zephyr/drivers/pwm.h>
-#include <zephyr/sys/atomic.h>
 #include <zephyr/irq.h>
-#include <cmsis_core.h>
+#include "counter_rpi_pico_pit.h"
+#include <stdint.h>
 
 #define LOG_LEVEL CONFIG_COUNTER_LOG_LEVEL
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(counter_rpi_pico_pit, LOG_LEVEL);
+LOG_MODULE_REGISTER(counter_rpi_pico_pit_channel, LOG_LEVEL);
 
 #define DT_DRV_COMPAT raspberrypi_pico_pit_channel
 
 struct counter_rpi_pico_pit_channel_data {
+	/* Data struct for configuring the pwm slice*/
 	pwm_config config_pwm;
+	/* Current top value of the counter*/
 	uint16_t top_value;
-	struct counter_top_cfg *top_cfg;
+	/* Struct containing callback information*/
+	struct rpi_pico_pit_callback callback_struct;
 };
 
 struct counter_rpi_pico_pit_channel_config {
+	/*Struct containing basic counter information, required by api*/
 	struct counter_config_info info;
+	/* PWM Slice number associated with this channel*/
 	int32_t slice;
-	void (*irq_config_func)(const struct device *dev);
+	/* Reference to the pico pit instance that is the channels parent*/
+	const struct device *controller;
+	/* Clock divider value used to generate the slices frequency*/
+	uint8_t divider_integral;
+	uint8_t divider_frac;
 };
 
-static void counter_rpi_pico_pit_channel_isr(const struct device *dev)
+/* Returns the clockdivider of the slice associated with this pit channel as a float*/
+static float counter_rpi_pico_pit_channel_get_clkdiv(const struct device *dev)
 {
-	// LOG_INF("In ISR of Driver");
 	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
-	struct counter_rpi_pico_pit_channel_data *data = dev->data;
 
-	uint32_t inter_mask = pwm_get_irq_status_mask();
-	inter_mask = find_lsb_set(inter_mask) - 1;
-	if (inter_mask == config->slice && data->top_cfg->callback != NULL) {
-		data->top_cfg->callback(dev, data->top_cfg->user_data);
-	}
-	pwm_clear_irq(config->slice);
+	/* the divider is a fixed point 8.4 convert to float */
+	return (float)config->divider_integral + (float)config->divider_frac / 16.0f;
 }
 
 static int counter_rpi_pico_pit_channel_start(const struct device *dev)
 {
 	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
 
-	pwm_set_counter(config->slice, 0);
 	pwm_set_enabled(config->slice, true);
 
 	return 0;
@@ -104,39 +102,41 @@ static int counter_rpi_pico_pit_channel_set_top_value(const struct device *dev,
 	if (cfg->ticks == 0 || cfg->ticks > UINT16_MAX) {
 		return -EINVAL;
 	}
-	if (cfg->flags & COUNTER_TOP_CFG_DONT_RESET) {
-		return -ENOTSUP;
-	}
-
 	pwm_set_enabled(config->slice, false);
+	if (!(cfg->flags & COUNTER_TOP_CFG_DONT_RESET)) {
+		pwm_set_counter(config->slice, 0);
+
+	} else {
+		uint32_t value = pwm_get_counter(config->slice);
+		if (value >= cfg->ticks) {
+			pwm_set_enabled(config->slice, true);
+			return -ETIME;
+		}
+	}
 	pwm_set_chan_level(config->slice, 1, 0);
 	pwm_set_chan_level(config->slice, 0, 0);
-	pwm_set_counter(config->slice, 0);
-
-	// uint16_t cycles = (config->info.freq / cfg->ticks);
 
 	data->config_pwm = pwm_get_default_config();
 	pwm_config_set_wrap(&data->config_pwm, cfg->ticks);
-	pwm_config_set_clkdiv_int_frac(&data->config_pwm, 255, 15);
+	pwm_config_set_clkdiv_int_frac(&data->config_pwm, config->divider_integral,
+				       config->divider_frac);
 	data->top_value = cfg->ticks;
-	data->top_cfg = cfg;
-	pwm_init(config->slice, &data->config_pwm, true);
+	data->callback_struct.callback = cfg->callback;
+	data->callback_struct.top_user_data = cfg->user_data;
 
-	// TODO: Interrupt handling
-	// Temp
+	bool callback_set = cfg->callback ? true : false;
+	counter_rpi_pico_pit_manage_callback(config->controller, &data->callback_struct,
+					     callback_set);
+
+	pwm_init(config->slice, &data->config_pwm, true);
 
 	return 0;
 }
 
 static uint32_t counter_rpi_pico_pit_channel_get_pending_int(const struct device *dev)
 {
-	// TODO: Change for channel mode
-	uint32_t inter_mask = pwm_get_irq_status_mask();
-	if (inter_mask == 0) {
-		return 0;
-	} else {
-		return 1;
-	}
+	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
+	return counter_rpi_pico_pit_get_pending_int(config->controller, config->slice);
 }
 
 static uint32_t counter_rpi_pico_pit_channel_get_guard_period(const struct device *dev,
@@ -150,26 +150,31 @@ static int counter_rpi_pico_pit_channel_set_guard_period(const struct device *de
 {
 	return -ENOTSUP;
 }
+static uint32_t counter_rpi_pico_pit_channel_get_frequency(const struct device *dev)
+{
+	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
+	uint32_t frequency = 0;
+
+	/* Get clockspeed from controller, as it is the same for all slices, but each slice
+	 * has its own divider. No need to check for div by 0 as the clockdivider is
+	 * constant*/
+	counter_rpi_pico_pit_get_base_frequency(config->controller, &frequency);
+	return frequency / counter_rpi_pico_pit_channel_get_clkdiv(dev);
+}
 
 static int counter_rpi_pico_pit_channel_init(const struct device *dev)
 {
 	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
-	// struct counter_rpi_pico_pit_config *data = dev->data;
-	// int ret;
+	struct counter_rpi_pico_pit_channel_data *data = dev->data;
 
-	// config->irq_config();
-	// LOG_INF("Init PIT");
+	data->callback_struct.slice = config->slice;
 
-	pwm_set_enabled(config->slice, false);
-	pwm_set_irq_enabled(config->slice, true);
+	/* Disable slice channels to prevent side effects on their pins*/
 	pwm_set_chan_level(config->slice, 1, 0);
 	pwm_set_chan_level(config->slice, 0, 0);
-	// const struct device **tmp;
-	// tmp = &dev;
-	// IRQ_CONNECT(4, 2U, counter_rpi_pico_pit_isr, tmp, 0U);
-	// irq_enable(4);
-	config->irq_config_func(dev);
-	// LOG_INF("End Init PIT");
+	pwm_set_wrap(config->slice, UINT16_MAX);
+
+	pwm_set_enabled(config->slice, true);
 
 	return 0;
 }
@@ -185,32 +190,28 @@ static const struct counter_driver_api counter_rpi_pico_pit_channel_api = {
 	.get_top_value = counter_rpi_pico_pit_channel_get_top_value,
 	.get_guard_period = counter_rpi_pico_pit_channel_get_guard_period,
 	.set_guard_period = counter_rpi_pico_pit_channel_set_guard_period,
+	.get_freq = counter_rpi_pico_pit_channel_get_frequency,
 };
 
 #define COUNTER_RPI_PICO_PIT_CHANNEL(inst)                                                         \
-	static void counter_rpi_pico_pit_channel_##inst##_irq_config(const struct device *dev)     \
-	{                                                                                          \
-		IRQ_CONNECT(4U, 2U, counter_rpi_pico_pit_channel_isr, DEVICE_DT_INST_GET(inst),    \
-			    0);                                                                    \
-		irq_enable(4U);                                                                    \
-	}                                                                                          \
 	static const struct counter_rpi_pico_pit_channel_config counter_##inst##_config = {        \
 		.info =                                                                            \
 			{                                                                          \
 				.max_top_value = UINT16_MAX,                                       \
-				.freq = 488400,                                                    \
+				.freq = 0,                                                         \
 				.flags = COUNTER_CONFIG_INFO_COUNT_UP,                             \
 				.channels = 0,                                                     \
 			},                                                                         \
 		.slice = DT_INST_PROP(inst, pwm_slice),                                            \
-		.irq_config_func = counter_rpi_pico_pit_channel_##inst##_irq_config,               \
+		.controller = DEVICE_DT_GET(DT_INST_PARENT(inst)),                                 \
+		.divider_integral = 255,                                                           \
+		.divider_frac = 15,                                                                \
 	};                                                                                         \
 	static struct counter_rpi_pico_pit_channel_data counter_##inst##_data = {                  \
-		.config_pwm = NULL,                                                                \
 		.top_value = UINT16_MAX,                                                           \
 	};                                                                                         \
-	DEVICE_DT_INST_DEFINE(inst, counter_rpi_pico_pit_channel_init, NULL, &counter_##inst##_data,       \
-			      &counter_##inst##_config, POST_KERNEL, CONFIG_COUNTER_INIT_PRIORITY, \
-			      &counter_rpi_pico_pit_channel_api);
+	DEVICE_DT_INST_DEFINE(inst, counter_rpi_pico_pit_channel_init, NULL,                       \
+			      &counter_##inst##_data, &counter_##inst##_config, POST_KERNEL,       \
+			      CONFIG_COUNTER_INIT_PRIORITY, &counter_rpi_pico_pit_channel_api);
 
 DT_INST_FOREACH_STATUS_OKAY(COUNTER_RPI_PICO_PIT_CHANNEL)

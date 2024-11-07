@@ -711,14 +711,7 @@ static int drv8424_init(const struct device *dev)
 	data->counter_top_cfg.callback = drv8424_positioning_top_interrupt;
 	data->counter_top_cfg.user_data = data;
 	data->counter_top_cfg.flags = 0;
-	data->counter_top_cfg.ticks = counter_us_to_ticks(
-		config->counter, 1000000); /* Some counter drivers need ticks value > 0 */
-
-	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set counter top value (error: %d)", dev->name, ret);
-		return ret;
-	}
+	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, 1000000);
 
 	return 0;
 }

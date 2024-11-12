@@ -4,6 +4,5 @@
 config COUNTER_PIT_RPI_PICO
 	bool "RPI Pico pit driver"
 	def_bool y
-	depends on PWM
 	depends on DT_HAS_RASPBERRYPI_PICO_PIT_CHANNEL_ENABLED
 	select PICOSDK_USE_PWM

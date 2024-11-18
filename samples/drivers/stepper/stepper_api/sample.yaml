@@ -1,0 +1,12 @@
+sample:
+  name: Stepper API Sample
+tests:
+  sample.drivers.stepper.stepper_api:
+    tags:
+      - stepper
+      - motor
+    depends_on: stepper
+    integration_platforms:
+      - nucleo_f767zi
+      - rpi_pico
+      - mimxrt1060_evkb

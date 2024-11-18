@@ -1,0 +1,27 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2024 Navimatix GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+
+/ {
+	aliases {
+		stepper0 = &stepper_motor;
+	};
+};
+
+/ {
+	stepper_motor: stepper_motor {
+		compatible = "zephyr,gpio-steppers";
+		status = "okay";
+		motor_1: motor_1 {
+			micro-step-res = <1>;
+			gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>,
+				<&gpio0 13 GPIO_ACTIVE_HIGH>,
+				<&gpio0 14 GPIO_ACTIVE_HIGH>,
+				<&gpio0 15 GPIO_ACTIVE_HIGH>;
+		};
+	};
+};

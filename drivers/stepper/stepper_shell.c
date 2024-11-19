@@ -30,14 +30,12 @@ struct stepper_direction_map {
 
 #define STEPPER_DIRECTION_MAP_ENTRY(_name, _dir)                                                   \
 	{                                                                                          \
-		.name = _name,                                                                     \
-		.direction = _dir,                                                                 \
+		.name = _name, .direction = _dir,                                                  \
 	}
 
 #define STEPPER_MICROSTEP_MAP(_name, _microstep)                                                   \
 	{                                                                                          \
-		.name = _name,                                                                     \
-		.microstep = _microstep,                                                           \
+		.name = _name, .microstep = _microstep,                                            \
 	}
 
 static void print_callback(const struct device *dev, const enum stepper_event event,
@@ -455,14 +453,25 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 		      cmd_stepper_move, 3, 0),
 	SHELL_CMD_ARG(set_max_velocity, &dsub_pos_stepper_motor_name, "<device> <velocity>",
 		      cmd_stepper_set_max_velocity, 3, 0),
+	SHELL_CMD_ARG(set_vel, &dsub_pos_stepper_motor_name, "<device> <velocity>",
+		      cmd_stepper_set_max_velocity, 3, 0), // Set max velocity short
 	SHELL_CMD_ARG(set_micro_step_res, &dsub_pos_stepper_motor_name_microstep,
 		      "<device> <resolution>", cmd_stepper_set_micro_step_res, 3, 0),
 	SHELL_CMD_ARG(get_micro_step_res, &dsub_pos_stepper_motor_name, "<device>",
 		      cmd_stepper_get_micro_step_res, 2, 0),
+	SHELL_CMD_ARG(set_res, &dsub_pos_stepper_motor_name_microstep,
+		      "<device> <resolution>", cmd_stepper_set_micro_step_res, 3, 0),	//Ms short 1
+	SHELL_CMD_ARG(get_res, &dsub_pos_stepper_motor_name, "<device>",
+		      cmd_stepper_get_micro_step_res, 2, 0),	//Ms short 2
 	SHELL_CMD_ARG(set_actual_position, &dsub_pos_stepper_motor_name, "<device> <position>",
 		      cmd_stepper_set_actual_position, 3, 0),
 	SHELL_CMD_ARG(get_actual_position, &dsub_pos_stepper_motor_name, "<device>",
 		      cmd_stepper_get_actual_position, 2, 0),
+	SHELL_CMD_ARG(set_pos, &dsub_pos_stepper_motor_name, "<device> <position>",
+		      cmd_stepper_set_actual_position, 3, 0),	//Pos short 1
+	SHELL_CMD_ARG(get_pos, &dsub_pos_stepper_motor_name, "<device>",
+		      cmd_stepper_get_actual_position, 2, 0),	//Pos short 2
+
 	SHELL_CMD_ARG(set_target_position, &dsub_pos_stepper_motor_name, "<device> <micro_steps>",
 		      cmd_stepper_set_target_position, 3, 0),
 	SHELL_CMD_ARG(enable_constant_velocity_mode, &dsub_pos_stepper_motor_name_dir,

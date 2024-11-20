@@ -224,6 +224,18 @@ static int cmd_stepper_move(const struct shell *sh, size_t argc, char **argv)
 		return err;
 	}
 
+	if (argc == 4) {
+		uint32_t velocity = shell_strtoul(argv[ARG_IDX_VALUE], 10, &err);
+		if (err < 0) {
+			shell_error(sh, "Incorrect speed: %d", err);
+			return err;
+		}
+		err = stepper_set_max_velocity(dev, velocity);
+		if (err) {
+			shell_error(sh, "Failed to set speed: %d", err);
+		}
+	}
+
 	err = stepper_set_callback(dev, print_callback, (void *)sh);
 	if (err != 0) {
 		shell_error(sh, "Failed to set callback: %d", err);
@@ -371,6 +383,18 @@ static int cmd_stepper_set_target_position(const struct shell *sh, size_t argc, 
 		return err;
 	}
 
+	if (argc == 4) {
+		uint32_t velocity = shell_strtoul(argv[ARG_IDX_VALUE], 10, &err);
+		if (err < 0) {
+			shell_error(sh, "Incorrect speed: %d", err);
+			return err;
+		}
+		err = stepper_set_max_velocity(dev, velocity);
+		if (err) {
+			shell_error(sh, "Failed to set speed: %d", err);
+		}
+	}
+
 	err = stepper_set_callback(dev, print_callback, (void *)sh);
 	if (err != 0) {
 		shell_error(sh, "Failed to set callback: %d", err);
@@ -391,21 +415,6 @@ static int cmd_stepper_enable_constant_velocity_mode(const struct shell *sh, siz
 	int err = 0;
 	enum stepper_direction direction = STEPPER_DIRECTION_POSITIVE;
 
-	if (argc == 4) {
-
-		for (int i = 0; i < ARRAY_SIZE(stepper_direction_map); i++) {
-			if (strcmp(argv[ARG_IDX_VALUE], stepper_direction_map[i].name) == 0) {
-				direction = stepper_direction_map[i].direction;
-				err = 0;
-				break;
-			}
-		}
-		if (err != 0) {
-			shell_error(sh, "Invalid direction %s", argv[ARG_IDX_VALUE]);
-			return err;
-		}
-	}
-
 	int32_t velocity = shell_strtol(argv[ARG_IDX_PARAM], 10, &err);
 	if (err < 0) {
 		return err;
@@ -415,8 +424,6 @@ static int cmd_stepper_enable_constant_velocity_mode(const struct shell *sh, siz
 		direction = STEPPER_DIRECTION_NEGATIVE;
 		velocity = -velocity;
 	}
-	printk("Velocity %d\n", velocity);
-	k_msleep(100);
 
 	err = parse_device_arg(sh, argv, &dev);
 	if (err < 0) {
@@ -477,45 +484,97 @@ static int cmd_stepper_info(const struct shell *sh, size_t argc, char **argv)
 	return 0;
 }
 
+#define STEPPER_STATE_HELP                                                                         \
+	("Set stepper device state\n"                                                              \
+	 "Usage: stepper set_state <device> <on/off>")
+#define STEPPER_ENABLE_HELP                                                                        \
+	("Set stepper device state to on\n"                                                        \
+	 "Usage: stepper enable <device>")
+#define STEPPER_DISABLE_HELP                                                                       \
+	("Set stepper device state to off\n"                                                       \
+	 "Usage: stepper disable <device>")
+#define STEPPER_MOVE_HELP                                                                          \
+	("Move stepper motor by a micro step amount, optionally sets positioning speed\n"          \
+	 "Usage: stepper move <device> <micro_steps> opt: <speed>")
+/*#define STEPPER_SET_POS_SPEED_HELP \*/
+/*	("Set speed for move and set_target_position movement commands\n" \*/
+/*	 "Usage: stepper set_positioning_speed <device> <speed>")*/
+#define STEPPER_SET_SPD_HELP                                                                       \
+	("Set speed for move and target movement commands\n"                                       \
+	 "Usage: stepper set_spd <device> <speed>")
+/*#define STEPPER_SET_MICROSTEP_RES_HELP \*/
+/*	("Set micro step resolution, needs to be power of two between 1-256\n" \*/
+/*	 "Usage: stepper set_micro_step_res <device> <resolution>")*/
+#define STEPPER_SET_RES_HELP                                                                       \
+	("Set micro step resolution, needs to be power of two between 1-256\n"                     \
+	 "Usage: stepper set_res <device> <resolution>")
+/*#define STEPPER_GET_MICROSTEP_RES_HELP \*/
+/*	("Get micro step resolution\n" \*/
+/*	 "Usage: stepper get_micro_step_res <device>")*/
+#define STEPPER_GET_RES_HELP                                                                       \
+	("Get micro step resolution\n"                                                             \
+	 "Usage: stepper get_res <device>")
+#define STEPPER_SET_POS_HELP                                                                       \
+	("Set the current absolute position of the stepper device to the given value\n"            \
+	 "Usage: stepper set_pos <device> <position>")
+#define STEPPER_GET_POS_HELP                                                                       \
+	("Get the absolute position of the stepper device\n"                                       \
+	 "Usage: stepper get_pos <device>")
+#define STEPPER_TARGET_HELP                                                                        \
+	("Set the target absolute position and starts movement with the set speed, optionally "    \
+	 "takes new speed\n"                                                                       \
+	 "Usage: stepper target <device> <position> opt: <speed>")
+#define STEPPER_VELOCITY_HELP                                                                      \
+	("Starts the stepper device at the given velocity, it stops either when receiving a new "  \
+	 "movement command or when reaching the maximum or minimum position\n"                     \
+	 "Usage: stepper velocity <device> <velocity>")
+#define STEPPER_INFO_HELP                                                                          \
+	("Prints various information about the stepper device\n"                                   \
+	 "Usage: stepper info <device>")
+
 SHELL_STATIC_SUBCMD_SET_CREATE(
 	stepper_cmds,
-	SHELL_CMD_ARG(enable, &dsub_pos_stepper_motor_name, "<device> opt: <on/off>",
-		      cmd_stepper_enable, 2, 1), // Enable second parameter opt
-	SHELL_CMD_ARG(disable, &dsub_pos_stepper_motor_name, "<device>", cmd_stepper_disable, 2,
+	SHELL_CMD_ARG(set_state, &dsub_pos_stepper_motor_name, STEPPER_STATE_HELP,
+		      cmd_stepper_enable, 3, 0), // Enable
+	SHELL_CMD_ARG(enable, &dsub_pos_stepper_motor_name, STEPPER_ENABLE_HELP, cmd_stepper_enable,
+		      2, 0), // Enable directly
+	SHELL_CMD_ARG(disable, &dsub_pos_stepper_motor_name, STEPPER_DISABLE_HELP,
+		      cmd_stepper_disable, 2,
 		      0), // Disable
-	SHELL_CMD_ARG(move, &dsub_pos_stepper_motor_name, "<device> <micro_steps>",
-		      cmd_stepper_move, 3, 0),
-	SHELL_CMD_ARG(set_max_velocity, &dsub_pos_stepper_motor_name, "<device> <velocity>",
-		      cmd_stepper_set_max_velocity, 3, 0),
-	SHELL_CMD_ARG(set_vel, &dsub_pos_stepper_motor_name, "<device> <velocity>",
+	SHELL_CMD_ARG(move, &dsub_pos_stepper_motor_name, STEPPER_MOVE_HELP, cmd_stepper_move, 3,
+		      1),
+	/*SHELL_CMD_ARG(set_positioning_speed, &dsub_pos_stepper_motor_name,*/
+	/*	      STEPPER_SET_POS_SPEED_HELP, cmd_stepper_set_max_velocity, 3, 0),*/
+	SHELL_CMD_ARG(set_spd, &dsub_pos_stepper_motor_name, STEPPER_SET_SPD_HELP,
 		      cmd_stepper_set_max_velocity, 3, 0), // Set max velocity short
-	SHELL_CMD_ARG(set_micro_step_res, &dsub_pos_stepper_motor_name_microstep,
-		      "<device> <resolution>", cmd_stepper_set_micro_step_res, 3, 0),
-	SHELL_CMD_ARG(get_micro_step_res, &dsub_pos_stepper_motor_name, "<device>",
-		      cmd_stepper_get_micro_step_res, 2, 0),
-	SHELL_CMD_ARG(set_res, &dsub_pos_stepper_motor_name_microstep, "<device> <resolution>",
+	/*SHELL_CMD_ARG(set_micro_step_res, &dsub_pos_stepper_motor_name_microstep,*/
+	/*	      STEPPER_SET_MICROSTEP_RES_HELP, cmd_stepper_set_micro_step_res, 3, 0),*/
+	/*SHELL_CMD_ARG(get_micro_step_res, &dsub_pos_stepper_motor_name,*/
+	/*	      STEPPER_GET_MICROSTEP_RES_HELP, cmd_stepper_get_micro_step_res, 2, 0),*/
+	SHELL_CMD_ARG(set_res, &dsub_pos_stepper_motor_name_microstep, STEPPER_SET_RES_HELP,
 		      cmd_stepper_set_micro_step_res, 3, 0), // Ms short 1
-	SHELL_CMD_ARG(get_res, &dsub_pos_stepper_motor_name, "<device>",
+	SHELL_CMD_ARG(get_res, &dsub_pos_stepper_motor_name, STEPPER_GET_RES_HELP,
 		      cmd_stepper_get_micro_step_res, 2, 0), // Ms short 2
-	SHELL_CMD_ARG(set_actual_position, &dsub_pos_stepper_motor_name, "<device> <position>",
-		      cmd_stepper_set_actual_position, 3, 0),
-	SHELL_CMD_ARG(get_actual_position, &dsub_pos_stepper_motor_name, "<device>",
-		      cmd_stepper_get_actual_position, 2, 0),
-	SHELL_CMD_ARG(set_pos, &dsub_pos_stepper_motor_name, "<device> <position>",
+	/*SHELL_CMD_ARG(set_actual_position, &dsub_pos_stepper_motor_name, "<device> <position>",*/
+	/*	      cmd_stepper_set_actual_position, 3, 0),*/
+	/*SHELL_CMD_ARG(get_actual_position, &dsub_pos_stepper_motor_name, "<device>",*/
+	/*	      cmd_stepper_get_actual_position, 2, 0),*/
+	SHELL_CMD_ARG(set_pos, &dsub_pos_stepper_motor_name, STEPPER_SET_POS_HELP,
 		      cmd_stepper_set_actual_position, 3, 0), // Pos short 1
-	SHELL_CMD_ARG(get_pos, &dsub_pos_stepper_motor_name, "<device>",
+	SHELL_CMD_ARG(get_pos, &dsub_pos_stepper_motor_name, STEPPER_GET_POS_HELP,
 		      cmd_stepper_get_actual_position, 2, 0), // Pos short 2
-	SHELL_CMD_ARG(set_target_position, &dsub_pos_stepper_motor_name, "<device> <micro_steps>",
-		      cmd_stepper_set_target_position, 3, 0),
-	SHELL_CMD_ARG(target, &dsub_pos_stepper_motor_name, "<device> <micro_steps>",
-		      cmd_stepper_set_target_position, 3, 0), // Set target short
-	SHELL_CMD_ARG(enable_constant_velocity_mode, &dsub_pos_stepper_motor_name_dir,
-		      "<device> <velocity> opt: <direction>",
-		      cmd_stepper_enable_constant_velocity_mode, 3, 1),
-	SHELL_CMD_ARG(velocity, &dsub_pos_stepper_motor_name_dir,
-		      "<device> <velocity> opt: <direction>",
-		      cmd_stepper_enable_constant_velocity_mode, 3, 1), // Const Velocity mode short
-	SHELL_CMD_ARG(info, &dsub_pos_stepper_motor_name, "<device>", cmd_stepper_info, 2, 0),
+	/*SHELL_CMD_ARG(set_target_position, &dsub_pos_stepper_motor_name, "<device>
+	   <micro_steps>",*/
+	/*	      cmd_stepper_set_target_position, 3, 1),*/
+	SHELL_CMD_ARG(target, &dsub_pos_stepper_motor_name, STEPPER_TARGET_HELP,
+		      cmd_stepper_set_target_position, 3, 1), // Set target short
+	/*SHELL_CMD_ARG(enable_constant_velocity_mode, &dsub_pos_stepper_motor_name_dir,*/
+	/*	      "<device> <velocity>", // TODO: discuss direction*/
+	/*	      cmd_stepper_enable_constant_velocity_mode, 3, 0),*/
+	SHELL_CMD_ARG(velocity, &dsub_pos_stepper_motor_name_dir, STEPPER_VELOCITY_HELP,
+		      cmd_stepper_enable_constant_velocity_mode, 3, 0), // Const Velocity mode short
+	SHELL_CMD_ARG(info, &dsub_pos_stepper_motor_name, STEPPER_INFO_HELP, cmd_stepper_info, 2,
+		      0),
 	SHELL_SUBCMD_SET_END);
 
 SHELL_CMD_REGISTER(stepper, &stepper_cmds, "Stepper motor commands", NULL);

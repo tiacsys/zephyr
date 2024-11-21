@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+tests:
+  drivers.stepper.stepper_pos_edge:
+    tags:
+      - drivers
+      - stepper
+      - api
+    platform_allow:
+      - mimxrt1060_evkb
+      - nucleo_f767zi
+      - rpi_pico

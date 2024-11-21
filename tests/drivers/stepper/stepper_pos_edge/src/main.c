@@ -126,3 +126,71 @@ ZTEST_F(stepper, test_min_position_event)
 	zassert_equal(signaled, 1, "Minimum Position event not detected");
 	zassert_equal(result, STEPPER_EVENT_LEFT_END_STOP_DETECTED, "Minimum Position event not detected");
 }
+
+ZTEST_F(stepper, test_max_position_value)
+{
+	int32_t pos = INT32_MAX - 10;
+
+	/* Pass the function name as user data */
+	(void)stepper_set_callback(fixture->dev, fixture->callback, &fixture);
+
+	(void)stepper_set_actual_position(fixture->dev, pos);
+	(void)stepper_enable_constant_velocity_mode(fixture->dev, STEPPER_DIRECTION_POSITIVE, 100u);
+
+	(void)k_msleep(200);
+	int32_t value = 0;
+	(void)stepper_get_actual_position(fixture->dev, &value);
+
+	zassert_equal(value, INT32_MAX, "Position should be %d but is %d", INT32_MAX, value);
+}
+
+ZTEST_F(stepper, test_min_position_value)
+{
+	int32_t pos = INT32_MIN + 10;
+
+	/* Pass the function name as user data */
+	(void)stepper_set_callback(fixture->dev, fixture->callback, &fixture);
+
+	(void)stepper_set_actual_position(fixture->dev, pos);
+	(void)stepper_enable_constant_velocity_mode(fixture->dev, STEPPER_DIRECTION_NEGATIVE, 100u);
+
+	(void)k_msleep(200);
+	int32_t value = 0;
+	(void)stepper_get_actual_position(fixture->dev, &value);
+
+	zassert_equal(value, INT32_MIN, "Position should be %d but is %d", INT32_MIN, value);
+}
+
+ZTEST_F(stepper, test_max_position_is_not_moving)
+{
+	int32_t pos = INT32_MAX - 10;
+
+	/* Pass the function name as user data */
+	(void)stepper_set_callback(fixture->dev, fixture->callback, &fixture);
+
+	(void)stepper_set_actual_position(fixture->dev, pos);
+	(void)stepper_enable_constant_velocity_mode(fixture->dev, STEPPER_DIRECTION_POSITIVE, 100u);
+
+	(void)k_msleep(200);
+	bool moving = true;
+	(void)stepper_is_moving(fixture->dev, &moving);
+
+	zassert_false(moving, "Stepper should not be in state moving");
+}
+
+ZTEST_F(stepper, test_min_position_is_not_moving)
+{
+	int32_t pos = INT32_MIN + 10;
+
+	/* Pass the function name as user data */
+	(void)stepper_set_callback(fixture->dev, fixture->callback, &fixture);
+
+	(void)stepper_set_actual_position(fixture->dev, pos);
+	(void)stepper_enable_constant_velocity_mode(fixture->dev, STEPPER_DIRECTION_NEGATIVE, 100u);
+
+	(void)k_msleep(200);
+	bool moving = true;
+	(void)stepper_is_moving(fixture->dev, &moving);
+
+	zassert_false(moving, "Stepper should not be in state moving");
+}

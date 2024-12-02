@@ -1,0 +1,15 @@
+# Copyright (c) 2024 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+tests:
+  drivers.counter.counter_emul:
+    tags:
+      - drivers
+      - counter
+      - api
+      - emulation
+    depends_on: counter
+    min_ram: 16
+    platform_allow:
+      - qemu_cortex_m0
+    timeout: 600

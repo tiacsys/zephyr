@@ -1,0 +1,7 @@
+# Copyright (c) 2024 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+config COUNTER_EMUL
+	bool "Counter emulation driver"
+	def_bool y
+	depends on DT_HAS_ZEPHYR_COUNTER_EMUL_ENABLED

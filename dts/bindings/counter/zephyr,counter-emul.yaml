@@ -1,0 +1,17 @@
+# Copyright (c) 2024 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Emulated Counter using Kernel Timers
+  Designed for testing in emulations such as native_sim and qemu
+  WARNING: because of the usage of the kernel timers, accuracy can
+  not be guaranteed
+
+compatible: "zephyr,counter-emul"
+
+include: base.yaml
+
+properties:
+  counting-down:
+    type: boolean
+    description: If the counter counts up or down

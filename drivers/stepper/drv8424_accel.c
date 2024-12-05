@@ -41,7 +41,7 @@ struct drv8424_config {
 	struct gpio_dt_spec m1_pin;
 	/** Counter used as timing source. */
 	const struct device *counter;
-	/** Fullstep acceleration in steps/s^2 */
+	/** Fullstep acceleration in steps/s^2. */
 	uint32_t acceleration;
 };
 
@@ -55,13 +55,20 @@ struct drv8424_pin_states {
 
 /* Struct for storing ramp information */
 struct drv8424_ramp_data {
+	/* Iterator for the current step in the current phase. */
 	uint32_t step_index;
+	/* Current step period time in us. NOTE: float is used for calculation purposes. */
 	float current_time;
+	/* Step period of the first step of acceleration. */
 	float base_time;
-	float accel_time;
+	/* Number of steps to take during constant speed phase. */
 	uint32_t const_steps;
+	/* Number of steps to take during deceleration phase. */
 	uint32_t decel_steps;
+	/* Number of steps to take during acceleration phase. */
 	uint32_t accel_steps;
+	/* Pointer to step_pin dt_spec. */
+	const struct gpio_dt_spec *step_pin;
 };
 
 /**
@@ -163,34 +170,11 @@ static void drv8424_positioning_top_interrupt(const struct device *dev, void *us
 	struct drv8424_data *data = (struct drv8424_data *)user_data;
 	const struct drv8424_config *config = (struct drv8424_config *)data->dev->config;
 
-	if (!data->constant_velocity) {
-		/* Check if target position is reached */
-		if (data->actual_position == data->target_position) {
-			counter_stop(config->counter);
-			if (data->event_callback != NULL) {
-				/* Ignore return value since we can't do anything about it anyway */
-				drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
-			}
-			data->is_moving = false;
-			return;
-		}
-	}
-
-	/* Determine direction we're going in for counting purposes */
-	enum stepper_direction direction = 0;
-	if (data->constant_velocity) {
-		direction = data->direction;
-	} else {
-		direction = (data->target_position >= data->actual_position)
-				    ? STEPPER_DIRECTION_POSITIVE
-				    : STEPPER_DIRECTION_NEGATIVE;
-	}
-
 	/* Switch step pin on or off depending position in step period */
 	if (data->step_signal_high) {
 		/* Generate a falling edge and count a completed step */
 		gpio_pin_set_dt(&config->step_pin, 0);
-		if (direction == STEPPER_DIRECTION_POSITIVE) {
+		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			data->actual_position++;
 		} else {
 			data->actual_position--;
@@ -205,17 +189,13 @@ static void drv8424_positioning_top_interrupt(const struct device *dev, void *us
 
 static void drv8424_positioning_smooth_deceleration(const struct device *dev, void *user_data)
 {
-	// TODO: adjust getting config and data
-	const struct device *stepper_dev = user_data;
-	const struct drv8424_config *config = stepper_dev->config;
-	struct drv8424_data *data = stepper_dev->data;
-
+	struct drv8424_data *data = user_data;
 	float new_time;
 
 	/* Switch step pin on or off depending position in step period and calculate length of the
 	 * new step period */
 	if (data->step_signal_high) {
-		gpio_pin_set_dt(&config->step_pin, 0);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		data->ramp_data.step_index--;
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			data->actual_position++;
@@ -242,7 +222,7 @@ static void drv8424_positioning_smooth_deceleration(const struct device *dev, vo
 		}
 		data->counter_top_cfg.ticks = counter_us_to_ticks(dev, (uint32_t)new_time / 2);
 		data->ramp_data.current_time = new_time;
-		gpio_pin_set_dt(&config->step_pin, 1);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(dev, &data->counter_top_cfg);
 	}
 
@@ -256,29 +236,26 @@ static void drv8424_positioning_smooth_deceleration(const struct device *dev, vo
 			drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
 		}
 		data->is_moving = false;
-		gpio_pin_set_dt(&config->step_pin, 0);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		data->step_signal_high = false;
 	}
 }
 
 static void drv8424_positioning_smooth_constant(const struct device *dev, void *user_data)
 {
-	// TODO: adjust getting config and data
-	const struct device *stepper_dev = user_data;
-	const struct drv8424_config *config = stepper_dev->config;
-	struct drv8424_data *data = stepper_dev->data;
+	struct drv8424_data *data = user_data;
 
 	/* Switch step pin on or off depending position in step period */
 	if (data->step_signal_high) {
 		data->ramp_data.step_index++;
-		gpio_pin_set_dt(&config->step_pin, 0);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			data->actual_position++;
 		} else {
 			data->actual_position--;
 		}
 	} else {
-		gpio_pin_set_dt(&config->step_pin, 1);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 	}
 
 	data->step_signal_high = !data->step_signal_high;
@@ -293,10 +270,7 @@ static void drv8424_positioning_smooth_constant(const struct device *dev, void *
 
 static void drv8424_positioning_smooth_acceleration(const struct device *dev, void *user_data)
 {
-	// TODO: adjust getting config and data
-	const struct device *stepper_dev = user_data;
-	const struct drv8424_config *config = stepper_dev->config;
-	struct drv8424_data *data = stepper_dev->data;
+	struct drv8424_data *data = user_data;
 
 	float new_time;
 
@@ -304,7 +278,7 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 	 * new step period */
 	if (data->step_signal_high) {
 		data->ramp_data.step_index++;
-		gpio_pin_set_dt(&config->step_pin, 0);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			data->actual_position++;
 		} else {
@@ -329,7 +303,7 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 		}
 		data->counter_top_cfg.ticks = counter_us_to_ticks(dev, (uint32_t)new_time / 2);
 		data->ramp_data.current_time = new_time;
-		gpio_pin_set_dt(&config->step_pin, 1);
+		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(dev, &data->counter_top_cfg);
 	}
 
@@ -351,7 +325,7 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 				drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
 			}
 			data->is_moving = false;
-			gpio_pin_set_dt(&config->step_pin, 0);
+			gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 			data->step_signal_high = false;
 		} else {
 			/* Otherwise switch to constant speed */
@@ -561,7 +535,7 @@ static int drv8424_move_positioning_smooth(const struct device *dev, uint32_t st
 
 	data->counter_top_cfg.callback = drv8424_positioning_smooth_acceleration;
 	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
-	data->counter_top_cfg.user_data = dev;
+	data->counter_top_cfg.user_data = data;
 	data->counter_top_cfg.flags = COUNTER_TOP_CFG_DONT_RESET;
 
 	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
@@ -899,6 +873,7 @@ static int drv8424_init(const struct device *dev)
 		LOG_ERR("%s: Failed to configure step_pin (error: %d)", dev->name, ret);
 		return ret;
 	}
+	data->ramp_data.step_pin = &config->step_pin;
 
 	/* Configure sleep pin if it is available */
 	if (config->sleep_pin.port != NULL) {

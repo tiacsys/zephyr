@@ -30,5 +30,6 @@ rsource "adi_tmc/Kconfig"
 rsource "Kconfig.fake"
 rsource "Kconfig.gpio"
 rsource "Kconfig.drv8424"
+rsource "Kconfig.drv8424_accel"
 
 endif

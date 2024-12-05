@@ -217,6 +217,11 @@ static void drv8424_positioning_smooth_deceleration(const struct device *dev, vo
 	if (data->step_signal_high) {
 		gpio_pin_set_dt(&config->step_pin, 0);
 		data->ramp_data.step_index--;
+		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+			data->actual_position++;
+		} else {
+			data->actual_position--;
+		}
 
 	} else {
 		/* data->n is 1 larger than actual value to prevent overflow */
@@ -246,6 +251,10 @@ static void drv8424_positioning_smooth_deceleration(const struct device *dev, vo
 	/* Stop Counter if positioning_smooth move is finished */
 	if (data->ramp_data.step_index == 0) {
 		counter_stop(dev);
+		if (data->event_callback != NULL) {
+			/* Ignore return value since we can't do anything about it anyway */
+			drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
+		}
 		data->is_moving = false;
 		gpio_pin_set_dt(&config->step_pin, 0);
 		data->step_signal_high = false;
@@ -263,6 +272,11 @@ static void drv8424_positioning_smooth_constant(const struct device *dev, void *
 	if (data->step_signal_high) {
 		data->ramp_data.step_index++;
 		gpio_pin_set_dt(&config->step_pin, 0);
+		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+			data->actual_position++;
+		} else {
+			data->actual_position--;
+		}
 	} else {
 		gpio_pin_set_dt(&config->step_pin, 1);
 	}
@@ -291,6 +305,11 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 	if (data->step_signal_high) {
 		data->ramp_data.step_index++;
 		gpio_pin_set_dt(&config->step_pin, 0);
+		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+			data->actual_position++;
+		} else {
+			data->actual_position--;
+		}
 
 	} else {
 		/* Use Approximation once error is small enough*/
@@ -327,6 +346,10 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 		} else if (data->ramp_data.decel_steps == 0) {
 			/* If no deceleration steps: movement finished*/
 			counter_stop(dev);
+			if (data->event_callback != NULL) {
+				/* Ignore return value since we can't do anything about it anyway */
+				drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
+			}
 			data->is_moving = false;
 			gpio_pin_set_dt(&config->step_pin, 0);
 			data->step_signal_high = false;
@@ -610,10 +633,12 @@ static int drv8424_move(const struct device *dev, int32_t micro_steps)
 		return -ENODEV;
 	}
 
-	/* Compute target position */
-	data->target_position = data->actual_position + micro_steps;
+	if (micro_steps < 0) {
+		data->direction = STEPPER_DIRECTION_NEGATIVE;
+	} else {
+		data->direction = STEPPER_DIRECTION_POSITIVE;
+	}
 
-	// ret = drv8424_start_positioning(dev);
 	ret = drv8424_move_positioning_smooth(dev, labs(micro_steps));
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to begin positioning (error %d)", dev->name, ret);

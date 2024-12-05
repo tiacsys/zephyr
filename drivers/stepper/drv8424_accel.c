@@ -557,6 +557,8 @@ static int drv8424_move_positioning_smooth(const struct device *dev, uint32_t st
 	data->ramp_data.decel_steps = decel_steps;
 	data->ramp_data.step_index = 0;
 
+	int key = irq_lock();
+
 	data->counter_top_cfg.callback = drv8424_positioning_smooth_acceleration;
 	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
 	data->counter_top_cfg.user_data = dev;
@@ -565,52 +567,12 @@ static int drv8424_move_positioning_smooth(const struct device *dev, uint32_t st
 	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to set counter top value (error: %d)", dev->name, ret);
-		return ret;
-	}
-	ret = counter_start(config->counter);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to start counter (error: %d)", dev->name, ret);
-		return ret;
-	}
-
-	return 0;
-}
-
-static int drv8424_start_positioning(const struct device *dev)
-{
-
-	const struct drv8424_config *config = dev->config;
-	struct drv8424_data *data = dev->data;
-	int ret = 0;
-
-	/* Unset constant velocity flag if present */
-	data->constant_velocity = false;
-
-	/* Set direction pin */
-	int dir_value = (data->target_position >= data->actual_position) ? 1 : 0;
-	ret = gpio_pin_set_dt(&config->dir_pin, dir_value);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set direction pin (error %d)", dev->name, ret);
-		return ret;
-	}
-
-	/* Lock interrupts while modifying counter settings */
-	int key = irq_lock();
-
-	/* Set counter to correct frequency */
-	ret = drv8424_set_counter_frequency(dev, data->max_velocity * 2);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set counter frequency (error %d)", dev->name, ret);
 		goto end;
 	}
-
 	data->is_moving = true;
-
-	/* Start counter */
 	ret = counter_start(config->counter);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to start counter (error: %d)", dev->name, ret);
-		data->is_moving = false;
 		goto end;
 	}
 
@@ -685,8 +647,15 @@ static int drv8424_set_target_position(const struct device *dev, int32_t positio
 	}
 
 	data->target_position = position;
+	int64_t steps = position - data->actual_position;
 
-	ret = drv8424_start_positioning(dev);
+	if (steps < 0) {
+		data->direction = STEPPER_DIRECTION_NEGATIVE;
+	} else {
+		data->direction = STEPPER_DIRECTION_POSITIVE;
+	}
+
+	ret = drv8424_move_positioning_smooth(dev, llabs(steps));
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to begin positioning (error %d)", dev->name, ret);
 		return ret;
@@ -729,8 +698,6 @@ static int drv8424_run(const struct device *dev, const enum stepper_direction di
 	data->direction = direction;
 	data->is_moving = true;
 
-	// TODO: set interrupt
-
 	/* Treat velocity 0 by not stepping at all */
 	if (velocity == 0) {
 		ret = counter_stop(config->counter);
@@ -743,6 +710,9 @@ static int drv8424_run(const struct device *dev, const enum stepper_direction di
 		gpio_pin_set_dt(&config->step_pin, 0);
 		data->step_signal_high = false;
 	} else {
+		data->counter_top_cfg.callback = drv8424_positioning_top_interrupt;
+		data->counter_top_cfg.user_data = data;
+
 		ret = drv8424_set_counter_frequency(dev, velocity * 2);
 		if (ret != 0) {
 			LOG_ERR("%s: Failed to set counter frequency (error %d)", dev->name, ret);

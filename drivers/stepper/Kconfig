@@ -36,6 +36,7 @@ rsource "Kconfig.fake"
 rsource "Kconfig.gpio"
 rsource "adi_tmc/Kconfig"
 rsource "Kconfig.drv8424"
+rsource "Kconfig.drv8424_accel"
 # zephyr-keep-sorted-stop
 
 endif

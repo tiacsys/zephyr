@@ -57,10 +57,10 @@ struct drv8424_pin_states {
 struct drv8424_ramp_data {
 	/* Iterator for the current step in the current phase. */
 	uint32_t step_index;
-	/* Current step period time in us. NOTE: float is used for calculation purposes. */
-	float current_time;
+	/* Current step period time in us. */
+	uint64_t current_time_int;
 	/* Step period of the first step of acceleration. */
-	float base_time;
+	uint64_t base_time_int;
 	/* Number of steps to take during constant speed phase. */
 	uint32_t const_steps;
 	/* Number of steps to take during deceleration phase. */
@@ -69,6 +69,8 @@ struct drv8424_ramp_data {
 	uint32_t accel_steps;
 	/* Pointer to step_pin dt_spec. */
 	const struct gpio_dt_spec *step_pin;
+	/* Counter ticks per us, saved here as value is constant and function call expensive*/
+	uint32_t ticks_us;
 };
 
 /**
@@ -190,7 +192,7 @@ static void drv8424_positioning_top_interrupt(const struct device *dev, void *us
 static void drv8424_positioning_smooth_deceleration(const struct device *dev, void *user_data)
 {
 	struct drv8424_data *data = user_data;
-	float new_time;
+	uint64_t new_time_int;
 
 	/* Switch step pin on or off depending position in step period and calculate length of the
 	 * new step period */
@@ -212,16 +214,17 @@ static void drv8424_positioning_smooth_deceleration(const struct device *dev, vo
 			 * Iterative algorithm using Taylor expansion, see 'Generate stepper-motor
 			 * speed profiles in real time' (2005) by David Austin
 			 */
-			float t_n = data->ramp_data.current_time;
-			float adjust = 2 * t_n / (4 * n_adjusted - 1);
-			new_time = t_n + adjust;
+			uint64_t t_n = data->ramp_data.current_time_int;
+			uint64_t adjust = 2 * t_n / (4 * n_adjusted - 1);
+			new_time_int = t_n + adjust;
 		} else {
 			/* Use accurate (but expensive) calculation when error would be large */
-			new_time = data->ramp_data.base_time *
-				   (sqrtf(n_adjusted + 1) - sqrtf(n_adjusted));
+			new_time_int = data->ramp_data.base_time_int *
+				       (sqrtf(n_adjusted + 1) - sqrtf(n_adjusted));
 		}
-		data->counter_top_cfg.ticks = counter_us_to_ticks(dev, (uint32_t)new_time / 2);
-		data->ramp_data.current_time = new_time;
+		data->counter_top_cfg.ticks =
+			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
+		data->ramp_data.current_time_int = new_time_int;
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(dev, &data->counter_top_cfg);
 	}
@@ -270,9 +273,12 @@ static void drv8424_positioning_smooth_constant(const struct device *dev, void *
 
 static void drv8424_positioning_smooth_acceleration(const struct device *dev, void *user_data)
 {
+	uint32_t start;
+	counter_get_value(dev, &start);
 	struct drv8424_data *data = user_data;
+	// LOG_INF("Entering Interrupt");
 
-	float new_time;
+	uint64_t new_time_int;
 
 	/* Switch step pin on or off depending position in step period and calculate length of the
 	 * new step period */
@@ -292,17 +298,24 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 			 * Iterative algorithm using Taylor expansion, see 'Generate stepper-motor
 			 * speed profiles in real time' (2005) by David Austin
 			 */
-			float t_n_1 = data->ramp_data.current_time;
-			float adjust = 2 * t_n_1 / (4 * data->ramp_data.step_index + 1);
-			new_time = t_n_1 - adjust;
+			uint64_t t_n_1 = data->ramp_data.current_time_int;
+			uint64_t adjust = 2 * t_n_1 / (4 * data->ramp_data.step_index + 1);
+			new_time_int = t_n_1 - adjust;
 		} else {
 			/* Use accurate (but expensive) calculation when error would be large */
-			new_time =
-				data->ramp_data.base_time * (sqrtf(data->ramp_data.step_index + 1) -
-							     sqrtf(data->ramp_data.step_index));
+			new_time_int = data->ramp_data.base_time_int *
+				       (sqrtf(data->ramp_data.step_index + 1) -
+					sqrtf(data->ramp_data.step_index));
 		}
-		data->counter_top_cfg.ticks = counter_us_to_ticks(dev, (uint32_t)new_time / 2);
-		data->ramp_data.current_time = new_time;
+		// LOG_INF("Entering Interrupt 2");
+		data->counter_top_cfg.ticks =
+			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
+		data->ramp_data.current_time_int = new_time_int;
+		// uint32_t delay;
+		// counter_get_value(dev, &delay);
+		// LOG_INF("Delay in us: %llu, in ticks: %u", counter_ticks_to_us(dev, delay -
+		// start), 	delay - start);
+		// LOG_INF("Entering Interrupt 3");
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(dev, &data->counter_top_cfg);
 	}
@@ -331,6 +344,7 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
 			data->counter_top_cfg.callback = drv8424_positioning_smooth_constant;
+			// LOG_INF("Current Time: %llu", data->ramp_data.current_time_int/1000000);
 			counter_set_top_value(dev, &data->counter_top_cfg);
 		}
 	}
@@ -524,12 +538,14 @@ static int drv8424_move_positioning_smooth(const struct device *dev, uint32_t st
 			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
 
 	/* Configure interrupt data */
-	data->ramp_data.current_time = base_time;
-	data->ramp_data.base_time = base_time;
 	data->ramp_data.accel_steps = accel_steps;
 	data->ramp_data.const_steps = const_steps;
 	data->ramp_data.decel_steps = decel_steps;
 	data->ramp_data.step_index = 0;
+	data->ramp_data.ticks_us = counter_us_to_ticks(config->counter, 1);
+	/* Multiplications to get additional accuracy*/
+	data->ramp_data.current_time_int = base_time * 1000000;
+	data->ramp_data.base_time_int = base_time * 1000000;
 
 	int key = irq_lock();
 
@@ -945,7 +961,7 @@ static DEVICE_API(stepper, drv8424_stepper_api) = {
 		.m0_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m0_gpios, {0}),                           \
 		.m1_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m1_gpios, {0}),                           \
 		.counter = DEVICE_DT_GET(DT_INST_PHANDLE(inst, counter)),                          \
-		.acceleration = 200,                                                               \
+		.acceleration = 2000,                                                              \
 	};                                                                                         \
                                                                                                    \
 	static struct drv8424_data drv8424_data_##inst = {                                         \

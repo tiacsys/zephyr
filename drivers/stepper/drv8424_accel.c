@@ -71,6 +71,8 @@ struct drv8424_ramp_data {
 	const struct gpio_dt_spec *step_pin;
 	/* Counter ticks per us, saved here as value is constant and function call expensive*/
 	uint32_t ticks_us;
+	/** Velocity during const velocity phase (steps/s). */
+	uint32_t const_velocity;
 };
 
 /**
@@ -250,7 +252,9 @@ static void drv8424_positioning_smooth_constant(const struct device *dev, void *
 
 	/* Switch step pin on or off depending position in step period */
 	if (data->step_signal_high) {
-		data->ramp_data.step_index++;
+		if (!data->constant_velocity) {
+			data->ramp_data.step_index++;
+		}
 		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			data->actual_position++;
@@ -344,6 +348,8 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
 			data->counter_top_cfg.callback = drv8424_positioning_smooth_constant;
+			data->counter_top_cfg.ticks =
+				data->ramp_data.ticks_us * (1000000 / data->ramp_data.const_velocity) / 2;
 			// LOG_INF("Current Time: %llu", data->ramp_data.current_time_int/1000000);
 			counter_set_top_value(dev, &data->counter_top_cfg);
 		}
@@ -470,32 +476,34 @@ static int drv8424_enable(const struct device *dev, bool enable)
 	return 0;
 }
 
-static int drv8424_set_counter_frequency(const struct device *dev, uint32_t freq_hz)
-{
-	const struct drv8424_config *config = dev->config;
-	struct drv8424_data *data = dev->data;
-	int ret = 0;
+// static int drv8424_set_counter_frequency(const struct device *dev, uint32_t freq_hz)
+// {
+// 	const struct drv8424_config *config = dev->config;
+// 	struct drv8424_data *data = dev->data;
+// 	int ret = 0;
 
-	if (freq_hz == 0) {
-		return -EINVAL;
-	}
+// 	if (freq_hz == 0) {
+// 		return -EINVAL;
+// 	}
 
-	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, USEC_PER_SEC / freq_hz);
+// 	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, USEC_PER_SEC / freq_hz);
 
-	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set counter top value (error: %d)", dev->name, ret);
-		return ret;
-	}
+// 	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
+// 	if (ret != 0) {
+// 		LOG_ERR("%s: Failed to set counter top value (error: %d)", dev->name, ret);
+// 		return ret;
+// 	}
 
-	return 0;
-}
+// 	return 0;
+// }
 
 static int drv8424_move_positioning_smooth(const struct device *dev, uint32_t step_count)
 {
 	const struct drv8424_config *config = dev->config;
 	struct drv8424_data *data = dev->data;
 	int ret = 0;
+
+	data->constant_velocity = false;
 
 	if (data->max_velocity == 0) {
 		return -EINVAL;
@@ -546,13 +554,14 @@ static int drv8424_move_positioning_smooth(const struct device *dev, uint32_t st
 	/* Multiplications to get additional accuracy*/
 	data->ramp_data.current_time_int = base_time * 1000000;
 	data->ramp_data.base_time_int = base_time * 1000000;
+	data->ramp_data.const_velocity = data->max_velocity;
 
 	int key = irq_lock();
 
 	data->counter_top_cfg.callback = drv8424_positioning_smooth_acceleration;
 	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
 	data->counter_top_cfg.user_data = data;
-	data->counter_top_cfg.flags = COUNTER_TOP_CFG_DONT_RESET;
+	data->counter_top_cfg.flags = 0;
 
 	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 	if (ret != 0) {
@@ -680,6 +689,30 @@ static int drv8424_run(const struct device *dev, const enum stepper_direction di
 		return ret;
 	}
 
+	/* Algorithm uses sec for acceleration time, adjusts acceleration for current microstep
+	 * resolution */
+	float accel_time =
+		velocity * 1.0f / (config->acceleration * data->ms_res); /* s */
+
+	/* Split total steps into steps for the three phases */
+	uint32_t accel_steps = (velocity * accel_time) / 2; /* steps */
+	uint32_t decel_steps = accel_steps;                           /* steps */
+	uint32_t const_steps = 10;                                    /* steps */
+
+	float base_time = sqrtf(2.0f / (config->acceleration * data->ms_res)) *
+			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
+
+	/* Configure interrupt data */
+	data->ramp_data.accel_steps = accel_steps;
+	data->ramp_data.const_steps = const_steps;
+	data->ramp_data.decel_steps = decel_steps;
+	data->ramp_data.step_index = 0;
+	data->ramp_data.ticks_us = counter_us_to_ticks(config->counter, 1);
+	/* Multiplications to get additional accuracy*/
+	data->ramp_data.current_time_int = base_time * 1000000;
+	data->ramp_data.base_time_int = base_time * 1000000;
+	data->ramp_data.const_velocity = velocity;
+
 	/* Lock interrupts while modifying settings used by ISR */
 	int key = irq_lock();
 
@@ -700,13 +733,14 @@ static int drv8424_run(const struct device *dev, const enum stepper_direction di
 		gpio_pin_set_dt(&config->step_pin, 0);
 		data->step_signal_high = false;
 	} else {
-		data->counter_top_cfg.callback = drv8424_positioning_top_interrupt;
+		data->counter_top_cfg.callback = drv8424_positioning_smooth_acceleration;
 		data->counter_top_cfg.user_data = data;
+		data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
+		LOG_INF("%u", data->ramp_data.accel_steps);
 
-		ret = drv8424_set_counter_frequency(dev, velocity * 2);
+		ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 		if (ret != 0) {
-			LOG_ERR("%s: Failed to set counter frequency (error %d)", dev->name, ret);
-			data->is_moving = false;
+			LOG_ERR("%s: Failed to set counter top value (error: %d)", dev->name, ret);
 			goto end;
 		}
 
@@ -961,7 +995,7 @@ static DEVICE_API(stepper, drv8424_stepper_api) = {
 		.m0_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m0_gpios, {0}),                           \
 		.m1_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m1_gpios, {0}),                           \
 		.counter = DEVICE_DT_GET(DT_INST_PHANDLE(inst, counter)),                          \
-		.acceleration = 2000,                                                              \
+		.acceleration = 200,                                                              \
 	};                                                                                         \
                                                                                                    \
 	static struct drv8424_data drv8424_data_##inst = {                                         \

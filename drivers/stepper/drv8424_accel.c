@@ -73,6 +73,9 @@ struct drv8424_ramp_data {
 	uint32_t ticks_us;
 	/** Velocity during const velocity phase (steps/s). */
 	uint32_t const_velocity;
+	/* Counter reference, because *dev in counter interrupt doesn't allways references the
+	 * counter*/
+	const struct device *counter;
 };
 
 /**
@@ -228,14 +231,14 @@ static void drv8424_positioning_smooth_deceleration(const struct device *dev, vo
 			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
 		data->ramp_data.current_time_int = new_time_int;
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
-		counter_set_top_value(dev, &data->counter_top_cfg);
+		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
 
 	data->step_signal_high = !data->step_signal_high;
 
 	/* Stop Counter if positioning_smooth move is finished */
 	if (data->ramp_data.step_index == 0) {
-		counter_stop(dev);
+		counter_stop(data->ramp_data.counter);
 		if (data->event_callback != NULL) {
 			/* Ignore return value since we can't do anything about it anyway */
 			drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
@@ -271,16 +274,15 @@ static void drv8424_positioning_smooth_constant(const struct device *dev, void *
 	if (data->ramp_data.step_index == data->ramp_data.const_steps) {
 		data->ramp_data.step_index = data->ramp_data.decel_steps;
 		data->counter_top_cfg.callback = drv8424_positioning_smooth_deceleration;
-		counter_set_top_value(dev, &data->counter_top_cfg);
+		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
 }
 
 static void drv8424_positioning_smooth_acceleration(const struct device *dev, void *user_data)
 {
-	uint32_t start;
-	counter_get_value(dev, &start);
 	struct drv8424_data *data = user_data;
-	// LOG_INF("Entering Interrupt");
+	uint32_t start;
+	counter_get_value(data->ramp_data.counter, &start);
 
 	uint64_t new_time_int;
 
@@ -311,7 +313,6 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 				       (sqrtf(data->ramp_data.step_index + 1) -
 					sqrtf(data->ramp_data.step_index));
 		}
-		// LOG_INF("Entering Interrupt 2");
 		data->counter_top_cfg.ticks =
 			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
 		data->ramp_data.current_time_int = new_time_int;
@@ -319,9 +320,8 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 		// counter_get_value(dev, &delay);
 		// LOG_INF("Delay in us: %llu, in ticks: %u", counter_ticks_to_us(dev, delay -
 		// start), 	delay - start);
-		// LOG_INF("Entering Interrupt 3");
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
-		counter_set_top_value(dev, &data->counter_top_cfg);
+		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
 
 	data->step_signal_high = !data->step_signal_high;
@@ -333,10 +333,10 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 			 * steps exist */
 			data->ramp_data.step_index = data->ramp_data.decel_steps;
 			data->counter_top_cfg.callback = drv8424_positioning_smooth_deceleration;
-			counter_set_top_value(dev, &data->counter_top_cfg);
+			counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 		} else if (data->ramp_data.decel_steps == 0) {
 			/* If no deceleration steps: movement finished*/
-			counter_stop(dev);
+			counter_stop(data->ramp_data.counter);
 			if (data->event_callback != NULL) {
 				/* Ignore return value since we can't do anything about it anyway */
 				drv8424_schedule_user_callback(data, STEPPER_EVENT_STEPS_COMPLETED);
@@ -348,10 +348,11 @@ static void drv8424_positioning_smooth_acceleration(const struct device *dev, vo
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
 			data->counter_top_cfg.callback = drv8424_positioning_smooth_constant;
-			data->counter_top_cfg.ticks =
-				data->ramp_data.ticks_us * (1000000 / data->ramp_data.const_velocity) / 2;
+			data->counter_top_cfg.ticks = data->ramp_data.ticks_us *
+						      (1000000 / data->ramp_data.const_velocity) /
+						      2;
 			// LOG_INF("Current Time: %llu", data->ramp_data.current_time_int/1000000);
-			counter_set_top_value(dev, &data->counter_top_cfg);
+			counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 		}
 	}
 }
@@ -691,13 +692,12 @@ static int drv8424_run(const struct device *dev, const enum stepper_direction di
 
 	/* Algorithm uses sec for acceleration time, adjusts acceleration for current microstep
 	 * resolution */
-	float accel_time =
-		velocity * 1.0f / (config->acceleration * data->ms_res); /* s */
+	float accel_time = velocity * 1.0f / (config->acceleration * data->ms_res); /* s */
 
 	/* Split total steps into steps for the three phases */
 	uint32_t accel_steps = (velocity * accel_time) / 2; /* steps */
-	uint32_t decel_steps = accel_steps;                           /* steps */
-	uint32_t const_steps = 10;                                    /* steps */
+	uint32_t decel_steps = accel_steps;                 /* steps */
+	uint32_t const_steps = 10;                          /* steps */
 
 	float base_time = sqrtf(2.0f / (config->acceleration * data->ms_res)) *
 			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
@@ -735,8 +735,8 @@ static int drv8424_run(const struct device *dev, const enum stepper_direction di
 	} else {
 		data->counter_top_cfg.callback = drv8424_positioning_smooth_acceleration;
 		data->counter_top_cfg.user_data = data;
-		data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
-		LOG_INF("%u", data->ramp_data.accel_steps);
+		data->counter_top_cfg.ticks =
+			counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
 
 		ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 		if (ret != 0) {
@@ -968,6 +968,8 @@ static int drv8424_init(const struct device *dev)
 	data->counter_top_cfg.flags = 0;
 	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, 1000000);
 
+	data->ramp_data.counter = config->counter;
+
 	return 0;
 }
 
@@ -995,7 +997,7 @@ static DEVICE_API(stepper, drv8424_stepper_api) = {
 		.m0_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m0_gpios, {0}),                           \
 		.m1_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m1_gpios, {0}),                           \
 		.counter = DEVICE_DT_GET(DT_INST_PHANDLE(inst, counter)),                          \
-		.acceleration = 200,                                                              \
+		.acceleration = 200,                                                               \
 	};                                                                                         \
                                                                                                    \
 	static struct drv8424_data drv8424_data_##inst = {                                         \

@@ -19,7 +19,8 @@ LOG_MODULE_REGISTER(drv8424_accel, CONFIG_STEPPER_LOG_LEVEL);
 #define DT_DRV_COMPAT ti_drv8424_accel
 
 /* Number of steps for which the accurate ramp calculation algorithm is used, once the error is low
- * enough, an approximation algorithm is used */
+ * enough, an approximation algorithm is used
+ */
 #define ACCURATE_STEPS 15
 
 /**
@@ -43,7 +44,7 @@ struct drv8424_accel_config {
 	struct gpio_dt_spec m1_pin;
 	/** Counter used as timing source. */
 	const struct device *counter;
-	/** Fullstep acceleration in steps/s^2. */
+	/** Acceleration in steps/s^2. */
 	uint32_t acceleration;
 };
 
@@ -76,7 +77,8 @@ struct drv8424_accel_ramp_data {
 	/** Velocity during const velocity phase (steps/s). */
 	uint32_t const_velocity;
 	/* Counter reference, because *dev in counter interrupt doesn't allways references the
-	 * counter*/
+	 * counte
+	 */
 	const struct device *counter;
 };
 
@@ -165,7 +167,8 @@ static int drv8424_accel_schedule_user_callback(struct drv8424_accel_data *data,
 	/* Try to submit the item */
 	int ret = k_work_submit(&callback_work->work);
 	/* ret == 0 shouldn't happen (it would mean we've submitted this same item before), but
-	 * there's no reason to force a segfault in case it somehow does happen. */
+	 * there's no reason to force a segfault in case it somehow does happen.
+	 */
 	if (ret != 1 && ret != 0) {
 		/* We failed to submit the item, so we need to free it here */
 		k_free(callback_work);
@@ -204,7 +207,8 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 	uint64_t new_time_int;
 
 	/* Switch step pin on or off depending position in step period and calculate length of the
-	 * new step period */
+	 * new step period
+	 */
 	if (data->step_signal_high) {
 		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		data->ramp_data.step_index--;
@@ -213,6 +217,7 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 		} else {
 			data->reference_position--;
 		}
+		// LOG_INF("Index: %u", data->ramp_data.step_index);
 
 	} else {
 		/* data->n is 1 larger than actual value to prevent overflow */
@@ -222,20 +227,26 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 			/*
 			 * Iterative algorithm using Taylor expansion, see 'Generate stepper-motor
 			 * speed profiles in real time' (2005) by David Austin
+			 * Added 0.5 to n equivalent for better acceleration behaviour
 			 */
 			uint64_t t_n = data->ramp_data.current_time_int;
-			uint64_t adjust = 2 * t_n / (4 * n_adjusted - 1);
+			uint64_t adjust = 2 * t_n / (4 * n_adjusted + 1);
 			new_time_int = t_n + adjust;
 		} else {
-			/* Use accurate (but expensive) calculation when error would be large */
+			// LOG_INF("Yeah");
+			/* Use accurate (but expensive) calculation when error would be large
+			 * Added 0.5 to n equivalent for better acceleration behaviour
+			 */
 			new_time_int = data->ramp_data.base_time_int *
-				       (sqrtf(n_adjusted + 1) - sqrtf(n_adjusted));
+				       (sqrtf(n_adjusted + 1.5f) - sqrtf(n_adjusted + 0.5f));
+			// LOG_INF("Time: %llu", data->ramp_data.base_time_int);
 		}
 		data->counter_top_cfg.ticks =
 			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
 		data->ramp_data.current_time_int = new_time_int;
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
+		// LOG_INF("Current Time Decel: %llu", data->ramp_data.current_time_int / 1000000);
 	}
 
 	data->step_signal_high = !data->step_signal_high;
@@ -291,7 +302,8 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 	uint64_t new_time_int;
 
 	/* Switch step pin on or off depending position in step period and calculate length of the
-	 * new step period */
+	 * new step period
+	 */
 	if (data->step_signal_high) {
 		data->ramp_data.step_index++;
 		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
@@ -307,15 +319,18 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 			/*
 			 * Iterative algorithm using Taylor expansion, see 'Generate stepper-motor
 			 * speed profiles in real time' (2005) by David Austin
+			 * Added 0.5 to n equivalent for better acceleration behaviour
 			 */
 			uint64_t t_n_1 = data->ramp_data.current_time_int;
-			uint64_t adjust = 2 * t_n_1 / (4 * data->ramp_data.step_index + 1);
+			uint64_t adjust = 2 * t_n_1 / (4 * data->ramp_data.step_index + 3);
 			new_time_int = t_n_1 - adjust;
 		} else {
-			/* Use accurate (but expensive) calculation when error would be large */
+			/* Use accurate (but expensive) calculation when error would be large
+			 * Added 0.5 to n equivalent for better acceleration behaviour
+			 */
 			new_time_int = data->ramp_data.base_time_int *
-				       (sqrtf(data->ramp_data.step_index + 1) -
-					sqrtf(data->ramp_data.step_index));
+				       (sqrtf(data->ramp_data.step_index + 1.5f) -
+					sqrtf(data->ramp_data.step_index + 0.5f));
 		}
 		data->counter_top_cfg.ticks =
 			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
@@ -324,6 +339,7 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 		// counter_get_value(dev, &delay);
 		// LOG_INF("Delay in us: %llu, in ticks: %u", counter_ticks_to_us(dev, delay -
 		// start), 	delay - start);
+		// LOG_INF("Current Time: %llu", data->ramp_data.current_time_int / 1000000);
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
@@ -334,7 +350,8 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 	    data->ramp_data.accel_steps) { /* Acceleration section is finished */
 		if (data->ramp_data.const_steps == 0 && data->ramp_data.decel_steps != 0) {
 			/* If no constant speed section switch to deceleration if decelerations
-			 * steps exist */
+			 * steps exist
+			 */
 			data->ramp_data.step_index = data->ramp_data.decel_steps;
 			data->counter_top_cfg.callback =
 				drv8424_accel_positioning_smooth_deceleration;
@@ -357,7 +374,6 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 			data->counter_top_cfg.ticks = data->ramp_data.ticks_us *
 						      (1000000 / data->ramp_data.const_velocity) /
 						      2;
-			// LOG_INF("Current Time: %llu", data->ramp_data.current_time_int/1000000);
 			counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 		}
 	}
@@ -400,7 +416,8 @@ static int drv8424_accel_microstep_recovery(const struct device *dev)
 		break;
 	case 2:
 		/* Hi-Z is set by configuring pin as disconnected, not all gpio controllers support
-		 * this. */
+		 * this.
+		 */
 		ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_DISCONNECTED);
 		break;
 	default:
@@ -422,7 +439,8 @@ static int drv8424_accel_microstep_recovery(const struct device *dev)
 		break;
 	case 2:
 		/* Hi-Z is set by configuring pin as disconnected, not all gpio controllers support
-		 * this. */
+		 * this.
+		 */
 		ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_DISCONNECTED);
 		break;
 	default:
@@ -446,7 +464,7 @@ static int drv8424_accel_enable(const struct device *dev, bool enable)
 	bool has_enable_pin = config->en_pin.port != NULL;
 	bool has_sleep_pin = config->sleep_pin.port != NULL;
 
-	/* Check availability of sleep and and enable pins, as these might be hardwired. */
+	/* Check availability of sleep and enable pins, as these might be hardwired. */
 	if (!has_sleep_pin && !has_enable_pin) {
 		LOG_ERR("%s: Failed to enable/disable device, neither sleep pin nor enable pin are "
 			"available. The device is always on.",
@@ -483,6 +501,67 @@ static int drv8424_accel_enable(const struct device *dev, bool enable)
 	return 0;
 }
 
+static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32_t steps,
+						uint32_t end_velocity, bool run)
+{
+	const struct drv8424_accel_config *config = dev->config;
+	struct drv8424_accel_data *data = dev->data;
+
+	/* Algorithm uses sec for acceleration time, adjusts acceleration for current microstep
+	 * resolution
+	 */
+	float accel_time = end_velocity * 1.0f / config->acceleration; /* s */
+
+	/* Split total steps into steps for the three phases */
+	uint32_t accel_steps = ceilf((end_velocity * accel_time) / 2); /* steps */
+	uint32_t decel_steps = accel_steps;                            /* steps */
+	uint32_t const_steps;                                          /* steps */
+
+	if (!run) {
+		if (2 * accel_steps > steps) { /* Max speed not achievable */
+			const_steps = 0;
+			if ((2 * accel_steps - steps) % 2 == 0) {
+				accel_steps = accel_steps - (2 * accel_steps - steps) / 2;
+				decel_steps = accel_steps;
+			} else {
+				accel_steps = accel_steps -
+					      (2 * accel_steps - (steps - 1)) /
+						      2; /* Only even part of step_count needed*/
+				decel_steps = accel_steps;
+				accel_steps++; /* Compensate for uneven number of steps */
+			}
+		} else {
+			const_steps = steps - 2 * accel_steps;
+		}
+	} else {
+		const_steps = 10; /* Dummy value for correct behaviour */
+	}
+
+	float acceleration_adjusted =
+		(float)((end_velocity * end_velocity * 1.0) / (2.0 * accel_steps));
+	// float acceleration_adjusted = config->acceleration;
+	// LOG_INF("Adjusted accel: %d", (int32_t)acceleration_adjusted);
+	// LOG_INF("Accel Time x100: %d", (int32_t)(accel_time*100));
+	// LOG_INF("Raw accel steps x10: %d", (int32_t)ceilf((end_velocity * accel_time*5)));
+	float base_time = sqrtf(2.0f / acceleration_adjusted) *
+			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
+
+	/* Configure interrupt data */
+	data->ramp_data.accel_steps = accel_steps;
+	data->ramp_data.const_steps = const_steps;
+	data->ramp_data.decel_steps = decel_steps;
+	data->ramp_data.step_index = 0;
+	data->ramp_data.ticks_us = counter_us_to_ticks(config->counter, 1);
+	// LOG_INF("Accel: %u, Const: %u, Decel: %u", data->ramp_data.accel_steps,
+	// 	data->ramp_data.const_steps, data->ramp_data.decel_steps);
+	/* Multiplications to get additional accuracy*/
+	data->ramp_data.current_time_int = base_time * 1000000;
+	data->ramp_data.base_time_int = base_time * 1000000;
+	data->ramp_data.const_velocity = end_velocity;
+
+	return 0;
+}
+
 static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint32_t step_count)
 {
 	const struct drv8424_accel_config *config = dev->config;
@@ -502,50 +581,12 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 		return ret;
 	}
 
-	/* Algorithm uses sec for acceleration time, adjusts acceleration for current microstep
-	 * resolution */
-	float accel_time =
-		data->max_velocity * 1.0f / (config->acceleration * data->ms_res); /* s */
-
-	/* Split total steps into steps for the three phases */
-	uint32_t accel_steps = (data->max_velocity * accel_time) / 2; /* steps */
-	uint32_t decel_steps = accel_steps;                           /* steps */
-	uint32_t const_steps;                                         /* steps */
-
-	if (2 * accel_steps > step_count) { /* Max speed not achievable */
-		const_steps = 0;
-		if ((2 * accel_steps - step_count) % 2 == 0) {
-			accel_steps = accel_steps - (2 * accel_steps - step_count) / 2;
-			decel_steps = accel_steps;
-		} else {
-			accel_steps =
-				accel_steps - (2 * accel_steps - (step_count - 1)) /
-						      2; /* Only even part of step_count needed*/
-			decel_steps = accel_steps;
-			accel_steps++; /* Compensate for uneven number of steps */
-		}
-	} else {
-		const_steps = step_count - 2 * accel_steps;
-	}
-
-	float base_time = sqrtf(2.0f / (config->acceleration * data->ms_res)) *
-			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
-
-	/* Configure interrupt data */
-	data->ramp_data.accel_steps = accel_steps;
-	data->ramp_data.const_steps = const_steps;
-	data->ramp_data.decel_steps = decel_steps;
-	data->ramp_data.step_index = 0;
-	data->ramp_data.ticks_us = counter_us_to_ticks(config->counter, 1);
-	/* Multiplications to get additional accuracy*/
-	data->ramp_data.current_time_int = base_time * 1000000;
-	data->ramp_data.base_time_int = base_time * 1000000;
-	data->ramp_data.const_velocity = data->max_velocity;
-
 	int key = irq_lock();
+	ret = drv8424_accel_calculate_acceleration(dev, step_count, data->max_velocity, false);
 
 	data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
-	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
+	data->counter_top_cfg.ticks = counter_us_to_ticks(
+		config->counter, (uint32_t)data->ramp_data.base_time_int / 2000000);
 	data->counter_top_cfg.user_data = data;
 	data->counter_top_cfg.flags = 0;
 
@@ -622,7 +663,7 @@ static int drv8424_accel_get_actual_position(const struct device *dev, int32_t *
 	return 0;
 }
 
-static int drv8424_accel_set_target_position(const struct device *dev, int32_t position)
+static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 {
 	struct drv8424_accel_data *data = dev->data;
 	int ret = 0;
@@ -675,31 +716,10 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 		return ret;
 	}
 
-	/* Algorithm uses sec for acceleration time, adjusts acceleration for current microstep
-	 * resolution */
-	float accel_time = velocity * 1.0f / (config->acceleration * data->ms_res); /* s */
-
-	/* Split total steps into steps for the three phases */
-	uint32_t accel_steps = (velocity * accel_time) / 2; /* steps */
-	uint32_t decel_steps = accel_steps;                 /* steps */
-	uint32_t const_steps = 10;                          /* steps */
-
-	float base_time = sqrtf(2.0f / (config->acceleration * data->ms_res)) *
-			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
-
-	/* Configure interrupt data */
-	data->ramp_data.accel_steps = accel_steps;
-	data->ramp_data.const_steps = const_steps;
-	data->ramp_data.decel_steps = decel_steps;
-	data->ramp_data.step_index = 0;
-	data->ramp_data.ticks_us = counter_us_to_ticks(config->counter, 1);
-	/* Multiplications to get additional accuracy*/
-	data->ramp_data.current_time_int = base_time * 1000000;
-	data->ramp_data.base_time_int = base_time * 1000000;
-	data->ramp_data.const_velocity = velocity;
-
 	/* Lock interrupts while modifying settings used by ISR */
 	int key = irq_lock();
+
+	ret = drv8424_accel_calculate_acceleration(dev, 0, velocity, true);
 
 	/* Set data used in counter interrupt */
 	data->constant_velocity = true;
@@ -720,8 +740,8 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 	} else {
 		data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
 		data->counter_top_cfg.user_data = data;
-		data->counter_top_cfg.ticks =
-			counter_us_to_ticks(config->counter, (uint32_t)base_time / 2);
+		data->counter_top_cfg.ticks = counter_us_to_ticks(
+			config->counter, (uint32_t)data->ramp_data.base_time_int / 2000000);
 
 		ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 		if (ret != 0) {
@@ -825,7 +845,8 @@ static int drv8424_accel_set_micro_step_res(const struct device *dev,
 		break;
 	case 2:
 		/* Hi-Z is set by configuring pin as disconnected, not
-		 * all gpio controllers support this. */
+		 * all gpio controllers support this.
+		 */
 		ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_DISCONNECTED);
 		break;
 	default:
@@ -847,7 +868,8 @@ static int drv8424_accel_set_micro_step_res(const struct device *dev,
 		break;
 	case 2:
 		/* Hi-Z is set by configuring pin as disconnected, not
-		 * all gpio controllers support this. */
+		 * all gpio controllers support this.
+		 */
 		ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_DISCONNECTED);
 		break;
 	default:
@@ -961,7 +983,7 @@ static int drv8424_accel_init(const struct device *dev)
 static DEVICE_API(stepper, drv8424_accel_stepper_api) = {
 	.enable = drv8424_accel_enable,
 	.move_by = drv8424_accel_move_by,
-	.move_to = drv8424_accel_set_target_position,
+	.move_to = drv8424_accel_move_to,
 	.is_moving = drv8424_accel_is_moving,
 	.set_reference_position = drv8424_accel_set_reference_position,
 	.get_actual_position = drv8424_accel_get_actual_position,

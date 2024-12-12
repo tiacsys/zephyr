@@ -103,7 +103,7 @@ struct drv8424_accel_data {
 	/** Current reference position. */
 	int32_t reference_position;
 	/** Target position. */;
-	int32_t target_position;
+	// int32_t target_position;
 	/** Whether the motor is currently moving. */
 	bool is_moving;
 	/** Whether we're in constant velocity mode. */
@@ -691,12 +691,13 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 							&decel_steps, steps, data->current_velocity,
 							end_velocity, step_index);
 		// LOG_INF("Index: %u Accel: %u", step_index, accel_steps);
-		if(ret != 0){
+		if (ret != 0) {
 			return ret;
 		}
 	} else {
 		const_steps = 10; /* Dummy value for correct behaviour */
 	}
+	LOG_INF("Accel: %u, Const: %u, Decel: %u", accel_steps, const_steps, decel_steps);
 
 	/* Configure interrupt data */
 	data->ramp_data.accel_steps = accel_steps;
@@ -835,7 +836,7 @@ static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 		return -ENODEV;
 	}
 
-	data->target_position = position;
+	// data->target_position = position;
 	int64_t steps = position - data->reference_position;
 
 	if (steps < 0) {
@@ -1174,7 +1175,7 @@ static DEVICE_API(stepper, drv8424_accel_stepper_api) = {
 	static struct drv8424_accel_data drv8424_accel_data_##inst = {                             \
 		.ms_res = STEPPER_MICRO_STEP_1,                                                    \
 		.reference_position = 0,                                                           \
-		.target_position = 0,                                                              \
+		/*.target_position = 0,*/                                                              \
 		.is_moving = false,                                                                \
 		.event_callback = NULL,                                                            \
 		.event_callback_user_data = NULL,                                                  \

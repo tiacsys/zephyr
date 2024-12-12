@@ -77,9 +77,17 @@ struct drv8424_accel_ramp_data {
 	/** Velocity during const velocity phase (steps/s). */
 	uint32_t const_velocity;
 	/* Counter reference, because *dev in counter interrupt doesn't allways references the
-	 * counte
+	 * counter
 	 */
 	const struct device *counter;
+	/* Position at the time the move command was given, used to account for position
+	 * inaccuracies because of delays
+	 */
+	uint32_t start_position;
+	/* If it is the first step of a move command. Used for the same calculation as
+	 * start_position
+	 */
+	bool is_first_step;
 };
 
 /**
@@ -265,6 +273,7 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 		data->is_moving = false;
 		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		data->step_signal_high = false;
+		data->current_velocity = 0;
 	}
 }
 
@@ -300,16 +309,82 @@ static void drv8424_accel_positioning_smooth_constant(const struct device *dev, 
 static void drv8424_accel_positioning_smooth_acceleration(const struct device *dev, void *user_data)
 {
 	struct drv8424_accel_data *data = user_data;
-	uint32_t start;
-	counter_get_value(data->ramp_data.counter, &start);
+	// uint32_t start;
+	// counter_get_value(data->ramp_data.counter, &start);
+	/* Adjust for additional steps that might have been taken between calculating the total
+	 * number of steps to take and entering the interrupt of the first step to take
+	 */
+	// if (data->ramp_data.is_first_step) {
+	// 	data->ramp_data.is_first_step = false;
+	// 	int diff = data->reference_position - data->ramp_data.start_position;
+	// 	if (diff != 0) {
+	// 		diff = abs(diff);
+	// 		LOG_INF("T1");
+	// 		/* If difference can be subtracted from const velocity phase, do so*/
+	// 		if (data->ramp_data.const_steps >= diff) {
+	// 			LOG_INF("T2");
+	// 			data->ramp_data.const_steps -= diff;
+	// 			diff = 0;
+	// 		} else {
+	// 			LOG_INF("T3");
+	// 			diff -= data->ramp_data.const_steps;
+	// 			data->ramp_data.const_steps = 0;
+	// 			/* Special case for 1 total move step*/
+	// 			if (data->ramp_data.accel_steps == 1 &&
+	// 			    data->ramp_data.decel_steps == 0) {
+	// 				LOG_INF("T4");
+	// 				if (data->event_callback != NULL) {
+	// 					/* Ignore return value since we can't do anything
+	// 					 * about it anyway */
+	// 					drv8424_accel_schedule_user_callback(
+	// 						data, STEPPER_EVENT_STEPS_COMPLETED);
+	// 				}
+	// 				counter_stop(data->ramp_data.counter);
+	// 				data->is_moving = false;
+	// 				gpio_pin_set_dt(data->ramp_data.step_pin, 0);
+	// 				data->step_signal_high = false;
+	// 				data->current_velocity = 0;
+	// 				return;
+	// 			}
+	// 			if (diff % 2 == 1) {
+	// 				LOG_INF("T5");
+	// 				diff--;
+	// 				data->ramp_data.decel_steps--;
+	// 			}
+	// 			data->ramp_data.decel_steps -= diff / 2;
+	// 			data->ramp_data.accel_steps -= diff / 2;
+	// 			if (data->ramp_data.step_index == data->ramp_data.accel_steps) {
+	// 				LOG_INF("T6");
+	// 				goto end;
+	// 			} else if (data->ramp_data.step_index >
+	// 				   data->ramp_data.accel_steps) {
+	// 				LOG_INF("T7");
+	// 				if (data->event_callback != NULL) {
+	// 					/* Ignore return value since we can't do anything
+	// 					 * about it anyway */
+	// 					drv8424_accel_schedule_user_callback(
+	// 						data, STEPPER_EVENT_STEPS_COMPLETED);
+	// 				}
+	// 				counter_stop(data->ramp_data.counter);
+	// 				data->is_moving = false;
+	// 				gpio_pin_set_dt(data->ramp_data.step_pin, 0);
+	// 				data->step_signal_high = false;
+	// 				data->current_velocity = 0;
+	// 				return;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	uint64_t new_time_int;
+	// LOG_INF("Yeah %u %u", data->ramp_data.step_index, data->ramp_data.accel_steps);
 
 	/* Switch step pin on or off depending position in step period and calculate length of the
 	 * new step period
 	 */
 	if (data->step_signal_high) {
 		data->ramp_data.step_index++;
+
 		gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			data->reference_position++;
@@ -354,6 +429,7 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 
 	if (data->ramp_data.step_index ==
 	    data->ramp_data.accel_steps) { /* Acceleration section is finished */
+// end:
 		if (data->ramp_data.const_steps == 0 && data->ramp_data.decel_steps != 0) {
 			/* If no constant speed section switch to deceleration if decelerations
 			 * steps exist
@@ -373,6 +449,7 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 			data->is_moving = false;
 			gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 			data->step_signal_high = false;
+			data->current_velocity = 0;
 		} else {
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
@@ -462,6 +539,7 @@ static void drv8424_accel_positioning_smooth_deceleration_start(const struct dev
 			data->is_moving = false;
 			gpio_pin_set_dt(data->ramp_data.step_pin, 0);
 			data->step_signal_high = false;
+			data->current_velocity = 0;
 		} else {
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
@@ -593,6 +671,7 @@ static int drv8424_accel_enable(const struct device *dev, bool enable)
 		data->is_moving = false;
 		gpio_pin_set_dt(&config->step_pin, 0);
 		data->step_signal_high = false;
+		data->current_velocity = 0;
 	}
 
 	return 0;
@@ -603,8 +682,19 @@ static int drv8424_phase_steps_adjusting(const struct device *dev, uint32_t *acc
 					 uint32_t total_steps, uint32_t start_velocity,
 					 uint32_t const_velocity, uint32_t index)
 {
+	LOG_INF("Started Adjusting");
+	/* Catch edge case*/
+	if (total_steps == 1) {
+		*accel_steps = 1;
+		*const_steps = 0;
+		*decel_steps = 0;
+		return 0;
+	}
+	LOG_INF("Start V: %u, Const V: %u", start_velocity, const_velocity);
+
 	/* Decelerate at start */
 	if (const_velocity < start_velocity) {
+		LOG_INF("Deceleration-Start");
 		/* If stop cant be reached from start velocity with straight deceleration, throw
 		 * error */
 		if (*decel_steps + (index - *accel_steps) > total_steps) {
@@ -620,24 +710,33 @@ static int drv8424_phase_steps_adjusting(const struct device *dev, uint32_t *acc
 	}
 	/* Accalerate at start*/
 	else {
+		LOG_INF("Test1");
 		/* If enough steps available, simply set last value */
-		if (*decel_steps + (index - *accel_steps) <= total_steps) {
-			*const_steps = total_steps - *decel_steps - (index - *accel_steps);
+		if (*decel_steps + (*accel_steps - index) <= total_steps) {
+			LOG_INF("Test2");
+			LOG_INF("A: %u, C: %u, D: %u, Total: %u, Index: %u", *accel_steps,
+				*const_steps, *decel_steps, total_steps, index);
+			*const_steps = total_steps - *decel_steps - (*accel_steps - index);
 		} else {
 			/* If stop cant be reached from start velocity with straight deceleration,
 			 * throw error */
 			if (index > total_steps) {
+				LOG_INF("Test3");
 				LOG_ERR("%s: Total step count is to low, it is %u, but needs to be "
 					"at least %u.",
 					dev->name, total_steps, index);
 				return -EINVAL;
 			} else {
+				LOG_INF("Test4");
 				uint32_t remain_steps = total_steps - index;
 				*accel_steps = index + (remain_steps / 2);
 				*decel_steps = *accel_steps;
 				if (remain_steps % 2 == 1) {
+					LOG_INF("Test5");
 					*const_steps = 1;
 				}
+				LOG_INF("A: %u, C: %u, D: %u, Total: %u, Index: %u", *accel_steps,
+					*const_steps, *decel_steps, total_steps, index);
 			}
 		}
 	}
@@ -651,6 +750,9 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 	const struct drv8424_accel_config *config = dev->config;
 	struct drv8424_accel_data *data = dev->data;
 
+	// uint32_t start;
+	// counter_get_value(data->ramp_data.counter, &start);
+
 	/* Algorithm uses sec for acceleration time, adjusts acceleration for current microstep
 	 * resolution
 	 */
@@ -659,7 +761,7 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 	/* Split total steps into steps for the three phases */
 	uint32_t accel_steps = ceilf((end_velocity * accel_time) / 2); /* steps */
 	uint32_t decel_steps = accel_steps;                            /* steps */
-	uint32_t const_steps;                                          /* steps */
+	uint32_t const_steps = 0;                                      /* steps */
 	uint32_t step_index = 0;
 
 	float acceleration_adjusted =
@@ -669,24 +771,9 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 
 	step_index =
 		(data->current_velocity * data->current_velocity) / (2 * acceleration_adjusted);
-	// LOG_INF("Index: %u, Accel Steps: %u", step_index, accel_steps);
+	LOG_INF("Index: %u", step_index);
 
 	if (!run) {
-		// if (2 * accel_steps > steps) { /* Max speed not achievable */
-		// 	const_steps = 0;
-		// 	if ((2 * accel_steps - steps) % 2 == 0) {
-		// 		accel_steps = accel_steps - (2 * accel_steps - steps) / 2;
-		// 		decel_steps = accel_steps;
-		// 	} else {
-		// 		accel_steps = accel_steps -
-		// 			      (2 * accel_steps - (steps - 1)) /
-		// 				      2; /* Only even part of step_count needed*/
-		// 		decel_steps = accel_steps;
-		// 		accel_steps++; /* Compensate for uneven number of steps */
-		// 	}
-		// } else {
-		// 	const_steps = steps - 2 * accel_steps;
-		// }
 		int ret = drv8424_phase_steps_adjusting(dev, &accel_steps, &const_steps,
 							&decel_steps, steps, data->current_velocity,
 							end_velocity, step_index);
@@ -698,6 +785,9 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 		const_steps = 10; /* Dummy value for correct behaviour */
 	}
 	LOG_INF("Accel: %u, Const: %u, Decel: %u", accel_steps, const_steps, decel_steps);
+
+	uint32_t start;
+	counter_get_value(data->ramp_data.counter, &start);
 
 	/* Configure interrupt data */
 	data->ramp_data.accel_steps = accel_steps;
@@ -723,6 +813,11 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 
 	data->ramp_data.const_velocity = end_velocity;
 
+	uint32_t delay;
+	counter_get_value(data->ramp_data.counter, &delay);
+	LOG_INF("Delay in us: %llu, in ticks: %u", counter_ticks_to_us(data->ramp_data.counter, delay -
+	start), 	delay - start);
+
 	return 0;
 }
 
@@ -732,7 +827,7 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 	struct drv8424_accel_data *data = dev->data;
 	int ret = 0;
 
-	data->constant_velocity = false;
+	
 
 	if (data->max_velocity == 0) {
 		return -EINVAL;
@@ -747,6 +842,9 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 
 	int key = irq_lock();
 	ret = drv8424_accel_calculate_acceleration(dev, step_count, data->max_velocity, false);
+	if (ret != 0) {
+		goto end;
+	}
 
 	// data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
 	data->counter_top_cfg.ticks = counter_us_to_ticks(
@@ -767,6 +865,10 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 	}
 
 end:
+	if (ret == 0) {
+		data->constant_velocity = false;
+	}
+	data->constant_velocity = false;
 	irq_unlock(key);
 	return ret;
 }
@@ -830,14 +932,23 @@ static int drv8424_accel_get_actual_position(const struct device *dev, int32_t *
 static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 {
 	struct drv8424_accel_data *data = dev->data;
+	// const struct drv8424_accel_config *config = dev->config;
 	int ret = 0;
 
 	if (!data->enabled) {
 		return -ENODEV;
 	}
 
+	// uint32_t start;
+	// counter_get_value(config->counter, &start);
+	LOG_INF("Ref Pos Start: %u", data->reference_position);
 	// data->target_position = position;
 	int64_t steps = position - data->reference_position;
+	data->ramp_data.is_first_step = true;
+	data->ramp_data.start_position = data->reference_position;
+	// data->reference_position++;
+	// data->reference_position++;
+	// data->reference_position++;
 
 	if (steps < 0) {
 		data->direction = STEPPER_DIRECTION_NEGATIVE;
@@ -850,6 +961,11 @@ static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 		LOG_ERR("%s: Failed to begin positioning (error %d)", dev->name, ret);
 		return ret;
 	};
+	LOG_INF("Ref End Start: %u", data->reference_position);
+	// uint32_t delay;
+	// counter_get_value(config->counter, &delay);
+	// LOG_INF("Delay in us: %llu, in ticks: %u",
+	// 	counter_ticks_to_us(config->counter, delay - start), delay - start);
 
 	return 0;
 }
@@ -901,6 +1017,7 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 		data->is_moving = false;
 		gpio_pin_set_dt(&config->step_pin, 0);
 		data->step_signal_high = false;
+		data->current_velocity = 0;
 	} else {
 		// data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
 		data->counter_top_cfg.user_data = data;
@@ -1174,8 +1291,7 @@ static DEVICE_API(stepper, drv8424_accel_stepper_api) = {
                                                                                                    \
 	static struct drv8424_accel_data drv8424_accel_data_##inst = {                             \
 		.ms_res = STEPPER_MICRO_STEP_1,                                                    \
-		.reference_position = 0,                                                           \
-		/*.target_position = 0,*/                                                              \
+		.reference_position = 0, /*.target_position = 0,*/                                 \
 		.is_moving = false,                                                                \
 		.event_callback = NULL,                                                            \
 		.event_callback_user_data = NULL,                                                  \

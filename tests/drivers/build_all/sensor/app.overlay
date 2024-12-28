@@ -163,8 +163,6 @@
 		test_w1: w1@66660000 {
 			compatible = "vnd,w1";
 			reg = <0x66660000 0x1000>;
-			#address-cells = <1>;
-			#size-cells = <0>;
 			status = "okay";
 
 			#include "w1.dtsi"
@@ -189,12 +187,7 @@
  */
 
 /* disable device to conflict with i2c version */
-&test_i2c_ism330dhcx {
-	status = "disabled";
-};
-
-/* disable device to conflict with i2c version */
-&test_spi_bme280 {
+&test_spi_ism330dhcx {
 	status = "disabled";
 };
 

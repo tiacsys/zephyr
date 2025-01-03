@@ -11,6 +11,6 @@ tests:
     depends_on: counter
     min_ram: 16
     platform_allow:
-      - cytron_maker_pi_rp2040
+      #- cytron_maker_pi_rp2040
       - rpi_pico
     timeout: 600

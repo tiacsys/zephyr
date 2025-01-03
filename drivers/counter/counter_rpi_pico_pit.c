@@ -28,9 +28,7 @@ struct counter_rpi_pico_pit_data {
 };
 
 struct counter_rpi_pico_pit_config {
-	/* Interrupt configuration function*/
 	void (*irq_config_func)(const struct device *dev);
-	/* Clock device associated with the pwm hardware*/
 	const struct device *clk_dev;
 	const clock_control_subsys_t clk_id;
 };
@@ -61,6 +59,7 @@ uint32_t counter_rpi_pico_pit_get_pending_int(const struct device *dev, uint32_t
 	 * needs to be set to true for the wrap to generate an interrupt which can be detected with
 	 * this function*/
 	uint32_t status_mask = pwm_get_irq_status_mask();
+
 	if (status_mask & (0 | 1 << slice)) {
 		return 1;
 	} else {

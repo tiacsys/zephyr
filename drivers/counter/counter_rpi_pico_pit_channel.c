@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#define DT_DRV_COMPAT raspberrypi_pico_pit_channel
+
 #include <hardware/pwm.h>
 #include <hardware/structs/pwm.h>
 
@@ -18,25 +20,18 @@
 
 LOG_MODULE_REGISTER(counter_rpi_pico_pit_channel, LOG_LEVEL);
 
-#define DT_DRV_COMPAT raspberrypi_pico_pit_channel
 
 struct counter_rpi_pico_pit_channel_data {
-	/* Data struct for configuring the pwm slice*/
 	pwm_config config_pwm;
-	/* Current top value of the counter*/
 	uint16_t top_value;
-	/* Struct containing callback information*/
 	struct rpi_pico_pit_callback callback_struct;
 };
 
 struct counter_rpi_pico_pit_channel_config {
-	/*Struct containing basic counter information, required by api*/
 	struct counter_config_info info;
-	/* PWM Slice number associated with this channel*/
 	int32_t slice;
 	/* Reference to the pico pit instance that is the channels parent*/
 	const struct device *controller;
-	/* Clock divider value used to generate the slices frequency*/
 	uint8_t divider_integral;
 	uint8_t divider_frac;
 };
@@ -78,6 +73,7 @@ static uint32_t counter_rpi_pico_pit_channel_get_top_value(const struct device *
 static int counter_rpi_pico_pit_channel_get_value(const struct device *dev, uint32_t *ticks)
 {
 	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
+
 	*ticks = pwm_get_counter(config->slice);
 	return 0;
 }
@@ -108,6 +104,7 @@ static int counter_rpi_pico_pit_channel_set_top_value(const struct device *dev,
 
 	} else {
 		uint32_t value = pwm_get_counter(config->slice);
+
 		if (value >= cfg->ticks) {
 			pwm_set_enabled(config->slice, true);
 			return -ETIME;
@@ -125,6 +122,7 @@ static int counter_rpi_pico_pit_channel_set_top_value(const struct device *dev,
 	data->callback_struct.top_user_data = cfg->user_data;
 
 	bool callback_set = cfg->callback ? true : false;
+
 	counter_rpi_pico_pit_manage_callback(config->controller, &data->callback_struct,
 					     callback_set);
 
@@ -136,6 +134,7 @@ static int counter_rpi_pico_pit_channel_set_top_value(const struct device *dev,
 static uint32_t counter_rpi_pico_pit_channel_get_pending_int(const struct device *dev)
 {
 	const struct counter_rpi_pico_pit_channel_config *config = dev->config;
+
 	return counter_rpi_pico_pit_get_pending_int(config->controller, config->slice);
 }
 
@@ -150,6 +149,7 @@ static int counter_rpi_pico_pit_channel_set_guard_period(const struct device *de
 {
 	return -ENOTSUP;
 }
+
 static uint32_t counter_rpi_pico_pit_channel_get_frequency(const struct device *dev)
 {
 	const struct counter_rpi_pico_pit_channel_config *config = dev->config;

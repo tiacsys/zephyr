@@ -8,6 +8,10 @@
 #include <zephyr/drivers/counter.h>
 #include <zephyr/sys/slist.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct rpi_pico_pit_callback {
 	/** This is meant to be used in the driver and the user should not
 	 * mess with it
@@ -56,3 +60,7 @@ int counter_rpi_pico_pit_manage_callback(const struct device *dev,
  * @return 0 on success, negative errno otherwise.
  */
 int counter_rpi_pico_pit_get_base_frequency(const struct device *dev, uint32_t *frequency);
+
+#ifdef __cplusplus
+}
+#endif

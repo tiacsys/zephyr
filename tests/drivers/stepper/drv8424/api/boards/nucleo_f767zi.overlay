@@ -5,12 +5,6 @@
 
 #include <zephyr/dt-bindings/gpio/gpio.h>
 
-/ {
-	zephyr,user {
-		stepper-motors = <&drv8424 0>;
-	};
-};
-
 &i2c1 {
 	status = "okay";
 
@@ -50,9 +44,12 @@
 		m1-gpios = <&mikroe_stepper_gpios 1 0>;
 		counter = <&counter2>;
 
-		#address-cells = <1>;
-		#size-cells = <0>;
-		#stepper-motor-cells = <0>;
+		timing_source {
+			status = "okay";
+			compatible = "vnd,timing-source-counter";
+
+			counter = <&counter2>;
+		};
 	};
 };
 

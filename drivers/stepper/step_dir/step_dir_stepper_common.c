@@ -111,7 +111,7 @@ static void stepper_work_event_handler(struct k_work *work)
 
 static void update_remaining_steps(struct step_dir_stepper_common_data *data)
 {
-	const struct step_dir_stepper_common_config *config = data->dev->config;
+	// const struct step_dir_stepper_common_config *config = data->dev->config;
 
 	if (data->step_count > 0) {
 		data->step_count--;
@@ -119,7 +119,7 @@ static void update_remaining_steps(struct step_dir_stepper_common_data *data)
 		data->step_count++;
 	} else {
 		stepper_trigger_callback(data->dev, STEPPER_EVENT_STEPS_COMPLETED);
-		config->timing_source->stop(data->dev);
+		data->timing_source->stop(data->dev);
 	}
 }
 
@@ -139,7 +139,7 @@ static void update_direction_from_step_count(const struct device *dev)
 static void position_mode_task(const struct device *dev)
 {
 	struct step_dir_stepper_common_data *data = dev->data;
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
 
 	if (data->step_count) {
 		(void)step_dir_stepper_perform_step(dev);
@@ -147,25 +147,28 @@ static void position_mode_task(const struct device *dev)
 
 	update_remaining_steps(dev->data);
 
-	if (config->timing_source->needs_reschedule(dev) && data->step_count != 0) {
-		(void)config->timing_source->start(dev);
+	if (data->timing_source->needs_reschedule(dev) && data->step_count != 0) {
+		(void)data->timing_source->start(dev);
 	}
 }
 
 static void velocity_mode_task(const struct device *dev)
 {
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
+	struct step_dir_stepper_common_data *data = dev->data;
 
 	(void)step_dir_stepper_perform_step(dev);
 
-	if (config->timing_source->needs_reschedule(dev)) {
-		(void)config->timing_source->start(dev);
+	if (data->timing_source->needs_reschedule(dev)) {
+		(void)data->timing_source->start(dev);
 	}
 }
 
 void stepper_handle_timing_signal(const struct device *dev)
 {
 	struct step_dir_stepper_common_data *data = dev->data;
+	// LOG_INF("Timing Signal");
+	k_busy_wait(10000);
 
 	K_SPINLOCK(&data->lock) {
 		switch (data->run_mode) {
@@ -185,6 +188,7 @@ void stepper_handle_timing_signal(const struct device *dev)
 int step_dir_stepper_common_init(const struct device *dev)
 {
 	const struct step_dir_stepper_common_config *config = dev->config;
+	struct step_dir_stepper_common_data *data = dev->data;
 	int ret;
 
 	if (!gpio_is_ready_dt(&config->step_pin) || !gpio_is_ready_dt(&config->dir_pin)) {
@@ -203,17 +207,21 @@ int step_dir_stepper_common_init(const struct device *dev)
 		LOG_ERR("Failed to configure dir pin: %d", ret);
 		return ret;
 	}
+	// LOG_INF("Counter Name: %s", config->counter->name);
 
-	if (config->timing_source->init) {
-		ret = config->timing_source->init(dev);
-		if (ret < 0) {
-			LOG_ERR("Failed to initialize timing source: %d", ret);
-			return ret;
-		}
-	}
+	data->timing_source = config->timing_source_dev->api;
+	LOG_INF("Data Device Name: %s", data->dev->name);
+
+	// if (data->timing_source->init) {
+	// 	ret = config->timing_source->init(dev);
+	// 	if (ret < 0) {
+	// 		LOG_ERR("Failed to initialize timing source: %d", ret);
+	// 		return ret;
+	// 	}
+	// }
 
 #ifdef CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS
-	struct step_dir_stepper_common_data *data = dev->data;
+	// struct step_dir_stepper_common_data *data = dev->data;
 
 	k_msgq_init(&data->event_msgq, data->event_msgq_buffer, sizeof(enum stepper_event),
 		    CONFIG_STEPPER_STEP_DIR_EVENT_QUEUE_LEN);
@@ -226,7 +234,7 @@ int step_dir_stepper_common_init(const struct device *dev)
 int step_dir_stepper_common_move_by(const struct device *dev, const int32_t micro_steps)
 {
 	struct step_dir_stepper_common_data *data = dev->data;
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
 
 	if (data->max_velocity == 0) {
 		LOG_ERR("Velocity not set or invalid velocity set");
@@ -236,9 +244,9 @@ int step_dir_stepper_common_move_by(const struct device *dev, const int32_t micr
 	K_SPINLOCK(&data->lock) {
 		data->run_mode = STEPPER_RUN_MODE_POSITION;
 		data->step_count = micro_steps;
-		config->timing_source->update(dev, data->max_velocity);
+		data->timing_source->update(dev, data->max_velocity);
 		update_direction_from_step_count(dev);
-		config->timing_source->start(dev);
+		data->timing_source->start(dev);
 	}
 
 	return 0;
@@ -247,7 +255,7 @@ int step_dir_stepper_common_move_by(const struct device *dev, const int32_t micr
 int step_dir_stepper_common_set_max_velocity(const struct device *dev, const uint32_t velocity)
 {
 	struct step_dir_stepper_common_data *data = dev->data;
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
 
 	if (velocity == 0) {
 		LOG_ERR("Velocity cannot be zero");
@@ -261,7 +269,7 @@ int step_dir_stepper_common_set_max_velocity(const struct device *dev, const uin
 
 	K_SPINLOCK(&data->lock) {
 		data->max_velocity = velocity;
-		config->timing_source->update(dev, velocity);
+		data->timing_source->update(dev, velocity);
 	}
 
 	return 0;
@@ -292,7 +300,7 @@ int step_dir_stepper_common_get_actual_position(const struct device *dev, int32_
 int step_dir_stepper_common_move_to(const struct device *dev, const int32_t value)
 {
 	struct step_dir_stepper_common_data *data = dev->data;
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
 
 	if (data->max_velocity == 0) {
 		LOG_ERR("Velocity not set or invalid velocity set");
@@ -302,9 +310,9 @@ int step_dir_stepper_common_move_to(const struct device *dev, const int32_t valu
 	K_SPINLOCK(&data->lock) {
 		data->run_mode = STEPPER_RUN_MODE_POSITION;
 		data->step_count = value - data->actual_position;
-		config->timing_source->update(dev, data->max_velocity);
+		data->timing_source->update(dev, data->max_velocity);
 		update_direction_from_step_count(dev);
-		config->timing_source->start(dev);
+		data->timing_source->start(dev);
 	}
 
 	return 0;
@@ -312,9 +320,10 @@ int step_dir_stepper_common_move_to(const struct device *dev, const int32_t valu
 
 int step_dir_stepper_common_is_moving(const struct device *dev, bool *is_moving)
 {
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
+	struct step_dir_stepper_common_data *data = dev->data;
 
-	*is_moving = config->timing_source->is_running(dev);
+	*is_moving = data->timing_source->is_running(dev);
 	return 0;
 }
 
@@ -322,17 +331,17 @@ int step_dir_stepper_common_run(const struct device *dev, const enum stepper_dir
 				const uint32_t velocity)
 {
 	struct step_dir_stepper_common_data *data = dev->data;
-	const struct step_dir_stepper_common_config *config = dev->config;
+	// const struct step_dir_stepper_common_config *config = dev->config;
 
 	K_SPINLOCK(&data->lock) {
 		data->run_mode = STEPPER_RUN_MODE_VELOCITY;
 		data->direction = direction;
 		data->max_velocity = velocity;
-		config->timing_source->update(dev, velocity);
+		data->timing_source->update(dev, velocity);
 		if (velocity != 0) {
-			config->timing_source->start(dev);
+			data->timing_source->start(dev);
 		} else {
-			config->timing_source->stop(dev);
+			data->timing_source->stop(dev);
 		}
 	}
 

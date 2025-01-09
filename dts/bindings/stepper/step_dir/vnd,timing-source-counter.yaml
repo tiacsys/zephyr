@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2024 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Counter based step-dir timing source
+
+
+compatible: "vnd,timing-source-counter"
+
+include:
+  - name: base.yaml
+
+properties:
+  counter:
+    required: true
+    type: phandle
+    description: Counter used for generating step-accurate pulse signals.

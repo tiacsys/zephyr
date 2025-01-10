@@ -30,7 +30,6 @@ struct step_dir_stepper_common_config {
 	const struct gpio_dt_spec step_pin;
 	const struct gpio_dt_spec dir_pin;
 	bool dual_edge;
-	const struct stepper_timing_source_api *timing_source;
 	const struct device *counter;
 	const struct device *timing_source_dev;
 };
@@ -49,10 +48,7 @@ struct step_dir_stepper_common_config {
 		.dual_edge = DT_PROP_OR(node_id, dual_edge_step, false),                           \
 		.counter = DEVICE_DT_GET_OR_NULL(DT_PHANDLE(node_id, counter)),                    \
 		.timing_source_dev = DEVICE_DT_GET(DT_CHILD(node_id, timing_source)),              \
-		.timing_source = COND_CODE_1(DT_NODE_HAS_PROP(node_id, counter),                   \
-						(&step_counter_timing_source_api),                 \
-						(&step_work_timing_source_api)),    \
-		}
+	}
 
 /**
  * @brief Initialize common step direction stepper config from devicetree instance.
@@ -80,10 +76,6 @@ struct step_dir_stepper_common_data {
 
 	struct k_work_delayable stepper_dwork;
 
-#ifdef CONFIG_STEP_DIR_STEPPER_COUNTER_TIMING
-	struct counter_top_cfg counter_top_cfg;
-	bool counter_running;
-#endif /* CONFIG_STEP_DIR_STEPPER_COUNTER_TIMING */
 
 #ifdef CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS
 	struct k_work event_callback_work;

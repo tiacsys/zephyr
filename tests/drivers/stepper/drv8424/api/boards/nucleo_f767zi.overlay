@@ -42,14 +42,17 @@
 		en-gpios  = <&arduino_header 14 0>; /* D8 */
 		m0-gpios = <&mikroe_stepper_gpios 0 0>;
 		m1-gpios = <&mikroe_stepper_gpios 1 0>;
-		counter = <&counter2>;
 
 		timing_source {
 			status = "okay";
-			compatible = "vnd,timing-source-counter";
-
-			counter = <&counter2>;
+			compatible = "vnd,timing-source-work";
 		};
+		// timing_source {
+		// 	status = "okay";
+		// 	compatible = "vnd,timing-source-counter";
+
+		// 	counter = <&counter2>;
+		// };
 	};
 };
 

@@ -110,8 +110,6 @@ struct drv8424_accel_data {
 	uint32_t current_velocity;
 	/** Current reference position. */
 	int32_t reference_position;
-	/** Target position. */;
-	// int32_t target_position;
 	/** Whether the motor is currently moving. */
 	bool is_moving;
 	/** Whether we're in constant velocity mode. */
@@ -227,7 +225,6 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 		} else {
 			data->reference_position--;
 		}
-		// LOG_INF("Index: %u", data->ramp_data.step_index);
 
 	} else {
 		/* data->n is 1 larger than actual value to prevent overflow */
@@ -288,7 +285,6 @@ static void drv8424_accel_positioning_smooth_constant(const struct device *dev, 
 		} else {
 			data->reference_position--;
 		}
-		// LOG_INF("Pos in Const Velocity: %d", data->reference_position);
 	} else {
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 	}
@@ -320,7 +316,6 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 		} else {
 			data->reference_position--;
 		}
-		// LOG_INF("Pos in Accel: %d", data->reference_position);
 
 	} else {
 		/* Use Approximation once error is small enough*/
@@ -436,7 +431,6 @@ static void drv8424_accel_positioning_smooth_deceleration_start(const struct dev
 	/* Stop Counter if positioning_smooth move is finished */
 	if (data->ramp_data.step_index ==
 	    data->ramp_data.accel_steps) { /* Deceleration start section is finished */
-		LOG_INF("Pos after Decel Start: %d", data->reference_position);
 		if (data->ramp_data.const_steps == 0 && data->ramp_data.decel_steps != 0) {
 			/* If no constant speed section switch to deceleration if decelerations
 			 * steps exist
@@ -747,6 +741,7 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 		goto end;
 	}
 	data->is_moving = true;
+
 	ret = counter_start(config->counter);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to start counter (error: %d)", dev->name, ret);
@@ -759,6 +754,7 @@ end:
 	}
 	data->constant_velocity = false;
 	irq_unlock(key);
+
 	return ret;
 }
 
@@ -854,7 +850,6 @@ static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 		data->direction = STEPPER_DIRECTION_POSITIVE;
 	}
 
-	// int64_t steps = position - data->reference_position;
 	data->ramp_data.is_first_step = true;
 	data->ramp_data.start_position = data->reference_position;
 
@@ -884,8 +879,7 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 	if (!data->enabled) {
 		return -ENODEV;
 	}
-	if (data->direction != direction && data->is_moving && velocity != 0) {	//TODO: velocity != 0 to be removed later
-		LOG_INF("Current Direction: %u,Target Direction: %u", data->direction, direction);
+	if (data->direction != direction && data->is_moving && velocity != 0) {
 		LOG_ERR("%s: Can't change direction while moving (error %d)", dev->name, -ENOTSUP);
 		return -ENOTSUP;
 	}
@@ -897,44 +891,51 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 		LOG_ERR("%s: Failed to set direction pin (error %d)", dev->name, ret);
 		return ret;
 	}
-	LOG_INF("Current Position: %u", data->reference_position);
 
 	/* Lock interrupts while modifying settings used by ISR */
 	int key = irq_lock();
 
-	ret = drv8424_accel_calculate_acceleration(dev, 0, velocity, true);
-
-	/* Set data used in counter interrupt */
-	data->constant_velocity = true;
-	data->direction = direction;
-	data->is_moving = true;
-
 	/* Treat velocity 0 by not stepping at all */
 	if (velocity == 0) {
-		ret = counter_stop(config->counter);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to stop counter (error %d)", dev->name, ret);
-			data->is_moving = false;
-			goto end;
+		if (data->current_velocity != 0) {
+			data->constant_velocity = true;
+			data->direction = direction;
+			data->is_moving = true;
+			uint32_t steps = data->current_velocity * data->current_velocity * 1.0f /
+					 config->acceleration;
+			ret = drv8424_accel_calculate_acceleration(dev, steps,
+								   data->current_velocity, true);
+			data->ramp_data.step_index = data->ramp_data.decel_steps;
+			data->counter_top_cfg.callback =
+				drv8424_accel_positioning_smooth_deceleration;
+			data->counter_top_cfg.user_data = data;
+			ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
+			if (ret != 0) {
+				LOG_ERR("%s: Failed to set counter top value (error: %d)",
+					dev->name, ret);
+				goto end;
+			}
+
+			/* Start counter */
+			ret = counter_start(config->counter);
+			if (ret != 0) {
+				LOG_ERR("%s: Failed to start counter (error %d)", dev->name, ret);
+				data->is_moving = false;
+				goto end;
+			}
 		}
-		data->is_moving = false;
-		gpio_pin_set_dt(&config->step_pin, 0);
-		data->step_signal_high = false;
-		data->current_velocity = 0;
+
 	} else {
-		// data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
+		data->constant_velocity = true;
+		data->direction = direction;
+		data->is_moving = true;
+		ret = drv8424_accel_calculate_acceleration(dev, 0, velocity, true);
 		data->counter_top_cfg.ticks = counter_us_to_ticks(
 			config->counter, (uint32_t)data->ramp_data.base_time_int / 2000000);
-		LOG_INF("Current Velocity: %u, End Velocity: %u", data->current_velocity,
-			data->ramp_data.const_velocity);
 		if (data->current_velocity > data->ramp_data.const_velocity) {
 			data->counter_top_cfg.callback =
 				drv8424_accel_positioning_smooth_deceleration_start;
 		}
-		// else if (data->current_velocity > data->ramp_data.const_velocity) {
-		// 	data->counter_top_cfg.callback =
-		// drv8424_accel_positioning_smooth_acceleration;
-		// }
 		if (data->current_velocity == data->ramp_data.const_velocity) {
 			data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_constant;
 			data->counter_top_cfg.ticks = counter_us_to_ticks(

@@ -63,6 +63,8 @@ static void *drv8424_accel_setup(void)
 static void drv8424_accel_before(void *f)
 {
 	struct drv8424_accel_fixture *fixture = f;
+	(void)stepper_enable(fixture->dev, false);
+	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_set_reference_position(fixture->dev, 0);
 	(void)stepper_set_micro_step_res(fixture->dev, 1);
 	k_poll_signal_reset(&stepper_signal);
@@ -71,7 +73,8 @@ static void drv8424_accel_before(void *f)
 static void drv8424_accel_after(void *f)
 {
 	struct drv8424_accel_fixture *fixture = f;
-	(void)stepper_run(fixture->dev, STEPPER_DIRECTION_POSITIVE, 0);
+	(void)stepper_enable(fixture->dev, false);
+	(void)stepper_enable(fixture->dev, true);
 }
 
 static void test_move_by_different_speeds(struct drv8424_accel_fixture *fixture,
@@ -140,13 +143,11 @@ static void test_run_different_speeds(struct drv8424_accel_fixture *fixture, int
 	int32_t pos = 0;
 	int start_pos;
 	stepper_get_actual_position(fixture->dev, &start_pos);
-	printk("Current Position: %d\n", start_pos);
 
 	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_run(fixture->dev, direction, speed_start);
 	k_busy_wait(t_start);
 	stepper_get_actual_position(fixture->dev, &start_pos);
-	printk("Mid Position: %d\n", start_pos);
 	(void)stepper_run(fixture->dev, direction, speed_test);
 	k_busy_wait(t_test);
 
@@ -169,20 +170,17 @@ ZTEST_F(drv8424_accel, test_run_negative_direction_correct_position_from_zero_sp
 	test_run_different_speeds(fixture, 0, 50, -30, 0, 1100000, STEPPER_DIRECTION_NEGATIVE);
 }
 
-ZTEST_EXPECT_FAIL(drv8424_accel, test_run_positive_direction_correct_position_to_zero_speed);
 ZTEST_F(drv8424_accel, test_run_positive_direction_correct_position_to_zero_speed)
 {
 	test_run_different_speeds(fixture, 50, 0, 50, 1000000, 1100000, STEPPER_DIRECTION_POSITIVE);
 }
 
-ZTEST_EXPECT_FAIL(drv8424_accel, test_run_negative_direction_correct_position_to_zero_speed);
 ZTEST_F(drv8424_accel, test_run_negative_direction_correct_position_to_zero_speed)
 {
 	test_run_different_speeds(fixture, 50, 0, -50, 1000000, 1100000,
 				  STEPPER_DIRECTION_NEGATIVE);
 }
 
-ZTEST_EXPECT_FAIL(drv8424_accel, test_run_positive_direction_to_zero_speed_signals);
 ZTEST_F(drv8424_accel, test_run_positive_direction_to_zero_speed_signals)
 {
 	(void)stepper_enable(fixture->dev, true);
@@ -201,7 +199,6 @@ ZTEST_F(drv8424_accel, test_run_positive_direction_to_zero_speed_signals)
 		      "Event was not STEPPER_EVENT_STEPS_COMPLETED event");
 }
 
-ZTEST_EXPECT_FAIL(drv8424_accel, test_run_negative_direction_to_zero_speed_signals);
 ZTEST_F(drv8424_accel, test_run_negative_direction_to_zero_speed_signals)
 {
 	(void)stepper_enable(fixture->dev, true);
@@ -267,12 +264,12 @@ ZTEST_F(drv8424_accel, test_move_to_negative_direction_movement_from_zero_speed)
 
 ZTEST_F(drv8424_accel, test_move_to_positive_direction_movement_from_same_speed)
 {
-	test_move_to_different_speeds(fixture, 0, 50, 80);
+	test_move_to_different_speeds(fixture, 50, 50, 80);
 }
 
 ZTEST_F(drv8424_accel, test_move_to_negative_direction_movement_from_same_speed)
 {
-	test_move_to_different_speeds(fixture, 0, 50, -80);
+	test_move_to_different_speeds(fixture, 50, 50, -80);
 }
 
 ZTEST_F(drv8424_accel, test_move_to_positive_direction_movement_from_lower_speed)
@@ -343,7 +340,6 @@ ZTEST_F(drv8424_accel, test_move_by_negative_direction_movement_from_higher_spee
 	test_move_by_different_speeds(fixture, 100, 50, -100, -210);
 }
 
-// ZTEST_EXPECT_FAIL(drv8424_accel, test_run_negative_to_posive_direction_change);
 ZTEST_F(drv8424_accel, test_run_negative_to_posive_direction_change)
 {
 	int ret = 0;
@@ -354,7 +350,6 @@ ZTEST_F(drv8424_accel, test_run_negative_to_posive_direction_change)
 	zassert_equal(ret, -ENOTSUP, "Should return error code %d but returned %d", -ENOTSUP, ret);
 }
 
-// ZTEST_EXPECT_FAIL(drv8424_accel, test_run_positive_to_negative_direction_change);
 ZTEST_F(drv8424_accel, test_run_positive_to_negative_direction_change)
 {
 	int ret = 0;
@@ -365,7 +360,6 @@ ZTEST_F(drv8424_accel, test_run_positive_to_negative_direction_change)
 	zassert_equal(ret, -ENOTSUP, "Should return error code %d but returned %d", -ENOTSUP, ret);
 }
 
-// ZTEST_EXPECT_FAIL(drv8424_accel, test_move_to_negative_to_posive_direction_change);
 ZTEST_F(drv8424_accel, test_move_to_negative_to_posive_direction_change)
 {
 	int ret = 0;
@@ -377,7 +371,6 @@ ZTEST_F(drv8424_accel, test_move_to_negative_to_posive_direction_change)
 	zassert_equal(ret, -ENOTSUP, "Should return error code %d but returned %d", -ENOTSUP, ret);
 }
 
-// ZTEST_EXPECT_FAIL(drv8424_accel, test_move_to_positive_to_negative_direction_change);
 ZTEST_F(drv8424_accel, test_move_to_positive_to_negative_direction_change)
 {
 	int ret = 0;
@@ -389,7 +382,6 @@ ZTEST_F(drv8424_accel, test_move_to_positive_to_negative_direction_change)
 	zassert_equal(ret, -ENOTSUP, "Should return error code %d but returned %d", -ENOTSUP, ret);
 }
 
-// ZTEST_EXPECT_FAIL(drv8424_accel, test_move_by_negative_to_posive_direction_change);
 ZTEST_F(drv8424_accel, test_move_by_negative_to_posive_direction_change)
 {
 	int ret = 0;
@@ -401,7 +393,6 @@ ZTEST_F(drv8424_accel, test_move_by_negative_to_posive_direction_change)
 	zassert_equal(ret, -ENOTSUP, "Should return error code %d but returned %d", -ENOTSUP, ret);
 }
 
-// ZTEST_EXPECT_FAIL(drv8424_accel, test_move_by_positive_to_negative_direction_change);
 ZTEST_F(drv8424_accel, test_move_by_positive_to_negative_direction_change)
 {
 	int ret = 0;

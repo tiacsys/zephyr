@@ -3,25 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "zephyr/sys/util.h"
-#include "zephyr/sys_clock.h"
+#define DT_DRV_COMPAT ti_drv8424_accel
+
+#include <zephyr/sys/util.h>
 #include <math.h>
 #include <stdlib.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/stepper.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/counter.h>
+#include <zephyr/drivers/stepper/stepper_drv8424_accel.h>
 #include <zephyr/irq.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(drv8424_accel, CONFIG_STEPPER_LOG_LEVEL);
 
-#define DT_DRV_COMPAT ti_drv8424_accel
-
 /* Number of steps for which the accurate ramp calculation algorithm is used, once the error is low
  * enough, an approximation algorithm is used
  */
 #define ACCURATE_STEPS 15
+
+/** number of picoseconds per micorsecond */
+#define PSEC_PER_USEC (1000 * NSEC_PER_USEC)
+
+/** number of picoseconds per second */
+#define PSEC_PER_SEC ((uint64_t)PSEC_PER_USEC * (uint64_t)USEC_PER_SEC)
+
+/** divisor that is used several times for tick calculation */
+#define TICK_DIVISOR (2 * PSEC_PER_USEC)
 
 /**
  * @brief DRV8424 stepper driver configuration data.
@@ -30,22 +39,14 @@ LOG_MODULE_REGISTER(drv8424_accel, CONFIG_STEPPER_LOG_LEVEL);
  * needed by a given DRV8424 stepper driver.
  */
 struct drv8424_accel_config {
-	/** Direction pin. */
 	struct gpio_dt_spec dir_pin;
-	/** Step pin. */
 	struct gpio_dt_spec step_pin;
-	/** Sleep pin. */
 	struct gpio_dt_spec sleep_pin;
-	/** Enable pin. */
 	struct gpio_dt_spec en_pin;
-	/** Microstep configuration pin 0. */
 	struct gpio_dt_spec m0_pin;
-	/** Microstep configuration pin 1. */
 	struct gpio_dt_spec m1_pin;
-	/** Counter used as timing source. */
 	const struct device *counter;
-	/** Acceleration in steps/s^2. */
-	uint32_t acceleration;
+	uint32_t acceleration; /* In micro-steps/s^2*/
 };
 
 /* Struct for storing the states of output pins. */
@@ -60,34 +61,19 @@ struct drv8424_accel_pin_states {
 struct drv8424_accel_ramp_data {
 	/* Iterator for the current step in the current phase. */
 	uint32_t step_index;
-	/* Current step period time in us. */
-	uint64_t current_time_int;
-	/* Step period of the first step of acceleration. */
-	uint64_t base_time_int;
+	uint64_t current_time_int; /* in pikoseconds ps */
+	uint64_t base_time_int;    /* in ps */
 	/* Number of steps to take during constant speed phase. */
 	uint32_t const_steps;
 	/* Number of steps to take during deceleration phase. */
 	uint32_t decel_steps;
-	/* Number of steps to take during acceleration phase. */
+	/* Number of steps to take during initial phase (accel or decel). */
 	uint32_t accel_steps;
-	/* Pointer to step_pin dt_spec. */
 	const struct gpio_dt_spec *step_pin;
-	/* Counter ticks per us, saved here as value is constant and function call expensive*/
 	uint32_t ticks_us;
 	/** Velocity during const velocity phase (steps/s). */
 	uint32_t const_velocity;
-	/* Counter reference, because *dev in counter interrupt doesn't allways references the
-	 * counter
-	 */
 	const struct device *counter;
-	/* Position at the time the move command was given, used to account for position
-	 * inaccuracies because of delays
-	 */
-	uint32_t start_position;
-	/* If it is the first step of a move command. Used for the same calculation as
-	 * start_position
-	 */
-	bool is_first_step;
 };
 
 /**
@@ -98,44 +84,64 @@ struct drv8424_accel_ramp_data {
 struct drv8424_accel_data {
 	/** Back pointer to the device, e.g. for access to config */
 	const struct device *dev;
-	/** Whether the device is enabled */
 	bool enabled;
-	/** Struct containing the states of different pins. */
 	struct drv8424_accel_pin_states pin_states;
-	/** Current microstep resolution. */
-	enum stepper_micro_step_resolution ms_res;
-	/** Maximum velocity (steps/s). */
+	enum stepper_micro_step_resolution ustep_res;
 	uint32_t max_velocity;
-	/** Current velocity (steps/s). */
 	uint32_t current_velocity;
-	/** Current reference position. */
 	int32_t reference_position;
-	/** Whether the motor is currently moving. */
 	bool is_moving;
-	/** Whether we're in constant velocity mode. */
 	bool constant_velocity;
-	/** Which direction we're going. */
 	enum stepper_direction direction;
-	/** Event handler registered by user. */
 	stepper_event_callback_t event_callback;
-	/** Event handler user data. */
 	void *event_callback_user_data;
-	/** Whether the step signal is currently high or low. */
 	bool step_signal_high;
-	/** Struct containing counter top configuration. */
 	struct counter_top_cfg counter_top_cfg;
-	/** Struct containing ramp information. */
 	struct drv8424_accel_ramp_data ramp_data;
 };
 
 struct drv8424_accel_callback_work {
-	/** The work item itself. */
 	struct k_work work;
-	/** Type of event to handle. */
 	enum stepper_event event;
-	/** Driver instance data. */
 	struct drv8424_accel_data *driver_data;
 };
+
+static int drv8424_accel_set_microstep_pin(const struct device *dev, const struct gpio_dt_spec *pin,
+					   int value)
+{
+	int ret;
+
+	/* Reset microstep pin as it may have been disconnected. */
+	ret = gpio_pin_configure_dt(pin, GPIO_OUTPUT_INACTIVE);
+	if (ret != 0) {
+		LOG_ERR("%s: Failed to reset micro-step pin (error: %d)", dev->name, ret);
+		return ret;
+	}
+
+	/* Set microstep pin */
+	switch (value) {
+	case 0:
+		ret = gpio_pin_set_dt(pin, 0);
+		break;
+	case 1:
+		ret = gpio_pin_set_dt(pin, 1);
+		break;
+	case 2:
+		/* Hi-Z is set by configuring pin as disconnected, not
+		 * all gpio controllers support this.
+		 */
+		ret = gpio_pin_configure_dt(pin, GPIO_DISCONNECTED);
+		break;
+	default:
+		break;
+	}
+
+	if (ret != 0) {
+		LOG_ERR("%s: Failed to set micro-step pin (error: %d)", dev->name, ret);
+		return ret;
+	}
+	return 0;
+}
 
 static void drv8424_accel_user_callback_work_fn(struct k_work *work)
 {
@@ -186,29 +192,6 @@ static int drv8424_accel_schedule_user_callback(struct drv8424_accel_data *data,
 	return 0;
 }
 
-static void drv8424_accel_positioning_top_interrupt(const struct device *dev, void *user_data)
-{
-	struct drv8424_accel_data *data = (struct drv8424_accel_data *)user_data;
-	const struct drv8424_accel_config *config =
-		(struct drv8424_accel_config *)data->dev->config;
-
-	/* Switch step pin on or off depending position in step period */
-	if (data->step_signal_high) {
-		/* Generate a falling edge and count a completed step */
-		gpio_pin_set_dt(&config->step_pin, 0);
-		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-			data->reference_position++;
-		} else {
-			data->reference_position--;
-		}
-	} else {
-		/* Generate a rising edge */
-		gpio_pin_set_dt(&config->step_pin, 1);
-	}
-
-	data->step_signal_high = !data->step_signal_high;
-}
-
 static void drv8424_accel_positioning_smooth_deceleration(const struct device *dev, void *user_data)
 {
 	struct drv8424_accel_data *data = user_data;
@@ -225,10 +208,7 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 		} else {
 			data->reference_position--;
 		}
-
 	} else {
-		/* data->n is 1 larger than actual value to prevent overflow */
-		uint32_t n_adjusted = data->ramp_data.step_index /*- 1*/;
 		/* Use Approximation as long as error is small enough */
 		if (data->ramp_data.step_index > ACCURATE_STEPS) {
 			/*
@@ -237,19 +217,20 @@ static void drv8424_accel_positioning_smooth_deceleration(const struct device *d
 			 * Added 0.5 to n equivalent for better acceleration behaviour
 			 */
 			uint64_t t_n = data->ramp_data.current_time_int;
-			uint64_t adjust = 2 * t_n / (4 * n_adjusted + 1);
+			uint64_t adjust = 2 * t_n / (4 * data->ramp_data.step_index + 1);
 			new_time_int = t_n + adjust;
 		} else {
 			/* Use accurate (but expensive) calculation when error would be large
 			 * Added 0.5 to n equivalent for better acceleration behaviour
 			 */
 			new_time_int = data->ramp_data.base_time_int *
-				       (sqrtf(n_adjusted + 0.0f) - sqrtf(n_adjusted - 1.0f));
+				       (sqrtf(data->ramp_data.step_index + 0.0f) -
+					sqrtf(data->ramp_data.step_index - 1.0f));
 		}
 		data->counter_top_cfg.ticks =
-			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
+			data->ramp_data.ticks_us * DIV_ROUND_UP(new_time_int, TICK_DIVISOR);
 		data->ramp_data.current_time_int = new_time_int;
-		data->current_velocity = 1000000000000 / (new_time_int);
+		data->current_velocity = PSEC_PER_SEC / new_time_int;
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
@@ -287,6 +268,8 @@ static void drv8424_accel_positioning_smooth_constant(const struct device *dev, 
 		}
 	} else {
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
+		if (data->ramp_data.step_index % 5 == 0) {
+		}
 	}
 
 	data->step_signal_high = !data->step_signal_high;
@@ -316,7 +299,6 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 		} else {
 			data->reference_position--;
 		}
-
 	} else {
 		/* Use Approximation once error is small enough*/
 		if (data->ramp_data.step_index > ACCURATE_STEPS) {
@@ -337,9 +319,9 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 					sqrtf(data->ramp_data.step_index + 0.0f));
 		}
 		data->counter_top_cfg.ticks =
-			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
+			data->ramp_data.ticks_us * DIV_ROUND_UP(new_time_int, TICK_DIVISOR);
 		data->ramp_data.current_time_int = new_time_int;
-		data->current_velocity = 1000000000000 / (new_time_int);
+		data->current_velocity = PSEC_PER_SEC / (new_time_int);
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
@@ -372,9 +354,9 @@ static void drv8424_accel_positioning_smooth_acceleration(const struct device *d
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
 			data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_constant;
-			data->counter_top_cfg.ticks = data->ramp_data.ticks_us *
-						      (1000000 / data->ramp_data.const_velocity) /
-						      2;
+			data->counter_top_cfg.ticks =
+				data->ramp_data.ticks_us *
+				DIV_ROUND_UP(USEC_PER_SEC, 2 * data->ramp_data.const_velocity);
 			data->current_velocity = data->ramp_data.const_velocity;
 			counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 		}
@@ -399,8 +381,6 @@ static void drv8424_accel_positioning_smooth_deceleration_start(const struct dev
 			data->reference_position--;
 		}
 	} else {
-		/* data->n is 1 larger than actual value to prevent overflow */
-		uint32_t n_adjusted = data->ramp_data.step_index - 1;
 		/* Use Approximation as long as error is small enough */
 		if (data->ramp_data.step_index > ACCURATE_STEPS) {
 			/*
@@ -409,19 +389,20 @@ static void drv8424_accel_positioning_smooth_deceleration_start(const struct dev
 			 * Added 0.5 to n equivalent for better acceleration behaviour
 			 */
 			uint64_t t_n = data->ramp_data.current_time_int;
-			uint64_t adjust = 2 * t_n / (4 * n_adjusted + 1);
+			uint64_t adjust = 2 * t_n / (4 * data->ramp_data.step_index - 3);
 			new_time_int = t_n + adjust;
 		} else {
 			/* Use accurate (but expensive) calculation when error would be large
 			 * Added 0.5 to n equivalent for better acceleration behaviour
 			 */
 			new_time_int = data->ramp_data.base_time_int *
-				       (sqrtf(n_adjusted + 1.0f) - sqrtf(n_adjusted + 0.0f));
+				       (sqrtf(data->ramp_data.step_index + 0.0f) -
+					sqrtf(data->ramp_data.step_index - 1.0f));
 		}
 		data->counter_top_cfg.ticks =
-			data->ramp_data.ticks_us * (uint32_t)(new_time_int / 1000000) / 2;
+			data->ramp_data.ticks_us * DIV_ROUND_UP(new_time_int, TICK_DIVISOR);
 		data->ramp_data.current_time_int = new_time_int;
-		data->current_velocity = 1000000000000 / (new_time_int);
+		data->current_velocity = PSEC_PER_SEC / (new_time_int);
 		gpio_pin_set_dt(data->ramp_data.step_pin, 1);
 		counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 	}
@@ -455,9 +436,9 @@ static void drv8424_accel_positioning_smooth_deceleration_start(const struct dev
 			/* Otherwise switch to constant speed */
 			data->ramp_data.step_index = 0;
 			data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_constant;
-			data->counter_top_cfg.ticks = data->ramp_data.ticks_us *
-						      (1000000 / data->ramp_data.const_velocity) /
-						      2;
+			data->counter_top_cfg.ticks =
+				data->ramp_data.ticks_us *
+				DIV_ROUND_UP(USEC_PER_SEC, 2 * data->ramp_data.const_velocity);
 			data->current_velocity = data->ramp_data.const_velocity;
 			counter_set_top_value(data->ramp_data.counter, &data->counter_top_cfg);
 		}
@@ -467,71 +448,23 @@ static void drv8424_accel_positioning_smooth_deceleration_start(const struct dev
 /*
  * If microstep setter fails, attempt to recover into previous state.
  */
-static int drv8424_accel_microstep_recovery(const struct device *dev)
+int drv8424_accel_microstep_recovery(const struct device *dev)
 {
 	const struct drv8424_accel_config *config = dev->config;
 	struct drv8424_accel_data *data = dev->data;
-	int ret = 0;
+	int ret;
 
-	int m0_value = data->pin_states.m0;
-	int m1_value = data->pin_states.m1;
+	uint8_t m0_value = data->pin_states.m0;
+	uint8_t m1_value = data->pin_states.m1;
 
-	/* Reset m0 pin as it may have been disconnected */
-	ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_OUTPUT_INACTIVE);
+	ret = drv8424_accel_set_microstep_pin(dev, &config->m0_pin, m0_value);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to restore microstep configuration (error: %d)", dev->name,
 			ret);
 		return ret;
 	}
 
-	/* Reset m1 pin as it may have been disconnected. */
-	ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_OUTPUT_INACTIVE);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to restore microstep configuration (error: %d)", dev->name,
-			ret);
-		return ret;
-	}
-
-	switch (m0_value) {
-	case 0:
-		ret = gpio_pin_set_dt(&config->m0_pin, 0);
-		break;
-	case 1:
-		ret = gpio_pin_set_dt(&config->m0_pin, 1);
-		break;
-	case 2:
-		/* Hi-Z is set by configuring pin as disconnected, not all gpio controllers support
-		 * this.
-		 */
-		ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_DISCONNECTED);
-		break;
-	default:
-		break;
-	}
-
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to restore microstep configuration (error: %d)", dev->name,
-			ret);
-		return ret;
-	}
-
-	switch (m1_value) {
-	case 0:
-		ret = gpio_pin_set_dt(&config->m1_pin, 0);
-		break;
-	case 1:
-		ret = gpio_pin_set_dt(&config->m1_pin, 1);
-		break;
-	case 2:
-		/* Hi-Z is set by configuring pin as disconnected, not all gpio controllers support
-		 * this.
-		 */
-		ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_DISCONNECTED);
-		break;
-	default:
-		break;
-	}
-
+	ret = drv8424_accel_set_microstep_pin(dev, &config->m1_pin, m1_value);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to restore microstep configuration (error: %d)", dev->name,
 			ret);
@@ -658,8 +591,8 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 
 	float acceleration_adjusted =
 		(float)((end_velocity * end_velocity * 1.0) / (2.0 * accel_steps));
-	float base_time = sqrtf(2.0f / acceleration_adjusted) *
-			  1000000U; /* µs (via 1000000), 2.0 contains *1 step */
+	float base_time =
+		sqrtf(2.0f / acceleration_adjusted) * USEC_PER_SEC; /* µs, 2.0 contains *1 step */
 
 	step_index =
 		(data->current_velocity * data->current_velocity) / (2 * acceleration_adjusted);
@@ -675,9 +608,6 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 		const_steps = 10; /* Dummy value for correct behaviour */
 	}
 
-	uint32_t start;
-	counter_get_value(data->ramp_data.counter, &start);
-
 	/* Configure interrupt data */
 	data->ramp_data.accel_steps = accel_steps;
 	data->ramp_data.const_steps = const_steps;
@@ -685,14 +615,17 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 	data->ramp_data.step_index = step_index;
 	data->ramp_data.ticks_us = counter_us_to_ticks(config->counter, 1);
 	/* Multiplications to get additional accuracy*/
-	data->ramp_data.current_time_int = base_time * 1000000;
-	data->ramp_data.base_time_int = base_time * 1000000;
+	data->ramp_data.current_time_int = base_time * PSEC_PER_USEC; /* pikoseconds ps */
+	data->ramp_data.base_time_int = base_time * PSEC_PER_USEC;    /* in ps */
 
-	if (data->current_velocity <= end_velocity) {
+	if (data->current_velocity < end_velocity) {
 		data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
-	} else {
+	} else if (data->current_velocity > end_velocity) {
 		data->counter_top_cfg.callback =
 			drv8424_accel_positioning_smooth_deceleration_start;
+	} else {
+		data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_constant;
+		data->ramp_data.step_index = 0;
 	}
 
 	data->ramp_data.current_time_int =
@@ -701,9 +634,6 @@ static int drv8424_accel_calculate_acceleration(const struct device *dev, uint32
 
 	data->ramp_data.const_velocity = end_velocity;
 
-	uint32_t delay;
-	counter_get_value(data->ramp_data.counter, &delay);
-
 	return 0;
 }
 
@@ -711,7 +641,7 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 {
 	const struct drv8424_accel_config *config = dev->config;
 	struct drv8424_accel_data *data = dev->data;
-	int ret = 0;
+	int ret;
 
 	if (data->max_velocity == 0) {
 		return -EINVAL;
@@ -730,10 +660,12 @@ static int drv8424_accel_move_positioning_smooth(const struct device *dev, uint3
 		goto end;
 	}
 
-	data->counter_top_cfg.ticks = counter_us_to_ticks(
-		config->counter, (uint32_t)data->ramp_data.base_time_int / 2000000);
-	data->counter_top_cfg.user_data = data;
-	data->counter_top_cfg.flags = 0;
+	if (data->current_velocity == 0) {
+		data->counter_top_cfg.ticks =
+			DIV_ROUND_UP(((uint64_t)counter_get_frequency(config->counter) *
+				      data->ramp_data.base_time_int),
+				     ((uint64_t)USEC_PER_SEC * TICK_DIVISOR));
+	}
 
 	ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 	if (ret != 0) {
@@ -761,7 +693,7 @@ end:
 static int drv8424_accel_move_by(const struct device *dev, int32_t micro_steps)
 {
 	struct drv8424_accel_data *data = dev->data;
-	int ret = 0;
+	int ret;
 
 	if (data->max_velocity == 0) {
 		LOG_ERR("%s: Invalid max. velocity %d configured", dev->name, data->max_velocity);
@@ -769,7 +701,7 @@ static int drv8424_accel_move_by(const struct device *dev, int32_t micro_steps)
 	}
 
 	if (!data->enabled) {
-		return -ENODEV;
+		return -ECANCELED;
 	}
 
 	if (micro_steps < 0) {
@@ -827,11 +759,11 @@ static int drv8424_accel_get_actual_position(const struct device *dev, int32_t *
 static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 {
 	struct drv8424_accel_data *data = dev->data;
-	int ret = 0;
+	int ret;
 	int64_t steps = position - data->reference_position;
 
 	if (!data->enabled) {
-		return -ENODEV;
+		return -ECANCELED;
 	}
 
 	if (steps < 0) {
@@ -849,9 +781,6 @@ static int drv8424_accel_move_to(const struct device *dev, int32_t position)
 		}
 		data->direction = STEPPER_DIRECTION_POSITIVE;
 	}
-
-	data->ramp_data.is_first_step = true;
-	data->ramp_data.start_position = data->reference_position;
 
 	ret = drv8424_accel_move_positioning_smooth(dev, llabs(steps));
 	if (ret != 0) {
@@ -874,17 +803,16 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 {
 	const struct drv8424_accel_config *config = dev->config;
 	struct drv8424_accel_data *data = dev->data;
-	int ret = 0;
+	int ret;
 
 	if (!data->enabled) {
-		return -ENODEV;
+		return -ECANCELED;
 	}
 	if (data->direction != direction && data->is_moving && velocity != 0) {
 		LOG_ERR("%s: Can't change direction while moving (error %d)", dev->name, -ENOTSUP);
 		return -ENOTSUP;
 	}
 
-	/* Set direction pin */
 	int dir_value = (direction == STEPPER_DIRECTION_POSITIVE) ? 1 : 0;
 	ret = gpio_pin_set_dt(&config->dir_pin, dir_value);
 	if (ret != 0) {
@@ -895,7 +823,6 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 	/* Lock interrupts while modifying settings used by ISR */
 	int key = irq_lock();
 
-	/* Treat velocity 0 by not stepping at all */
 	if (velocity == 0) {
 		if (data->current_velocity != 0) {
 			data->constant_velocity = true;
@@ -908,6 +835,8 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 			data->ramp_data.step_index = data->ramp_data.decel_steps;
 			data->counter_top_cfg.callback =
 				drv8424_accel_positioning_smooth_deceleration;
+			data->ramp_data.current_time_int =
+				DIV_ROUND_UP(PSEC_PER_SEC, data->current_velocity);
 			data->counter_top_cfg.user_data = data;
 			ret = counter_set_top_value(config->counter, &data->counter_top_cfg);
 			if (ret != 0) {
@@ -916,7 +845,6 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 				goto end;
 			}
 
-			/* Start counter */
 			ret = counter_start(config->counter);
 			if (ret != 0) {
 				LOG_ERR("%s: Failed to start counter (error %d)", dev->name, ret);
@@ -930,8 +858,10 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 		data->direction = direction;
 		data->is_moving = true;
 		ret = drv8424_accel_calculate_acceleration(dev, 0, velocity, true);
-		data->counter_top_cfg.ticks = counter_us_to_ticks(
-			config->counter, (uint32_t)data->ramp_data.base_time_int / 2000000);
+		if (data->current_velocity == 0) {
+			data->counter_top_cfg.ticks =
+				counter_us_to_ticks(config->counter, USEC_PER_MSEC);
+		}
 		if (data->current_velocity > data->ramp_data.const_velocity) {
 			data->counter_top_cfg.callback =
 				drv8424_accel_positioning_smooth_deceleration_start;
@@ -939,7 +869,8 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 		if (data->current_velocity == data->ramp_data.const_velocity) {
 			data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_constant;
 			data->counter_top_cfg.ticks = counter_us_to_ticks(
-				config->counter, (uint32_t)1000000 / (2 * data->current_velocity));
+				config->counter,
+				(uint32_t)DIV_ROUND_UP(USEC_PER_SEC, (2 * data->current_velocity)));
 		}
 		data->counter_top_cfg.user_data = data;
 
@@ -949,7 +880,6 @@ static int drv8424_accel_run(const struct device *dev, const enum stepper_direct
 			goto end;
 		}
 
-		/* Start counter */
 		ret = counter_start(config->counter);
 		if (ret != 0) {
 			LOG_ERR("%s: Failed to start counter (error %d)", dev->name, ret);
@@ -968,10 +898,10 @@ static int drv8424_accel_set_micro_step_res(const struct device *dev,
 {
 	const struct drv8424_accel_config *config = dev->config;
 	struct drv8424_accel_data *data = dev->data;
-	int ret = 0;
+	int ret;
 
-	int m0_value = 0;
-	int m1_value = 0;
+	uint8_t m0_value = 0;
+	uint8_t m1_value = 0;
 
 	/* 0: low
 	 * 1: high
@@ -1019,70 +949,17 @@ static int drv8424_accel_set_micro_step_res(const struct device *dev,
 		return -EINVAL;
 	};
 
-	/* Reset m0 pin as it may have been disconnected. */
-	ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_OUTPUT_INACTIVE);
+	ret = drv8424_accel_set_microstep_pin(dev, &config->m0_pin, m0_value);
 	if (ret != 0) {
-		LOG_ERR("%s: Failed to reset m0_pin (error: %d)", dev->name, ret);
-		drv8424_accel_microstep_recovery(dev);
 		return ret;
 	}
 
-	/* Reset m1 pin as it may have been disconnected. */
-	ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_OUTPUT_INACTIVE);
+	ret = drv8424_accel_set_microstep_pin(dev, &config->m1_pin, m1_value);
 	if (ret != 0) {
-		LOG_ERR("%s: Failed to reset m1_pin (error: %d)", dev->name, ret);
-		drv8424_accel_microstep_recovery(dev);
 		return ret;
 	}
 
-	/* Set m0 pin */
-	switch (m0_value) {
-	case 0:
-		ret = gpio_pin_set_dt(&config->m0_pin, 0);
-		break;
-	case 1:
-		ret = gpio_pin_set_dt(&config->m0_pin, 1);
-		break;
-	case 2:
-		/* Hi-Z is set by configuring pin as disconnected, not
-		 * all gpio controllers support this.
-		 */
-		ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_DISCONNECTED);
-		break;
-	default:
-		break;
-	}
-
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set m0_pin (error: %d)", dev->name, ret);
-		drv8424_accel_microstep_recovery(dev);
-		return ret;
-	}
-
-	switch (m1_value) {
-	case 0:
-		ret = gpio_pin_set_dt(&config->m1_pin, 0);
-		break;
-	case 1:
-		ret = gpio_pin_set_dt(&config->m1_pin, 1);
-		break;
-	case 2:
-		/* Hi-Z is set by configuring pin as disconnected, not
-		 * all gpio controllers support this.
-		 */
-		ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_DISCONNECTED);
-		break;
-	default:
-		break;
-	}
-
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to set m1_pin (error: %d)", dev->name, ret);
-		drv8424_accel_microstep_recovery(dev);
-		return ret;
-	}
-
-	data->ms_res = micro_step_res;
+	data->ustep_res = micro_step_res;
 	data->pin_states.m0 = m0_value;
 	data->pin_states.m1 = m1_value;
 
@@ -1093,7 +970,7 @@ static int drv8424_accel_get_micro_step_res(const struct device *dev,
 					    enum stepper_micro_step_resolution *micro_step_res)
 {
 	struct drv8424_accel_data *data = dev->data;
-	*micro_step_res = data->ms_res;
+	*micro_step_res = data->ustep_res;
 	return 0;
 }
 
@@ -1112,19 +989,16 @@ static int drv8424_accel_init(const struct device *dev)
 {
 	const struct drv8424_accel_config *const config = dev->config;
 	struct drv8424_accel_data *const data = dev->data;
-	int ret = 0;
+	int ret;
 
-	/* Set device back pointer */
 	data->dev = dev;
 
-	/* Configure direction pin */
 	ret = gpio_pin_configure_dt(&config->dir_pin, GPIO_OUTPUT_ACTIVE);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to configure dir_pin (error: %d)", dev->name, ret);
 		return ret;
 	}
 
-	/* Configure step pin */
 	ret = gpio_pin_configure_dt(&config->step_pin, GPIO_OUTPUT_INACTIVE);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to configure step_pin (error: %d)", dev->name, ret);
@@ -1132,7 +1006,6 @@ static int drv8424_accel_init(const struct device *dev)
 	}
 	data->ramp_data.step_pin = &config->step_pin;
 
-	/* Configure sleep pin if it is available */
 	if (config->sleep_pin.port != NULL) {
 		ret = gpio_pin_configure_dt(&config->sleep_pin, GPIO_OUTPUT_ACTIVE);
 		if (ret != 0) {
@@ -1142,7 +1015,6 @@ static int drv8424_accel_init(const struct device *dev)
 		data->pin_states.sleep = 1U;
 	}
 
-	/* Configure enable pin if it is available */
 	if (config->en_pin.port != NULL) {
 		ret = gpio_pin_configure_dt(&config->en_pin, GPIO_OUTPUT_INACTIVE);
 		if (ret != 0) {
@@ -1152,7 +1024,6 @@ static int drv8424_accel_init(const struct device *dev)
 		data->pin_states.en = 0U;
 	}
 
-	/* Configure microstep pin 0 */
 	ret = gpio_pin_configure_dt(&config->m0_pin, GPIO_OUTPUT_INACTIVE);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to configure m0_pin (error: %d)", dev->name, ret);
@@ -1160,7 +1031,6 @@ static int drv8424_accel_init(const struct device *dev)
 	}
 	data->pin_states.m0 = 0U;
 
-	/* Configure microstep pin 1 */
 	ret = gpio_pin_configure_dt(&config->m1_pin, GPIO_OUTPUT_INACTIVE);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to configure m1_pin (error: %d)", dev->name, ret);
@@ -1168,9 +1038,8 @@ static int drv8424_accel_init(const struct device *dev)
 	}
 	data->pin_states.m1 = 0U;
 
-	/* Set initial counter configuration */
 	data->step_signal_high = false;
-	data->counter_top_cfg.callback = drv8424_accel_positioning_top_interrupt;
+	data->counter_top_cfg.callback = drv8424_accel_positioning_smooth_acceleration;
 	data->counter_top_cfg.user_data = data;
 	data->counter_top_cfg.flags = 0;
 	data->counter_top_cfg.ticks = counter_us_to_ticks(config->counter, 1000000);
@@ -1202,26 +1071,18 @@ static DEVICE_API(stepper, drv8424_accel_stepper_api) = {
 		.step_pin = GPIO_DT_SPEC_INST_GET(inst, step_gpios),                               \
 		.sleep_pin = GPIO_DT_SPEC_INST_GET_OR(inst, sleep_gpios, {0}),                     \
 		.en_pin = GPIO_DT_SPEC_INST_GET_OR(inst, en_gpios, {0}),                           \
-		.m0_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m0_gpios, {0}),                           \
-		.m1_pin = GPIO_DT_SPEC_INST_GET_OR(inst, m1_gpios, {0}),                           \
+		.m0_pin = GPIO_DT_SPEC_INST_GET(inst, m0_gpios),                                   \
+		.m1_pin = GPIO_DT_SPEC_INST_GET(inst, m1_gpios),                                   \
 		.counter = DEVICE_DT_GET(DT_INST_PHANDLE(inst, counter)),                          \
 		.acceleration = DT_INST_PROP(inst, acceleration),                                  \
 	};                                                                                         \
                                                                                                    \
 	static struct drv8424_accel_data drv8424_accel_data_##inst = {                             \
-		.ms_res = STEPPER_MICRO_STEP_1,                                                    \
-		.reference_position = 0, /*.target_position = 0,*/                                 \
-		.is_moving = false,                                                                \
-		.event_callback = NULL,                                                            \
-		.event_callback_user_data = NULL,                                                  \
+		.ustep_res = DT_INST_PROP(inst, micro_step_res),                                   \
 	};                                                                                         \
                                                                                                    \
-	DEVICE_DT_INST_DEFINE(inst, &drv8424_accel_init,    /* Init */                             \
-			      NULL,                         /* PM */                               \
-			      &drv8424_accel_data_##inst,   /* Data */                             \
-			      &drv8424_accel_config_##inst, /* Config */                           \
-			      POST_KERNEL,                  /* Init stage */                       \
-			      CONFIG_STEPPER_INIT_PRIORITY, /* Init priority */                    \
-			      &drv8424_accel_stepper_api);  /* API */
+	DEVICE_DT_INST_DEFINE(inst, &drv8424_accel_init, NULL, &drv8424_accel_data_##inst,         \
+			      &drv8424_accel_config_##inst, POST_KERNEL,                           \
+			      CONFIG_STEPPER_INIT_PRIORITY, &drv8424_accel_stepper_api);
 
 DT_INST_FOREACH_STATUS_OKAY(DRV8424_ACCEL_DEVICE)

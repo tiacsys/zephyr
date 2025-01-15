@@ -147,7 +147,6 @@ static void test_run_different_speeds(struct drv8424_accel_fixture *fixture, int
 	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_run(fixture->dev, direction, speed_start);
 	k_busy_wait(t_start);
-	stepper_get_actual_position(fixture->dev, &start_pos);
 	(void)stepper_run(fixture->dev, direction, speed_test);
 	k_busy_wait(t_test);
 

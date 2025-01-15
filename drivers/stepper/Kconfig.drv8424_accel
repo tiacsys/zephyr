@@ -5,7 +5,7 @@ config DRV8424_ACCEL
 	bool "TI DRV8424 stepper motor driver with acceleration"
 	default y
 	depends on DT_HAS_TI_DRV8424_ACCEL_ENABLED
-	depends on COUNTER
+	select COUNTER
 	help
 	  Enable driver for TI DRV8424 stepper motor driver with acceleration.
 

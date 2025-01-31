@@ -5,12 +5,6 @@
 
 #include <zephyr/dt-bindings/gpio/gpio.h>
 
-/ {
-	zephyr,user {
-		stepper-motors = <&drv8424 0>;
-	};
-};
-
 &i2c1 {
 	status = "okay";
 
@@ -38,7 +32,7 @@
 };
 
 / {
-	 drv8424: drv8424 {
+	 stepper_motor: drv8424 {
 		status = "okay";
 		compatible = "ti,drv8424";
 
@@ -55,6 +49,8 @@
 		#stepper-motor-cells = <0>;
 	};
 };
+
+
 
 &timers2 {
 	status = "okay";

@@ -1,0 +1,71 @@
+/ {
+	soc{
+		rpi_pico_pit_controller: rpi_pico_pit_controller {
+			status = "okay";
+			compatible = "raspberrypi,pico-pit";
+			clocks = <&clocks 0x5>;
+			interrupts = <0x4 0x3>;
+			interrupt-names = "PWM_IRQ_WRAP";
+			#pico-pit-controller-cells = <0>;
+
+			rpi_pico_pit_channel_0: rpi_pico_pit_channel_0 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <0>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_1: rpi_pico_pit_channel_1 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <1>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_2: rpi_pico_pit_channel_2 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <2>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_3: rpi_pico_pit_channel_3 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <3>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_4: rpi_pico_pit_channel_4 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <4>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_5: rpi_pico_pit_channel_5 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <5>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_6: rpi_pico_pit_channel_6 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <6>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+			rpi_pico_pit_channel_7: rpi_pico_pit_channel_7 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				pwm_slice = <7>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+		};
+	};
+
+
+};

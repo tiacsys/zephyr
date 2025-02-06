@@ -38,8 +38,26 @@ drv8424: drv8424 {
 	en-gpios  = <&test_gpio 0 0>;
 	m0-gpios = <&test_gpio 0 0>;
 	m1-gpios = <&test_gpio 0 0>;
-	
+
 	timing-source = "counter";
 
 	counter = <&counter0>;
+};
+
+drv8424_2: drv8424_2 {
+	status = "okay";
+	compatible = "ti,drv8424";
+
+	dir-gpios = <&test_gpio 0 0>;
+	step-gpios = <&test_gpio 0 0>;
+	sleep-gpios = <&test_gpio 0 0>;
+	en-gpios  = <&test_gpio 0 0>;
+	m0-gpios = <&test_gpio 0 0>;
+	m1-gpios = <&test_gpio 0 0>;
+
+	timing-source = "counter-accel";
+
+	counter = <&counter0>;
+	acceleration = <50>;
+	accurate-steps = <20>;
 };

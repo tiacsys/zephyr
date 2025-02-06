@@ -12,6 +12,11 @@
 #include <zephyr/ztest.h>
 #include <zephyr/drivers/stepper.h>
 
+#define TEST_INTERVAL      NSEC_PER_SEC / 50
+#define BASE_MS_RESOLUTION 1
+#define TEST_MS_RESOLUTION 4
+#define FAIL_MS_RESOLUTION 3
+
 struct drv8424_api_fixture {
 	const struct device *dev;
 	stepper_event_callback_t callback;
@@ -60,7 +65,7 @@ static void drv8424_api_before(void *f)
 {
 	struct drv8424_api_fixture *fixture = f;
 	(void)stepper_set_reference_position(fixture->dev, 0);
-	(void)stepper_set_micro_step_res(fixture->dev, 1);
+	(void)stepper_set_micro_step_res(fixture->dev, BASE_MS_RESOLUTION);
 	k_poll_signal_reset(&stepper_signal);
 }
 
@@ -72,18 +77,19 @@ static void drv8424_api_after(void *f)
 
 ZTEST_F(drv8424_api, test_micro_step_res_set)
 {
-	(void)stepper_set_micro_step_res(fixture->dev, 4);
+	(void)stepper_set_micro_step_res(fixture->dev, TEST_MS_RESOLUTION);
 	enum stepper_micro_step_resolution res;
 	(void)stepper_get_micro_step_res(fixture->dev, &res);
-	zassert_equal(res, 4, "Micro step resolution not set correctly, should be %d but is %d", 4,
-		      res);
+	zassert_equal(res, TEST_MS_RESOLUTION,
+		      "Micro step resolution not set correctly, should be %d but is %d",
+		      TEST_MS_RESOLUTION, res);
 }
 
 ZTEST_F(drv8424_api, test_micro_step_res_set_incorrect_value_detection)
 {
 	int ret = 0;
 
-	ret = stepper_set_micro_step_res(fixture->dev, 3);
+	ret = stepper_set_micro_step_res(fixture->dev, FAIL_MS_RESOLUTION);
 	zassert_equal(ret, -EINVAL, "Command should fail with error %d but returned %d", -EINVAL,
 		      ret);
 }
@@ -205,19 +211,15 @@ ZTEST_F(drv8424_api, test_move_to_negative_direction_movement)
 ZTEST_F(drv8424_api, test_move_to_identical_current_and_target_position)
 {
 	int32_t pos = 0;
+	int ret;
 
 	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_set_microstep_interval(fixture->dev, 20000000);
 	(void)stepper_set_event_callback(fixture->dev, fixture->callback, NULL);
-	(void)stepper_move_to(fixture->dev, pos);
-	(void)k_poll(&stepper_event, 1, K_SECONDS(5));
-	unsigned int signaled;
-	int result;
+	ret = stepper_move_to(fixture->dev, pos);
 
-	k_poll_signal_check(&stepper_signal, &signaled, &result);
-	zassert_equal(signaled, 1, "No event detected");
-	zassert_equal(result, STEPPER_EVENT_STEPS_COMPLETED,
-		      "Event was not STEPPER_EVENT_STEPS_COMPLETED event");
+	zassert_equal(-EINVAL, ret, "Move_to should fail with error code %d but returned %d",
+		      -EINVAL, ret);
 	(void)stepper_get_actual_position(fixture->dev, &pos);
 	zassert_equal(pos, 0, "Target position should not have changed from %d but is %d", 0, pos);
 }
@@ -316,19 +318,16 @@ ZTEST_F(drv8424_api, test_move_by_negative_step_count)
 ZTEST_F(drv8424_api, test_move_by_zero_steps_no_movement)
 {
 	int32_t steps = 0;
+	int ret = 0;
 
 	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_set_microstep_interval(fixture->dev, 20000000);
 	(void)stepper_set_event_callback(fixture->dev, fixture->callback, NULL);
-	(void)stepper_move_by(fixture->dev, steps);
-	(void)k_poll(&stepper_event, 1, K_SECONDS(5));
-	unsigned int signaled;
-	int result;
+	ret = stepper_move_by(fixture->dev, steps);
+	k_msleep(200);
 
-	k_poll_signal_check(&stepper_signal, &signaled, &result);
-	zassert_equal(signaled, 1, "No event detected");
-	zassert_equal(result, STEPPER_EVENT_STEPS_COMPLETED,
-		      "Event was not STEPPER_EVENT_STEPS_COMPLETED event");
+	zassert_equal(-EINVAL, ret, "Move_to should fail with error code %d but returned %d",
+		      -EINVAL, ret);
 	(void)stepper_get_actual_position(fixture->dev, &steps);
 	zassert_equal(steps, 0, "Target position should be %d but is %d", 0, steps);
 }
@@ -408,7 +407,7 @@ ZTEST_F(drv8424_api, test_run_positive_direction_correct_position)
 	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_set_microstep_interval(fixture->dev, step_interval);
 	(void)stepper_run(fixture->dev, STEPPER_DIRECTION_POSITIVE);
-	k_busy_wait(110000);
+	k_msleep(110);
 
 	(void)stepper_get_actual_position(fixture->dev, &steps);
 	zassert_true(IN_RANGE(steps, 4, 6), "Current position should be between 4 and 6 but is %d",
@@ -423,10 +422,10 @@ ZTEST_F(drv8424_api, test_run_negative_direction_correct_position)
 	(void)stepper_enable(fixture->dev, true);
 	(void)stepper_set_microstep_interval(fixture->dev, step_interval);
 	(void)stepper_run(fixture->dev, STEPPER_DIRECTION_NEGATIVE);
-	k_busy_wait(110000);
+	k_msleep(110);
 
 	(void)stepper_get_actual_position(fixture->dev, &steps);
-	zassert_true(IN_RANGE(steps, -6, 4),
+	zassert_true(IN_RANGE(steps, -6, -4),
 		     "Current position should be between -6 and -4 but is %d", steps);
 }
 

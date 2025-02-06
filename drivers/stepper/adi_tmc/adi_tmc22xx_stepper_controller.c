@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "../step_dir/step_dir_stepper_common.h"
+#include "../step_dir/step_dir_stepper_common_accel.h"
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(tmc22xx, CONFIG_STEPPER_LOG_LEVEL);
@@ -12,18 +12,18 @@ LOG_MODULE_REGISTER(tmc22xx, CONFIG_STEPPER_LOG_LEVEL);
 #define MSX_PIN_STATE_COUNT 4
 
 struct tmc22xx_config {
-	struct step_dir_stepper_common_config common;
+	struct step_dir_stepper_common_accel_config common;
 	const struct gpio_dt_spec enable_pin;
 	const struct gpio_dt_spec *msx_pins;
 	enum stepper_micro_step_resolution *msx_resolutions;
 };
 
 struct tmc22xx_data {
-	struct step_dir_stepper_common_data common;
+	struct step_dir_stepper_common_accel_data common;
 	enum stepper_micro_step_resolution resolution;
 };
 
-STEP_DIR_STEPPER_STRUCT_CHECK(struct tmc22xx_config, struct tmc22xx_data);
+STEP_DIR_STEPPER_ACCEL_STRUCT_CHECK(struct tmc22xx_config, struct tmc22xx_data);
 
 static int tmc22xx_stepper_enable(const struct device *dev, const bool enable)
 {
@@ -33,6 +33,7 @@ static int tmc22xx_stepper_enable(const struct device *dev, const bool enable)
 	if (enable) {
 		return gpio_pin_set_dt(&config->enable_pin, 1);
 	} else {
+		step_dir_stepper_common_accel_stop(dev);
 		return gpio_pin_set_dt(&config->enable_pin, 0);
 	}
 }
@@ -134,7 +135,7 @@ static int tmc22xx_stepper_init(const struct device *dev)
 		}
 	}
 
-	ret = step_dir_stepper_common_init(dev);
+	ret = step_dir_stepper_common_accel_init(dev);
 	if (ret < 0) {
 		LOG_ERR("Failed to init step dir common stepper: %d", ret);
 		return ret;
@@ -145,39 +146,38 @@ static int tmc22xx_stepper_init(const struct device *dev)
 
 static DEVICE_API(stepper, tmc22xx_stepper_api) = {
 	.enable = tmc22xx_stepper_enable,
-	.move_by = step_dir_stepper_common_move_by,
-	.is_moving = step_dir_stepper_common_is_moving,
-	.set_reference_position = step_dir_stepper_common_set_reference_position,
-	.get_actual_position = step_dir_stepper_common_get_actual_position,
-	.move_to = step_dir_stepper_common_move_to,
-	.set_microstep_interval = step_dir_stepper_common_set_microstep_interval,
-	.run = step_dir_stepper_common_run,
-	.set_event_callback = step_dir_stepper_common_set_event_callback,
+	.move_by = step_dir_stepper_common_accel_move_by,
+	.is_moving = step_dir_stepper_common_accel_is_moving,
+	.set_reference_position = step_dir_stepper_common_accel_set_reference_position,
+	.get_actual_position = step_dir_stepper_common_accel_get_actual_position,
+	.move_to = step_dir_stepper_common_accel_move_to,
+	.set_microstep_interval = step_dir_stepper_common_accel_set_microstep_interval,
+	.run = step_dir_stepper_common_accel_run,
+	.set_event_callback = step_dir_stepper_common_accel_set_event_callback,
 	.set_micro_step_res = tmc22xx_stepper_set_micro_step_res,
 	.get_micro_step_res = tmc22xx_stepper_get_micro_step_res,
 };
 
 #define TMC22XX_STEPPER_DEFINE(inst, msx_table)                                                    \
-	IF_ENABLED(DT_INST_NODE_HAS_PROP(inst, msx_gpios), (                                       \
-	static const struct gpio_dt_spec tmc22xx_stepper_msx_pins_##inst[] = {                     \
-		DT_INST_FOREACH_PROP_ELEM_SEP(                                                     \
-			inst, msx_gpios, GPIO_DT_SPEC_GET_BY_IDX, (,)                              \
-		),                                                                                 \
-	};                                                                                         \
-	BUILD_ASSERT(                                                                              \
-		ARRAY_SIZE(tmc22xx_stepper_msx_pins_##inst) == MSX_PIN_COUNT,                      \
-		"Two microstep config pins needed");                                               \
-	))                                                                                         \
+	IF_ENABLED(DT_INST_NODE_HAS_PROP(inst, msx_gpios), (\
+	static const struct gpio_dt_spec tmc22xx_stepper_msx_pins_##inst[] = {\
+		DT_INST_FOREACH_PROP_ELEM_SEP(\
+			inst, msx_gpios, GPIO_DT_SPEC_GET_BY_IDX, (,)\
+		),\
+	};\
+	BUILD_ASSERT(\
+		ARRAY_SIZE(tmc22xx_stepper_msx_pins_##inst) == MSX_PIN_COUNT,\
+		"Two microstep config pins needed");\
+	))                                      \
                                                                                                    \
 	static const struct tmc22xx_config tmc22xx_config_##inst = {                               \
-		.common = STEP_DIR_STEPPER_DT_INST_COMMON_CONFIG_INIT(inst),                       \
-		.enable_pin = GPIO_DT_SPEC_INST_GET(inst, en_gpios),	                           \
+		.common = STEP_DIR_STEPPER_DT_INST_COMMON_ACCEL_CONFIG_INIT(inst),                 \
+		.enable_pin = GPIO_DT_SPEC_INST_GET(inst, en_gpios),                               \
 		.msx_resolutions = msx_table,                                                      \
-		IF_ENABLED(DT_INST_NODE_HAS_PROP(inst, msx_gpios),				   \
-		(.msx_pins = tmc22xx_stepper_msx_pins_##inst))					   \
-	};                                                                                         \
+		IF_ENABLED(DT_INST_NODE_HAS_PROP(inst, msx_gpios),\
+		(.msx_pins = tmc22xx_stepper_msx_pins_##inst)) };   \
 	static struct tmc22xx_data tmc22xx_data_##inst = {                                         \
-		.common = STEP_DIR_STEPPER_DT_INST_COMMON_DATA_INIT(inst),                         \
+		.common = STEP_DIR_STEPPER_DT_INST_COMMON_ACCEL_DATA_INIT(inst),                   \
 		.resolution = DT_INST_PROP(inst, micro_step_res),                                  \
 	};                                                                                         \
 	DEVICE_DT_INST_DEFINE(inst, tmc22xx_stepper_init, NULL, &tmc22xx_data_##inst,              \

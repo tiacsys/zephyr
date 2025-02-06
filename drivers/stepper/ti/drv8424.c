@@ -152,7 +152,7 @@ static int drv8424_enable(const struct device *dev, bool enable)
 
 	data->enabled = enable;
 	if (!enable) {
-		config->common.timing_source->stop(dev);
+		step_dir_stepper_common_stop(dev);
 		gpio_pin_set_dt(&config->common.step_pin, 0);
 	}
 

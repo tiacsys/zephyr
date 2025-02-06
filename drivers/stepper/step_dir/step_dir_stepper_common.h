@@ -31,13 +31,10 @@ struct step_dir_stepper_common_config {
 	const struct gpio_dt_spec dir_pin;
 	bool dual_edge;
 	const struct stepper_timing_source_api *timing_source;
-	const struct device *counter;
 };
 
 /**
  * @brief Initialize common step direction stepper config from devicetree instance.
- *        If the counter property is set, the timing source will be set to the counter timing
- *        source.
  *
  * @param node_id The devicetree node identifier.
  */
@@ -46,10 +43,7 @@ struct step_dir_stepper_common_config {
 		.step_pin = GPIO_DT_SPEC_GET(node_id, step_gpios),                                 \
 		.dir_pin = GPIO_DT_SPEC_GET(node_id, dir_gpios),                                   \
 		.dual_edge = DT_PROP_OR(node_id, dual_edge_step, false),                           \
-		.counter = DEVICE_DT_GET_OR_NULL(DT_PHANDLE(node_id, counter)),                    \
-		.timing_source = COND_CODE_1(DT_NODE_HAS_PROP(node_id, counter),                   \
-						(&step_counter_timing_source_api),                 \
-						(&step_work_timing_source_api)),                   \
+		.timing_source = STEP_DIR_TIMING_SOURCE_SELECT(node_id),                           \
 	}
 
 /**
@@ -60,11 +54,19 @@ struct step_dir_stepper_common_config {
 	STEP_DIR_STEPPER_DT_COMMON_CONFIG_INIT(DT_DRV_INST(inst))
 
 /**
+ * @brief Struct used to update the timing source.
+ */
+struct step_dir_timing_data {
+	uint64_t microstep_interval_ns;
+};
+
+/**
  * @brief Common step direction stepper data.
  *
  * This structure **must** be placed first in the driver's data structure.
  */
 struct step_dir_stepper_common_data {
+	union step_dir_timing_source_data ts_data;
 	const struct device *dev;
 	struct k_spinlock lock;
 	enum stepper_direction direction;
@@ -74,13 +76,7 @@ struct step_dir_stepper_common_data {
 	int32_t step_count;
 	stepper_event_callback_t callback;
 	void *event_cb_user_data;
-
-	struct k_work_delayable stepper_dwork;
-
-#ifdef CONFIG_STEP_DIR_STEPPER_COUNTER_TIMING
-	struct counter_top_cfg counter_top_cfg;
-	bool counter_running;
-#endif /* CONFIG_STEP_DIR_STEPPER_COUNTER_TIMING */
+	struct step_dir_timing_data timing_data;
 
 #ifdef CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS
 	struct k_work event_callback_work;
@@ -96,9 +92,7 @@ struct step_dir_stepper_common_data {
  * @param node_id The devicetree node identifier.
  */
 #define STEP_DIR_STEPPER_DT_COMMON_DATA_INIT(node_id)                                              \
-	{                                                                                          \
-		.dev = DEVICE_DT_GET(node_id),                                                     \
-	}
+	{.dev = DEVICE_DT_GET(node_id), STEP_DIR_TIMING_SOURCE_DATA(node_id)}
 
 /**
  * @brief Initialize common step direction stepper data from devicetree instance.
@@ -148,7 +142,7 @@ int step_dir_stepper_common_move_by(const struct device *dev, const int32_t micr
  * @return 0 on success, or a negative error code on failure.
  */
 int step_dir_stepper_common_set_microstep_interval(const struct device *dev,
-					      const uint64_t microstep_interval_ns);
+						   const uint64_t microstep_interval_ns);
 
 /**
  * @brief Set the reference position of the stepper motor.
@@ -208,6 +202,14 @@ int step_dir_stepper_common_run(const struct device *dev, const enum stepper_dir
  */
 int step_dir_stepper_common_set_event_callback(const struct device *dev,
 					       stepper_event_callback_t callback, void *user_data);
+
+/**
+ * @brief Immediately stops the step dir driver.
+ *
+ * @param dev Pointer to the device structure.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_common_stop(const struct device *dev);
 
 /**
  * @brief Handle a timing signal and update the stepper position.

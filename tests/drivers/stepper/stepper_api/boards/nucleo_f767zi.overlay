@@ -26,6 +26,8 @@
 		 m1-gpios = <&arduino_header 17 0>;
 		 counter = <&counter2>;
 
+		 timing-source = "counter";
+
 		 #address-cells = <1>;
 		 #size-cells = <0>;
 		 #stepper-motor-cells = <0>;

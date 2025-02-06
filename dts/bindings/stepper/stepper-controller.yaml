@@ -41,6 +41,14 @@ properties:
       The GPIO pins used to send direction signals to the stepper motor.
       Pin will be driven high for forward direction and low for reverse direction.
 
+  timing-source:
+    type: string
+    description: Identifier of the timing source used by step-dir drivers.
+    enum:
+      - "counter"
+      - "work"
+      - "counter-accel"
+
   counter:
     type: phandle
     description: Counter used for generating step-accurate pulse signals.

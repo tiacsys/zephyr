@@ -1,0 +1,57 @@
+
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <zephyr/dt-bindings/lvgl/lvgl.h>
+
+/ {
+        // lvgl_axis_x_keypad: lvgl-axis-x-keypad {
+        //         compatible = "zephyr,lvgl-keypad-input";
+        //         input = <&joystick_axis_x_keys>;
+        //         input-codes = <INPUT_KEY_LEFT INPUT_KEY_RIGHT>;
+        //         lvgl-codes = <LV_KEY_LEFT LV_KEY_RIGHT>;
+        // };
+
+        joystick_axis_x_keys: joystick-axis-x-keys {
+                compatible = "adc-keys";
+                keyup-threshold-mv = <10000>;
+                io-channels = <&adc 0>;
+                sample-period-ms = <100>;
+
+                joystick_axis_x_key_0: joystick_axis_x_key_0 {
+                        zephyr,code = <INPUT_KEY_LEFT>;
+                        press-thresholds-mv = <413>;
+                };
+                joystick_axis_x_key_1: joystick_axis_x_key_1 {
+                        zephyr,code = <INPUT_KEY_RIGHT>;
+                        press-thresholds-mv = <1237>;
+                };
+                joystick_axis_x_key_2: joystick_axis_x_key_2 {
+                        zephyr,code = <INPUT_KEY_UP>;
+                        press-thresholds-mv = <2062>;
+                };
+                joystick_axis_x_key_3: joystick_axis_x_key_3 {
+                        zephyr,code = <INPUT_KEY_DOWN>;
+                        press-thresholds-mv = <2887>;
+                };
+        };
+        buttons {
+		compatible = "gpio-keys";
+		btn: btn {
+			gpios = <&gpio0 10 GPIO_ACTIVE_HIGH>;
+			// label = "BTN10";
+                        zephyr,code = <INPUT_KEY_1>;
+		};
+	};
+};
+
+&adc {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        channel@0 {/* ADC0 */
+                reg = <0>;
+                zephyr,gain = "ADC_GAIN_1";
+                zephyr,reference = "ADC_REF_INTERNAL";
+                zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+                zephyr,resolution = <12>;
+        };
+};

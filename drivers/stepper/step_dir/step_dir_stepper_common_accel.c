@@ -535,7 +535,7 @@ int step_dir_stepper_common_accel_run(const struct device *dev,
 	K_SPINLOCK(&data->lock) {
 		data->timing_data.microstep_interval_ns = data->microstep_interval_ns;
 		data->run_mode = STEPPER_RUN_MODE_VELOCITY;
-		if (data->direction == direction || !config->timing_source->is_running(dev)) {
+		if (data->direction == direction || !config->timing_source->is_running(dev) || data->acceleration == 0) {
 			data->direction = direction;
 			if (data->direction == STEPPER_DIRECTION_POSITIVE &&
 			    data->microstep_interval_ns == 0) {

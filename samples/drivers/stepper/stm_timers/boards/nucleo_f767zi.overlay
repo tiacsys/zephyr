@@ -5,37 +5,17 @@
 
  #include <zephyr/dt-bindings/gpio/gpio.h>
 
-//  / {
-// 	 zephyr,user {
-// 		 stepper-motors = <&drv8424 0>;
-// 	 };
-//  };
- 
-//  &i2c1 {
-// 	 status = "okay";
- 
-// 	 mikroe_stepper_gpios: mikroe_stepper_ctrl_tca9538a@70 {
-// 		 status = "okay";
-// 		 compatible = "ti,tca9538";
- 
-// 		 reg = < 0x70 >;
- 
-// 		 gpio-controller;
-// 		 ngpios = < 8 >;
-// 		 #gpio-cells = < 2 >;
- 
-// 		 gpio-reserved-ranges = < 7 1 >;
- 
-// 		 gpio-line-names =
-// 			 "M0",
-// 			 "M1",
-// 			 "DEC0",
-// 			 "DEC1",
-// 			 "TOFF",
-// 			 "STP",
-// 			 "DIR";
-// 	 };
-//  };
+ &i2c1 {
+	status = "okay";
+
+       mcp4726: mcp4726@60 {
+	       status = "okay";
+	       compatible = "microchip,mcp4725";
+	       reg = < 0x60 >;
+
+	       #io-channel-cells = <1>;
+       };
+};
  
 / {
  

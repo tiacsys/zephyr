@@ -51,16 +51,13 @@ struct step_dir_stepper_stm_timer_config {
  */
 #define STEP_DIR_STEPPER_DT_STM_TIMER_CONFIG_INIT(node_id)                                         \
 	{                                                                                          \
-		/*.step_pin = GPIO_DT_SPEC_GET(node_id, step_gpios),*/                             \
 		.dir_pin = GPIO_DT_SPEC_GET(node_id, dir_gpios),                                   \
 		.step_generator = DEVICE_DT_GET(DT_PHANDLE(node_id, step_generator)),              \
 		.step_counter = DEVICE_DT_GET(DT_PHANDLE(node_id, step_counter)),                  \
 		.trigger_input = DT_PROP(node_id, trigger_input),                                  \
 		/*.pcfg = PINCTRL_DT_DEV_CONFIG_GET(node_id),  */                                      \
-		/*.tim_gen = ((TIM_TypeDef *)DT_REG_ADDR(DT_PHANDLE(node_id, step_generator))),*/        \
-		/*.tim_count = ((TIM_TypeDef *)DT_REG_ADDR(DT_PHANDLE(node_id, step_counter))),*/        \
-		.tim_gen = ((TIM_TypeDef *)DT_REG_ADDR(DT_NODELABEL(timers2))),\
-		.tim_count = ((TIM_TypeDef *)DT_REG_ADDR(DT_NODELABEL(timers5))),\
+		.tim_gen = ((TIM_TypeDef *)DT_REG_ADDR(DT_PARENT(DT_PHANDLE(node_id, step_generator)))),        \
+		.tim_count = ((TIM_TypeDef *)DT_REG_ADDR(DT_PARENT(DT_PHANDLE(node_id, step_counter)))),        \
 	}
 
 /**

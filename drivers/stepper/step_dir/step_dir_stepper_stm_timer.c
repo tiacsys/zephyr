@@ -165,72 +165,74 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 	const struct step_dir_stepper_stm_timer_config *config = dev->config;
 	int ret;
 	uint32_t pos_delta;
-	// TODO: Error Handling
 
 	if (data->microstep_interval_ns == 0) {
 		LOG_ERR("Step interval not set or invalid step interval set");
 		return -EINVAL;
 	}
 
-	/* Stop step signal, no error handling, as counter driver always returns 0 */
-	ret = counter_stop(config->step_generator);
-	if (ret < 0) {
-		LOG_ERR("Could not stop step generator counter (%d)", ret);
-		return ret;
+	K_SPINLOCK(&data->lock) {
+		/* Stop step signal, no error handling, as counter driver always returns 0 */
+		ret = counter_stop(config->step_generator);
+		if (ret < 0) {
+			LOG_ERR("Could not stop step generator counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		/* Update position */
+		ret = counter_get_value(config->step_counter, &pos_delta);
+		if (ret < 0) {
+			LOG_ERR("Could not get current position (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+			data->actual_position += pos_delta;
+		} else {
+			data->actual_position -= pos_delta;
+		}
+		LL_TIM_SetCounter(config->tim_count, 0);
+
+		/* If no steps need to be taken, we are finished */
+		if (micro_steps == 0) {
+			data->counter_running = false;
+			stepper_trigger_callback_stm_timer(dev, STEPPER_EVENT_STEPS_COMPLETED);
+			ret = 0;
+			K_SPINLOCK_BREAK;
+		}
+
+		/* Update Direction */
+		if (micro_steps > 0) {
+			ret = gpio_pin_set_dt(&config->dir_pin, 1);
+			data->direction = STEPPER_DIRECTION_POSITIVE;
+		} else {
+			ret = gpio_pin_set_dt(&config->dir_pin, 0);
+			data->direction = STEPPER_DIRECTION_NEGATIVE;
+		}
+		if (ret < 0) {
+			LOG_ERR("Could not set direction pin (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		/* Update Step Count, note that counter value gets reset automatically. */
+		data->cfg_count.ticks = abs(micro_steps);
+		ret = counter_set_top_value(config->step_counter, &data->cfg_count);
+		if (ret < 0) {
+			LOG_ERR("Could not update step counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		data->run_mode = STEPPER_RUN_MODE_POSITION;
+
+		/* Start step signal*/
+		ret = counter_start(config->step_generator);
+		if (ret < 0) {
+			LOG_ERR("Could not start step generator counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+		data->counter_running = true;
 	}
 
-	/* Update position */
-	ret = counter_get_value(config->step_counter, &pos_delta);
-	if (ret < 0) {
-		LOG_ERR("Could not get current position (%d)", ret);
-		return ret;
-	}
-	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-		data->actual_position += pos_delta;
-	} else {
-		data->actual_position -= pos_delta;
-	}
-	LL_TIM_SetCounter(config->tim_count, 0);
-
-	/* If no steps need to be taken, we are finished */
-	if (micro_steps == 0) {
-		data->counter_running = false;
-		stepper_trigger_callback_stm_timer(dev, STEPPER_EVENT_STEPS_COMPLETED);
-		return 0;
-	}
-
-	/* Update Direction */
-	if (micro_steps > 0) {
-		ret = gpio_pin_set_dt(&config->dir_pin, 1);
-		data->direction = STEPPER_DIRECTION_POSITIVE;
-	} else {
-		ret = gpio_pin_set_dt(&config->dir_pin, 0);
-		data->direction = STEPPER_DIRECTION_NEGATIVE;
-	}
-	if (ret < 0) {
-		LOG_ERR("Could not set direction pin (%d)", ret);
-		return ret;
-	}
-
-	/* Update Step Count, note that counter value gets reset automatically. */
-	data->cfg_count.ticks = abs(micro_steps);
-	ret = counter_set_top_value(config->step_counter, &data->cfg_count);
-	if (ret < 0) {
-		LOG_ERR("Could not update step counter (%d)", ret);
-		return ret;
-	}
-
-	data->run_mode = STEPPER_RUN_MODE_POSITION;
-
-	/* Start step signal*/
-	ret = counter_start(config->step_generator);
-	if (ret < 0) {
-		LOG_ERR("Could not start step generator counter (%d)", ret);
-		return ret;
-	}
-	data->counter_running = true;
-
-	return 0;
+	return ret;
 }
 
 int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
@@ -247,37 +249,41 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 		return -EINVAL;
 	}
 
-	data->microstep_interval_ns = microstep_interval_ns;
+	K_SPINLOCK(&data->lock) {
+		data->microstep_interval_ns = microstep_interval_ns;
 
-	ticks = counter_us_to_ticks(config->step_generator, microstep_interval_ns / NSEC_PER_USEC);
-	data->cfg_gen.ticks = ticks;
-	ret = counter_set_top_value(config->step_generator, &data->cfg_gen);
-	if (ret < 0) {
-		LOG_ERR("Could not update step generator counter (%d)", ret);
-		return ret;
+		ticks = counter_us_to_ticks(config->step_generator,
+					    microstep_interval_ns / NSEC_PER_USEC);
+		data->cfg_gen.ticks = ticks;
+		ret = counter_set_top_value(config->step_generator, &data->cfg_gen);
+		if (ret < 0) {
+			LOG_ERR("Could not update step generator counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		LL_TIM_OC_StructInit(&oc_init);
+		oc_init.OCMode = LL_TIM_OCMODE_PWM1;
+		oc_init.OCState = LL_TIM_OCSTATE_ENABLE;
+		oc_init.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+		oc_init.CompareValue = ticks / 2;
+		if (LL_TIM_OC_Init(config->tim_gen, ch2ll[config->output_channel - 1], &oc_init) !=
+		    SUCCESS) {
+			LOG_ERR("Could not initialize timer channel output");
+			ret = -EIO;
+			K_SPINLOCK_BREAK;
+		}
+		LL_TIM_OC_EnablePreload(config->tim_gen, 1);
 	}
-	
 
-	LL_TIM_OC_StructInit(&oc_init);
-	oc_init.OCMode = LL_TIM_OCMODE_PWM1;
-	oc_init.OCState = LL_TIM_OCSTATE_ENABLE;
-	oc_init.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
-	oc_init.CompareValue = ticks / 2;
-	if (LL_TIM_OC_Init(config->tim_gen, ch2ll[config->output_channel - 1], &oc_init) !=
-	    SUCCESS) {
-		LOG_ERR("Could not initialize timer channel output");
-		return -EIO;
-	}
-	LL_TIM_OC_EnablePreload(config->tim_gen, 1);
-
-	return 0;
+	return ret;
 }
 
 int step_dir_stepper_stm_timer_set_reference_position(const struct device *dev, const int32_t value)
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
-
-	data->actual_position = value;
+	K_SPINLOCK(&data->lock) {
+		data->actual_position = value;
+	}
 
 	return 0;
 }
@@ -286,25 +292,27 @@ int step_dir_stepper_stm_timer_get_actual_position(const struct device *dev, int
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
 	const struct step_dir_stepper_stm_timer_config *config = dev->config;
-	int ret;
+	int ret = 0;
 
-	*value = data->actual_position;
-	if (data->counter_running) {
-		uint32_t pos_delta;
+	K_SPINLOCK(&data->lock) {
+		*value = data->actual_position;
+		if (data->counter_running) {
+			uint32_t pos_delta;
 
-		ret = counter_get_value(config->step_counter, &pos_delta);
-		if (ret < 0) {
-			LOG_ERR("Could not get step counter value (%d)", ret);
-			return ret;
-		}
-		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-			*value += pos_delta;
-		} else {
-			*value -= pos_delta;
+			ret = counter_get_value(config->step_counter, &pos_delta);
+			if (ret < 0) {
+				LOG_ERR("Could not get step counter value (%d)", ret);
+				K_SPINLOCK_BREAK;
+			}
+			if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+				*value += pos_delta;
+			} else {
+				*value -= pos_delta;
+			}
 		}
 	}
 
-	return 0;
+	return ret;
 }
 
 int step_dir_stepper_stm_timer_move_to(const struct device *dev, const int32_t value)
@@ -317,8 +325,9 @@ int step_dir_stepper_stm_timer_move_to(const struct device *dev, const int32_t v
 int step_dir_stepper_stm_timer_is_moving(const struct device *dev, bool *is_moving)
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
-
-	*is_moving = data->counter_running;
+	K_SPINLOCK(&data->lock) {
+		*is_moving = data->counter_running;
+	}
 
 	return 0;
 }
@@ -328,62 +337,63 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
 	const struct step_dir_stepper_stm_timer_config *config = dev->config;
 	int ret;
-	// TODO: Error handling
 
-	/* Stop step signal, no error handling, as counter driver always returns 0 */
-	ret = counter_stop(config->step_generator);
-	if (ret < 0) {
-		LOG_ERR("Could not stop step generator counter (%d)", ret);
-		return ret;
+	//TODO: Shorter Spinlock?
+	K_SPINLOCK(&data->lock) {
+		ret = counter_stop(config->step_generator);
+		if (ret < 0) {
+			LOG_ERR("Could not stop step generator counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		/* Update position */
+		uint32_t pos_delta;
+		ret = counter_get_value(config->step_counter, &pos_delta);
+		if (ret < 0) {
+			LOG_ERR("Could not get current position (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+			data->actual_position += pos_delta;
+		} else {
+			data->actual_position -= pos_delta;
+		}
+
+		/* Update Direction */
+		data->direction = direction;
+		if (direction == STEPPER_DIRECTION_POSITIVE) {
+			ret = gpio_pin_set_dt(&config->dir_pin, 1);
+		} else {
+			ret = gpio_pin_set_dt(&config->dir_pin, 0);
+		}
+		if (ret < 0) {
+			LOG_ERR("Could not set direction pin (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		/* Set step count to max. The driver will only update position at that point, not
+		 * stop. Note that reaching that point causes integer over/underflow, but that is an
+		 * api limitation.
+		 */
+		data->cfg_count.ticks = UINT32_MAX;
+		ret = counter_set_top_value(config->step_counter, &data->cfg_count);
+		if (ret < 0) {
+			LOG_ERR("Could not update step counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		data->run_mode = STEPPER_RUN_MODE_VELOCITY;
+
+		/* Start step signal*/
+		counter_start(config->step_generator);
+		if (ret < 0) {
+			LOG_ERR("Could not start step generator counter (%d)", ret);
+			K_SPINLOCK_BREAK;
+		}
+		data->counter_running = true;
 	}
 
-	/* Update position */
-	uint32_t pos_delta;
-	ret = counter_get_value(config->step_counter, &pos_delta);
-	if (ret < 0) {
-		LOG_ERR("Could not get current position (%d)", ret);
-		return ret;
-	}
-	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-		data->actual_position += pos_delta;
-	} else {
-		data->actual_position -= pos_delta;
-	}
-
-	/* Update Direction */
-	data->direction = direction;
-	if (direction == STEPPER_DIRECTION_POSITIVE) {
-		ret = gpio_pin_set_dt(&config->dir_pin, 1);
-	}
-	else {
-		ret = gpio_pin_set_dt(&config->dir_pin, 0);
-	}
-	if (ret < 0) {
-		LOG_ERR("Could not set direction pin (%d)", ret);
-		return ret;
-	}
-
-	/* Set step count to max. The driver will only update position at that point, not stop. Note
-	 * that reaching that point causes integer over/underflow, but that is an api limitation.
-	 */
-	data->cfg_count.ticks = UINT32_MAX;
-	ret = counter_set_top_value(config->step_counter, &data->cfg_count);
-	if (ret < 0) {
-		LOG_ERR("Could not update step counter (%d)", ret);
-		return ret;
-	}
-
-	data->run_mode = STEPPER_RUN_MODE_VELOCITY;
-
-	/* Start step signal*/
-	counter_start(config->step_generator);
-	if (ret < 0) {
-		LOG_ERR("Could not start step generator counter (%d)", ret);
-		return ret;
-	}
-	data->counter_running = true;
-
-	return 0;
+	return ret;
 }
 
 int step_dir_stepper_stm_timer_set_event_callback(const struct device *dev,
@@ -404,26 +414,29 @@ int step_dir_stepper_stm_timer_stop(const struct device *dev)
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
 	int ret;
 
-	ret = counter_stop(config->step_generator);
-	if (ret < 0) {
-		LOG_ERR("Could not stop step generator counter (%d)", ret);
-		return ret;
-	}
-	if (data->counter_running) {
-		uint32_t pos_delta;
-		ret = counter_get_value(config->step_counter, &pos_delta);
+	K_SPINLOCK(&data->lock) {
+		ret = counter_stop(config->step_generator);
 		if (ret < 0) {
-			LOG_ERR("Could not get current position (%d)", ret);
-			return ret;
+			LOG_ERR("Could not stop step generator counter (%d)", ret);
+			K_SPINLOCK_BREAK;
 		}
-		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-			data->actual_position += pos_delta;
-		} else {
-			data->actual_position -= pos_delta;
+		if (data->counter_running) {
+			uint32_t pos_delta;
+			ret = counter_get_value(config->step_counter, &pos_delta);
+			if (ret < 0) {
+				LOG_ERR("Could not get current position (%d)", ret);
+				K_SPINLOCK_BREAK;
+			}
+			if (data->direction == STEPPER_DIRECTION_POSITIVE) {
+				data->actual_position += pos_delta;
+			} else {
+				data->actual_position -= pos_delta;
+			}
 		}
-	}
-	LL_TIM_SetCounter(config->tim_count, 0);
+		LL_TIM_SetCounter(config->tim_count, 0);
 
-	data->counter_running = false;
-	return 0;
+		data->counter_running = false;
+	}
+
+	return ret;
 }

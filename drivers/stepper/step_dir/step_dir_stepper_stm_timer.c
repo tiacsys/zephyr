@@ -96,9 +96,9 @@ static void step_dir_stepper_stm_timer_count_reached(const struct device *dev, v
 	}
 
 	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-		data->actual_position += data->cfg_count.ticks;
+		atomic_add(&data->actual_position, data->cfg_count.ticks);
 	} else {
-		data->actual_position -= data->cfg_count.ticks;
+		atomic_sub(&data->actual_position, data->cfg_count.ticks);
 	}
 	LL_TIM_SetCounter(config->tim_count, 0);
 }
@@ -128,11 +128,11 @@ int step_dir_stepper_stm_timer_init(const struct device *dev)
 
 	LL_TIM_EnableAllOutputs(config->tim_gen);
 
-	LL_TIM_SetTriggerOutput(config->tim_gen, LL_TIM_TRGO_UPDATE); // CR2-MMS - Update
+	LL_TIM_SetTriggerOutput(config->tim_gen, LL_TIM_TRGO_UPDATE);
 
-	LL_TIM_EnableMasterSlaveMode(config->tim_count);                        // SMCR-MSM 1
-	LL_TIM_SetTriggerInput(config->tim_count, config->trigger_input);       // SMCR-TS 000
-	LL_TIM_SetClockSource(config->tim_count, LL_TIM_CLOCKSOURCE_EXT_MODE1); // SMCR-SMS 0111
+	LL_TIM_EnableMasterSlaveMode(config->tim_count);
+	LL_TIM_SetTriggerInput(config->tim_count, config->trigger_input);
+	LL_TIM_SetClockSource(config->tim_count, LL_TIM_CLOCKSOURCE_EXT_MODE1);
 
 	data->cfg_count.flags = 0;
 	data->cfg_count.ticks = 100;
@@ -186,9 +186,9 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 			K_SPINLOCK_BREAK;
 		}
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-			data->actual_position += pos_delta;
+			atomic_add(&data->actual_position, pos_delta);
 		} else {
-			data->actual_position -= pos_delta;
+			atomic_sub(&data->actual_position, pos_delta);
 		}
 		LL_TIM_SetCounter(config->tim_count, 0);
 
@@ -281,9 +281,8 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 int step_dir_stepper_stm_timer_set_reference_position(const struct device *dev, const int32_t value)
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
-	K_SPINLOCK(&data->lock) {
-		data->actual_position = value;
-	}
+
+	atomic_set(&data->actual_position, value);
 
 	return 0;
 }
@@ -295,7 +294,7 @@ int step_dir_stepper_stm_timer_get_actual_position(const struct device *dev, int
 	int ret = 0;
 
 	K_SPINLOCK(&data->lock) {
-		*value = data->actual_position;
+		*value = atomic_get(&data->actual_position);
 		if (data->counter_running) {
 			uint32_t pos_delta;
 
@@ -319,7 +318,7 @@ int step_dir_stepper_stm_timer_move_to(const struct device *dev, const int32_t v
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
 
-	return step_dir_stepper_stm_timer_move_by(dev, value - data->actual_position);
+	return step_dir_stepper_stm_timer_move_by(dev, value - atomic_get(&data->actual_position));
 }
 
 int step_dir_stepper_stm_timer_is_moving(const struct device *dev, bool *is_moving)
@@ -338,7 +337,7 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 	const struct step_dir_stepper_stm_timer_config *config = dev->config;
 	int ret;
 
-	//TODO: Shorter Spinlock?
+	// TODO: Shorter Spinlock?
 	K_SPINLOCK(&data->lock) {
 		ret = counter_stop(config->step_generator);
 		if (ret < 0) {
@@ -354,9 +353,9 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 			K_SPINLOCK_BREAK;
 		}
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-			data->actual_position += pos_delta;
+			atomic_add(&data->actual_position, pos_delta);
 		} else {
-			data->actual_position -= pos_delta;
+			atomic_sub(&data->actual_position, pos_delta);
 		}
 
 		/* Update Direction */
@@ -428,9 +427,9 @@ int step_dir_stepper_stm_timer_stop(const struct device *dev)
 				K_SPINLOCK_BREAK;
 			}
 			if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-				data->actual_position += pos_delta;
+				atomic_add(&data->actual_position, pos_delta);
 			} else {
-				data->actual_position -= pos_delta;
+				atomic_sub(&data->actual_position, pos_delta);
 			}
 		}
 		LL_TIM_SetCounter(config->tim_count, 0);

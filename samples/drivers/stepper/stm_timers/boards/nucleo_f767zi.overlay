@@ -5,48 +5,48 @@
 
 #include <zephyr/dt-bindings/gpio/gpio.h>
 
-&i2c1 {
-	status = "okay";
+// &i2c1 {
+// 	status = "okay";
 
-	mcp4726: mcp4726@60 {
-		status = "okay";
-		compatible = "microchip,mcp4725";
-		reg = <0x60>;
+// 	mcp4726: mcp4726@60 {
+// 		status = "okay";
+// 		compatible = "microchip,mcp4725";
+// 		reg = <0x60>;
 
-		#io-channel-cells = <1>;
-	};
-};
+// 		#io-channel-cells = <1>;
+// 	};
+// };
 
-/ {
+// / {
 
-	drv8424: drv8424 {
-		status = "okay";
-		compatible = "ti,drv8424";
-		//  acceleration = <200>;
-
-
-		dir-gpios = <&arduino_header 18 0>; /* D12 */
-		step-gpios = <&arduino_header 19 0>; /* D13 */
-		sleep-gpios = <&arduino_header 15 GPIO_ACTIVE_LOW>; /* D9 */
-		en-gpios = <&arduino_header 14 0>; /* D8 */
-		m0-gpios = <&arduino_header 12 0>;
-		m1-gpios = <&arduino_header 13 0>;
-		// timing-source = "counter";
-
-		counter = <&counter2>;
-		// acceleration = <1600>;
+// 	drv8424: drv8424 {
+// 		status = "okay";
+// 		compatible = "ti,drv8424";
+// 		//  acceleration = <200>;
 
 
-	};
-};
+// 		dir-gpios = <&arduino_header 18 0>; /* D12 */
+// 		step-gpios = <&arduino_header 19 0>; /* D13 */
+// 		sleep-gpios = <&arduino_header 15 GPIO_ACTIVE_LOW>; /* D9 */
+// 		en-gpios = <&arduino_header 14 0>; /* D8 */
+// 		m0-gpios = <&arduino_header 12 0>;
+// 		m1-gpios = <&arduino_header 13 0>;
+// 		// timing-source = "counter";
+
+// 		counter = <&counter2>;
+// 		// acceleration = <1600>;
+
+
+// 	};
+// };
 
 
 
 &timers2 {
 	status = "okay";
 	pwm2: pwm {
-		status = "disabled";
-		pinctrl-0 = <&tim2_ch1_pa0>;
+		status = "okay";
+		pinctrl-0 = <&tim2_ch1_pa5>;
 		pinctrl-names = "default";
 	};
 	counter2: counter {

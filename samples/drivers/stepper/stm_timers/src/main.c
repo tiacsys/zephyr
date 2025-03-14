@@ -28,8 +28,8 @@
 const struct device *counter2 = DEVICE_DT_GET(DT_NODELABEL(counter2));
 const struct device *counter5 = DEVICE_DT_GET(DT_NODELABEL(counter5));
 // const struct device *pwm2 = DEVICE_DT_GET(DT_NODELABEL(pwm2));
-const struct device *stepper = DEVICE_DT_GET(DT_NODELABEL(drv8424));
-const struct device *dac = DEVICE_DT_GET(DT_NODELABEL(mcp4726));
+// const struct device *stepper = DEVICE_DT_GET(DT_NODELABEL(drv8424));
+// const struct device *dac = DEVICE_DT_GET(DT_NODELABEL(mcp4726));
 
 void test_callback(const struct device *dev, void *user_data)
 {
@@ -47,11 +47,11 @@ TIM_TypeDef *TIMx2 = ((TIM_TypeDef *)DT_REG_ADDR(DT_NODELABEL(timers2)));
 int main(void)
 {
 	int ret;
-	ret = dac_write_value(dac, 0, 2045);
-	printk("Dac Write Return Value: %i\n", ret);
-	ret = stepper_enable(stepper, true);
-	printk("Stepper Enable Return Value: %i\n", ret);
-	stepper_set_micro_step_res(stepper, 1);
+	// ret = dac_write_value(dac, 0, 2045);
+	// printk("Dac Write Return Value: %i\n", ret);
+	// ret = stepper_enable(stepper, true);
+	// printk("Stepper Enable Return Value: %i\n", ret);
+	// stepper_set_micro_step_res(stepper, 1);
 
 	// ret = pinctrl_apply_state(pcfg0, PINCTRL_STATE_DEFAULT);
 	// printk("Pinctrl Return Value: %i\n", ret);

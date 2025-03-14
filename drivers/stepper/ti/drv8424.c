@@ -351,6 +351,8 @@ static DEVICE_API(stepper, drv8424_stepper_api) = {
 
 #define DRV8424_DEVICE(inst)                                                                       \
                                                                                                    \
+	STEP_DIR_STEPPER_STM_TIMER_INST_SETUP(inst);                                               \
+                                                                                                   \
 	static const struct drv8424_config drv8424_config_##inst = {                               \
 		.common = STEP_DIR_STEPPER_DT_INST_STM_TIMER_CONFIG_INIT(inst),                    \
 		.sleep_pin = GPIO_DT_SPEC_INST_GET_OR(inst, sleep_gpios, {0}),                     \

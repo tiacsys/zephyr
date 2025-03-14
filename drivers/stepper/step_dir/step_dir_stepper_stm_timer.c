@@ -23,11 +23,11 @@ static void stepper_trigger_callback_stm_timer(const struct device *dev, enum st
 		return;
 	}
 
-	// if (!k_is_in_isr()) {
+	if (!k_is_in_isr()) {
 		LOG_INF("Executing Callback");
 		data->callback(dev, event, data->event_cb_user_data);
 		return;
-	// }
+	}
 
 #ifdef CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS
 	/* Dispatch to msgq instead of raising directly */
@@ -129,11 +129,11 @@ int step_dir_stepper_stm_timer_init(const struct device *dev)
 		return ret;
 	}
 
-	// ret = pinctrl_apply_state(config->pcfg, PINCTRL_STATE_DEFAULT);
-	// if (ret < 0) {
-	// 	LOG_ERR("Step-Dir pinctrl setup failed (%d)", ret);
-	// 	return ret;
-	// }
+	ret = pinctrl_apply_state(config->pcfg, PINCTRL_STATE_DEFAULT);
+	if (ret < 0) {
+		LOG_ERR("Step-Dir pinctrl setup failed (%d)", ret);
+		return ret;
+	}
 
 	LL_TIM_EnableAllOutputs(config->tim_gen);
 

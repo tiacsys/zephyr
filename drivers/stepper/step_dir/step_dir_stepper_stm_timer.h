@@ -55,9 +55,11 @@ struct step_dir_stepper_stm_timer_config {
 		.step_generator = DEVICE_DT_GET(DT_PHANDLE(node_id, step_generator)),              \
 		.step_counter = DEVICE_DT_GET(DT_PHANDLE(node_id, step_counter)),                  \
 		.trigger_input = DT_PROP(node_id, trigger_input),                                  \
-		/*.pcfg = PINCTRL_DT_DEV_CONFIG_GET(node_id),  */                                      \
-		.tim_gen = ((TIM_TypeDef *)DT_REG_ADDR(DT_PARENT(DT_PHANDLE(node_id, step_generator)))),        \
-		.tim_count = ((TIM_TypeDef *)DT_REG_ADDR(DT_PARENT(DT_PHANDLE(node_id, step_counter)))),        \
+		.pcfg = PINCTRL_DT_DEV_CONFIG_GET(node_id),                                        \
+		.tim_gen = ((TIM_TypeDef *)DT_REG_ADDR(                                            \
+			DT_PARENT(DT_PHANDLE(node_id, step_generator)))),                          \
+		.tim_count = ((TIM_TypeDef *)DT_REG_ADDR(                                          \
+			DT_PARENT(DT_PHANDLE(node_id, step_counter)))),                            \
 	}
 
 /**
@@ -127,6 +129,12 @@ struct step_dir_stepper_stm_timer_data {
 		     "struct step_dir_stepper_common_config must be placed first");                \
 	BUILD_ASSERT(offsetof(data, common) == 0,                                                  \
 		     "struct step_dir_stepper_common_data must be placed first");
+
+/**
+ * @brief Execute step-dir specific setup/configuration outside config and data
+ * @param inst Instance
+ */
+#define STEP_DIR_STEPPER_STM_TIMER_INST_SETUP(inst) PINCTRL_DT_INST_DEFINE(inst)
 
 /**
  * @brief Common function to initialize a step direction stepper device at init time.

@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2024 Fabian Blatz <fabianblatz@gmail.com>
+ * SPDX-FileCopyrightText: Copyright (c) 2025 Navimatix GmbH
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -30,18 +30,13 @@ static const uint32_t ch2ll[TIMER_MAX_CH] = {
 static void stepper_trigger_callback_stm_timer(const struct device *dev, enum stepper_event event)
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
-	LOG_INF("HIHIHI");
-	LOG_INF("Saved-Callback: %u++++++++++++++++++++", (uint32_t)data->callback);
-	LOG_INF("Device Name: %s", dev->name);
 
 	if (!data->callback) {
-		LOG_INF("No Callback");
 		LOG_WRN_ONCE("No callback set");
 		return;
 	}
 
 	if (!k_is_in_isr()) {
-		LOG_INF("Executing Callback");
 		data->callback(dev, event, data->event_cb_user_data);
 		return;
 	}
@@ -75,7 +70,6 @@ static void stepper_work_event_handler_stm_timer(struct k_work *work)
 	if (ret != 0) {
 		return;
 	}
-	LOG_INF("Running Callback");
 
 	/* Run the callback */
 	if (data->callback != NULL) {
@@ -95,38 +89,19 @@ static void step_dir_stepper_stm_timer_count_reached(const struct device *dev, v
 	const struct step_dir_stepper_stm_timer_config *config = stepper->config;
 	struct step_dir_stepper_stm_timer_data *data = stepper->data;
 
-	LOG_INF("Finished");
-
 	if (data->run_mode == STEPPER_RUN_MODE_POSITION) {
-		LOG_INF("Ding Dong Bong");
 		data->counter_running = false;
 		counter_stop(config->step_generator);
-		LOG_INF("Calling Callback handler");
 		stepper_trigger_callback_stm_timer(stepper, STEPPER_EVENT_STEPS_COMPLETED);
 	}
 
 	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-		LOG_INF("Added Reached %u", data->cfg_count.ticks);
 		data->actual_position += data->cfg_count.ticks;
 	} else {
-		LOG_INF("Subtracted Reached %u", data->cfg_count.ticks);
 		data->actual_position -= data->cfg_count.ticks;
 	}
 	LL_TIM_SetCounter(config->tim_count, 0);
 }
-
-// static void update_direction_from_step_count_stm_timer(const struct device *dev)
-// {
-// 	struct step_dir_stepper_stm_timer_data *data = dev->data;
-
-// 	if (data->step_count > 0) {
-// 		data->direction = STEPPER_DIRECTION_POSITIVE;
-// 	} else if (data->step_count < 0) {
-// 		data->direction = STEPPER_DIRECTION_NEGATIVE;
-// 	} else {
-// 		LOG_ERR("Step count is zero");
-// 	}
-// }
 
 int step_dir_stepper_stm_timer_init(const struct device *dev)
 {
@@ -194,10 +169,8 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 	uint32_t pos_delta;
 	counter_get_value(config->step_counter, &pos_delta);
 	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-		LOG_INF("Added Move By %u", pos_delta);
 		data->actual_position += pos_delta;
 	} else {
-		LOG_INF("Subtracted Move By %u", pos_delta);
 		data->actual_position -= pos_delta;
 	}
 	LL_TIM_SetCounter(config->tim_count, 0);
@@ -206,7 +179,6 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 	if (micro_steps == 0) {
 		data->counter_running = false;
 		stepper_trigger_callback_stm_timer(dev, STEPPER_EVENT_STEPS_COMPLETED);
-		// TODO: Maybe update position?
 		return 0;
 	}
 
@@ -238,6 +210,7 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
 	const struct step_dir_stepper_stm_timer_config *config = dev->config;
 	uint32_t ticks;
+	LL_TIM_OC_InitTypeDef oc_init;
 
 	if (microstep_interval_ns == 0) {
 		LOG_ERR("Step interval cannot be zero");
@@ -246,14 +219,10 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 
 	data->microstep_interval_ns = microstep_interval_ns;
 
-	// uint64_t freq = counter_get_frequency(config->step_generator);
-
-	// data->cfg_gen.ticks = (microstep_interval_ns * freq) / NSEC_PER_SEC;
 	ticks = counter_us_to_ticks(config->step_generator, microstep_interval_ns / NSEC_PER_USEC);
 	data->cfg_gen.ticks = ticks;
-	// data->cfg_gen.ticks = counter_us_to_ticks(config->step_generator, 20000);
 	counter_set_top_value(config->step_generator, &data->cfg_gen);
-	LL_TIM_OC_InitTypeDef oc_init;
+	
 
 	LL_TIM_OC_StructInit(&oc_init);
 	oc_init.OCMode = LL_TIM_OCMODE_PWM1;
@@ -286,11 +255,9 @@ int step_dir_stepper_stm_timer_get_actual_position(const struct device *dev, int
 
 	*value = data->actual_position;
 	if (data->counter_running) {
-		LOG_INF("Ping Pos");
 		uint32_t pos_delta;
+
 		counter_get_value(config->step_counter, &pos_delta);
-		LOG_INF("Pos Delta: %u", pos_delta);
-		LOG_INF("Actual Pos: %i", data->actual_position);
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
 			*value += pos_delta;
 		} else {
@@ -304,14 +271,6 @@ int step_dir_stepper_stm_timer_get_actual_position(const struct device *dev, int
 int step_dir_stepper_stm_timer_move_to(const struct device *dev, const int32_t value)
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
-	// const struct step_dir_stepper_stm_timer_config *config = dev->config;
-
-	// if (data->microstep_interval_ns == 0) {
-	// 	LOG_ERR("Step interval not set or invalid step interval set");
-	// 	return -EINVAL;
-	// }
-
-	// step_dir_stepper_stm_timer_move_by(dev, value - data->actual_position);
 
 	return step_dir_stepper_stm_timer_move_by(dev, value - data->actual_position);
 }
@@ -338,10 +297,8 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 	uint32_t pos_delta;
 	counter_get_value(config->step_counter, &pos_delta);
 	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-		LOG_INF("Added Run %u", pos_delta);
 		data->actual_position += pos_delta;
 	} else {
-		LOG_INF("Subtracted Run %u", pos_delta);
 		data->actual_position -= pos_delta;
 	}
 
@@ -365,7 +322,6 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 	/* Start step signal*/
 	counter_start(config->step_generator);
 	data->counter_running = true;
-	LOG_INF("Starting run");
 
 	return 0;
 }
@@ -378,8 +334,7 @@ int step_dir_stepper_stm_timer_set_event_callback(const struct device *dev,
 
 	data->callback = callback;
 	data->event_cb_user_data = user_data;
-	LOG_INF("Callback: %u---------------------------", (uint32_t)callback);
-	LOG_INF("Saved-Callback: %u---------------------", (uint32_t)data->callback);
+
 	return 0;
 }
 
@@ -393,10 +348,8 @@ int step_dir_stepper_stm_timer_stop(const struct device *dev)
 		uint32_t pos_delta;
 		counter_get_value(config->step_counter, &pos_delta);
 		if (data->direction == STEPPER_DIRECTION_POSITIVE) {
-			LOG_INF("Added Stop %u", pos_delta);
 			data->actual_position += pos_delta;
 		} else {
-			LOG_INF("Subtracted Stop %u", pos_delta);
 			data->actual_position -= pos_delta;
 		}
 	}

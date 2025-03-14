@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Fabian Blatz <fabianblatz@gmail.com>
+ * Copyright 2025 Copyright (c) 2024 Navimatix GmbH
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -22,18 +22,13 @@
 #include <stm32_ll_tim.h>
 #include <zephyr/drivers/pinctrl.h>
 
-// #include "step_dir_stepper_timing_source.h"
-
 /**
  * @brief Common step direction stepper config.
  *
  * This structure **must** be placed first in the driver's config structure.
  */
 struct step_dir_stepper_stm_timer_config {
-	// const struct gpio_dt_spec step_pin;
 	const struct gpio_dt_spec dir_pin;
-	// bool dual_edge;
-	// const struct stepper_timing_source_api *timing_source;
 	const struct device *step_generator;
 	const struct device *step_counter;
 	uint32_t trigger_input;
@@ -45,8 +40,6 @@ struct step_dir_stepper_stm_timer_config {
 
 /**
  * @brief Initialize common step direction stepper config from devicetree instance.
- *        If the counter property is set, the timing source will be set to the counter timing
- *        source.
  *
  * @param node_id The devicetree node identifier.
  */
@@ -86,12 +79,8 @@ struct step_dir_stepper_stm_timer_data {
 	int32_t step_count;
 	stepper_event_callback_t callback;
 	void *event_cb_user_data;
-
 	struct k_work_delayable stepper_dwork;
-
-	struct counter_top_cfg counter_top_cfg;
 	bool counter_running;
-
 	struct counter_top_cfg cfg_gen;
 	struct counter_top_cfg cfg_count;
 

@@ -10,6 +10,23 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(step_dir_stepper_stm_timer, CONFIG_STEPPER_LOG_LEVEL);
 
+/** Maximum number of timer channels : some stm32 soc have 6 else only 4 */
+#if defined(LL_TIM_CHANNEL_CH6)
+#define TIMER_HAS_6CH 1
+#define TIMER_MAX_CH  6u
+#else
+#define TIMER_HAS_6CH 0
+#define TIMER_MAX_CH  4u
+#endif
+
+/** Channel to LL mapping. */
+static const uint32_t ch2ll[TIMER_MAX_CH] = {
+	LL_TIM_CHANNEL_CH1, LL_TIM_CHANNEL_CH2, LL_TIM_CHANNEL_CH3, LL_TIM_CHANNEL_CH4,
+#if TIMER_HAS_6CH
+	LL_TIM_CHANNEL_CH5, LL_TIM_CHANNEL_CH6
+#endif
+};
+
 static void stepper_trigger_callback_stm_timer(const struct device *dev, enum stepper_event event)
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
@@ -86,7 +103,6 @@ static void step_dir_stepper_stm_timer_count_reached(const struct device *dev, v
 		counter_stop(config->step_generator);
 		LOG_INF("Calling Callback handler");
 		stepper_trigger_callback_stm_timer(stepper, STEPPER_EVENT_STEPS_COMPLETED);
-		
 	}
 
 	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
@@ -190,7 +206,7 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 	if (micro_steps == 0) {
 		data->counter_running = false;
 		stepper_trigger_callback_stm_timer(dev, STEPPER_EVENT_STEPS_COMPLETED);
-		//TODO: Maybe update position?
+		// TODO: Maybe update position?
 		return 0;
 	}
 
@@ -221,6 +237,7 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 {
 	struct step_dir_stepper_stm_timer_data *data = dev->data;
 	const struct step_dir_stepper_stm_timer_config *config = dev->config;
+	uint32_t ticks;
 
 	if (microstep_interval_ns == 0) {
 		LOG_ERR("Step interval cannot be zero");
@@ -232,9 +249,23 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 	// uint64_t freq = counter_get_frequency(config->step_generator);
 
 	// data->cfg_gen.ticks = (microstep_interval_ns * freq) / NSEC_PER_SEC;
-	data->cfg_gen.ticks = counter_us_to_ticks(config->step_generator, microstep_interval_ns/NSEC_PER_USEC);
+	ticks = counter_us_to_ticks(config->step_generator, microstep_interval_ns / NSEC_PER_USEC);
+	data->cfg_gen.ticks = ticks;
 	// data->cfg_gen.ticks = counter_us_to_ticks(config->step_generator, 20000);
 	counter_set_top_value(config->step_generator, &data->cfg_gen);
+	LL_TIM_OC_InitTypeDef oc_init;
+
+	LL_TIM_OC_StructInit(&oc_init);
+	oc_init.OCMode = LL_TIM_OCMODE_PWM1;
+	oc_init.OCState = LL_TIM_OCSTATE_ENABLE;
+	oc_init.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+	oc_init.CompareValue = ticks / 2;
+	if (LL_TIM_OC_Init(config->tim_gen, ch2ll[config->output_channel - 1], &oc_init) !=
+	    SUCCESS) {
+		LOG_ERR("Could not initialize timer channel output");
+		return -EIO;
+	}
+	LL_TIM_OC_EnablePreload(config->tim_gen, 1);
 
 	return 0;
 }
@@ -316,6 +347,12 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 
 	/* Update Direction */
 	data->direction = direction;
+	if (direction == STEPPER_DIRECTION_POSITIVE) {
+		gpio_pin_set_dt(&config->dir_pin, 1);
+	}
+	else {
+		gpio_pin_set_dt(&config->dir_pin, 0);
+	}
 
 	/* Set step count to max. The driver will only update position at that point, not stop. Note
 	 * that reaching that point causes integer over/underflow, but that is an api limitation.

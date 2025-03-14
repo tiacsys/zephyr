@@ -57,6 +57,7 @@
 		pinctrl-0 = < &tim2_ch1_pa0 >;
 		pinctrl-names = "default";
 		trigger-input = <0>;
+		output-channel = <1>;
 
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -70,11 +71,11 @@
 		status = "okay";
 	};
 
-	pwm2: pwm{
-		status = "okay";
-		pinctrl-0 = < &tim2_ch1_pa0 >;
-		pinctrl-names = "default";
-	};
+	// pwm2: pwm{
+	// 	status = "okay";
+	// 	pinctrl-0 = < &tim2_ch1_pa0 >;
+	// 	pinctrl-names = "default";
+	// };
 };
 
 &timers5 {

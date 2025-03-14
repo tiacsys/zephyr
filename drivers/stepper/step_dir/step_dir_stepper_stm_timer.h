@@ -19,8 +19,8 @@
 #include <zephyr/drivers/stepper.h>
 #include <zephyr/drivers/counter.h>
 #include <stm32_ll_rcc.h>
+#include <stm32_ll_tim.h>
 #include <zephyr/drivers/pinctrl.h>
-#include "stm32f7xx_ll_tim.h" //TODO: make more generalized
 
 // #include "step_dir_stepper_timing_source.h"
 
@@ -40,6 +40,7 @@ struct step_dir_stepper_stm_timer_config {
 	const struct pinctrl_dev_config *pcfg;
 	TIM_TypeDef *tim_gen;
 	TIM_TypeDef *tim_count;
+	uint32_t output_channel;
 };
 
 /**
@@ -60,6 +61,7 @@ struct step_dir_stepper_stm_timer_config {
 			DT_PARENT(DT_PHANDLE(node_id, step_generator)))),                          \
 		.tim_count = ((TIM_TypeDef *)DT_REG_ADDR(                                          \
 			DT_PARENT(DT_PHANDLE(node_id, step_counter)))),                            \
+		.output_channel = DT_PROP(node_id, output_channel),                                \
 	}
 
 /**

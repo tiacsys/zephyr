@@ -31,6 +31,10 @@ static void thread_fn(void *a, void *b, void *c)
 	mp_flag = true;
 }
 
+/**
+ * @brief Test the SMP CPU startup delay
+ * @ingroup kernel_smp_tests
+ */
 ZTEST(smp_boot_delay, test_smp_boot_delay)
 {
 	k_tid_t thr;
@@ -88,6 +92,10 @@ void custom_init_fn(void *arg)
 	*flag = true;
 }
 
+/**
+ * @brief Test SMP custom CPU startup
+ * @ingroup kernel_smp_tests
+ */
 ZTEST(smp_boot_delay, test_smp_custom_start)
 {
 	k_tid_t thr;

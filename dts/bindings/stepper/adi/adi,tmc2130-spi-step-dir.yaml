@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Analog Devices TMC2130 stepper motor driver.
+  Implements only the Step Dir Interface with SPI driver configuration. The Standalone and
+  (pure) Spi Driver Interfaces are not supported.
+
+  Example:
+  tmc2209: tmc2209 {
+      compatible = "adi,tmc2209";
+      enable-gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
+      msx-gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>,
+                  <&gpio0 2 GPIO_ACTIVE_HIGH>;
+      step-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
+      dir-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+      dual-edge-step;
+  }
+
+compatible: "adi,tmc2130-spi-step-dir"
+
+include:
+  - name: stepper-controller.yaml
+  - name: spi-device.yaml
+  - name: adi,trinamic-gconf.yaml
+    property-allowlist:
+      - i-scale-analog
+
+properties:
+  ihold:
+    type: int
+    default: 31
+    description: |
+      Standstill current (0=1/32…31=32/32)
+
+  irun:
+    type: int
+    default: 31
+    description: |
+      Motor run current (0=1/32…31=32/32)
+  
+  iholddelay:
+    type: int
+    default: 15
+    description: |
+      Number of clock cycles after standstill after which motor is powered down. TODO: Adjust description
+      Value of 0-15, 0: instant power down, 1-15: Delay per current reduction step in multiple
+      of 2^18 clock cycles
+      NOTE: Add TPOWERDOWN and reference it
+
+  dual-edge-step:
+    type: boolean
+    description: |
+      If present, the stepper motor controller supports dual edge step signals.
+      This means that the step signal can be toggled on both the rising and falling edge.

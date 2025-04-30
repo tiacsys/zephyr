@@ -20,10 +20,10 @@ extern "C" {
 /** Common Registers for TMC50XX and TMC51XX */
 #if defined(CONFIG_STEPPER_ADI_TMC50XX)
 
-#define TMC5XXX_WRITE_BIT        0x80U
-#define TMC5XXX_ADDRESS_MASK     0x7FU
+#define TMC5XXX_WRITE_BIT    0x80U
+#define TMC5XXX_ADDRESS_MASK 0x7FU
 
- #define TMC5XXX_CLOCK_FREQ_SHIFT 24
+#define TMC5XXX_CLOCK_FREQ_SHIFT 24
 
 #define TMC5XXX_GCONF 0x00
 #define TMC5XXX_GSTAT 0x01
@@ -33,8 +33,8 @@ extern "C" {
 #define TMC5XXX_RAMPMODE_NEGATIVE_VELOCITY_MODE 2
 #define TMC5XXX_RAMPMODE_HOLD_MODE              3
 
-#define TMC5XXX_SG_MIN_VALUE -64
-#define TMC5XXX_SG_MAX_VALUE 63
+#define TMC5XXX_SG_MIN_VALUE           -64
+#define TMC5XXX_SG_MAX_VALUE           63
 #define TMC5XXX_SW_MODE_SG_STOP_ENABLE BIT(10)
 
 #define TMC5XXX_COOLCONF_SG2_THRESHOLD_VALUE_SHIFT 16
@@ -63,8 +63,7 @@ extern "C" {
 	(TMC5XXX_RAMPSTAT_POS_REACHED_EVENT_MASK >> TMC5XXX_RAMPSTAT_INT_SHIFT)
 
 #define TMC5XXX_RAMPSTAT_STOP_SG_EVENT_MASK BIT(6)
-#define TMC5XXX_STOP_SG_EVENT                                                                      \
-	(TMC5XXX_RAMPSTAT_STOP_SG_EVENT_MASK >> TMC5XXX_RAMPSTAT_INT_SHIFT)
+#define TMC5XXX_STOP_SG_EVENT               (TMC5XXX_RAMPSTAT_STOP_SG_EVENT_MASK >> TMC5XXX_RAMPSTAT_INT_SHIFT)
 
 #define TMC5XXX_RAMPSTAT_STOP_RIGHT_EVENT_MASK BIT(5)
 #define TMC5XXX_STOP_RIGHT_EVENT                                                                   \
@@ -139,6 +138,30 @@ extern "C" {
 #define TMC50XX_DRVSTATUS(motor)  (0x6F | TMC50XX_MOTOR_ADDR_DRV(motor))
 
 #endif /* CONFIG_STEPPER_ADI_TMC50XX */
+
+/**
+ * @}
+ */
+
+#ifdef CONFIG_STEPPER_ADI_TMC2130_SPI_STEP_DIR
+
+/**
+ * @name TMC2130 module registers
+ * @anchor TMC2130_REGISTERS
+ *
+ * @{
+ */
+
+#define TMC2130_WRITE_BIT 0x80
+
+#define TMC2130_GCONF      0x00
+#define TMC2130_IHOLD_IRUN 0x10
+#define TMC2130_TPOWERDOWN 0x11
+#define TMC2130_TPWMTHRS   0x13
+#define TMC2130_CHOPCONF   0x6c
+#define TMC2130_PWMCONF    0x70
+
+#endif /* CONFIG_STEPPER_ADI_TMC2130_SPI_STEP_DIR */
 
 /**
  * @}

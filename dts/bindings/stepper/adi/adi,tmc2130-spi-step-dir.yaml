@@ -27,18 +27,21 @@ include:
       - i-scale-analog
 
 properties:
+#Replace with include
   ihold:
     type: int
     default: 31
     description: |
       Standstill current (0=1/32…31=32/32)
 
+#Replace with include
   irun:
     type: int
     default: 31
     description: |
       Motor run current (0=1/32…31=32/32)
-  
+
+#Replace with include 
   iholddelay:
     type: int
     default: 15

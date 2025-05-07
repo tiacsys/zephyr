@@ -106,12 +106,23 @@ static int tmc2130_spi_sd_stepper_enable(const struct device *dev, bool enable)
 			return ret;
 		}
 	}
-	data->enabled = enable;
 
 	if (!enable) {
-		step_dir_stepper_common_accel_stop(dev);
-		gpio_pin_set_dt(&config->common.step_pin, 0);
+		ret = step_dir_stepper_common_accel_stop(dev);
+		if (ret != 0) {
+			LOG_ERR("%s: Failed to stop stepper (error: %d)", dev->name, ret);
+			return ret;
+		}
+		if (!config->common.dual_edge) {
+			ret = gpio_pin_set_dt(&config->common.step_pin, 0);
+			if (ret != 0) {
+				LOG_ERR("%s: Failed to set step_pin (error: %d)", dev->name, ret);
+				return ret;
+			}
+		}
 	}
+
+	data->enabled = enable;
 
 	return 0;
 }
@@ -128,6 +139,10 @@ tmc2130_spi_sd_stepper_set_micro_step_res(const struct device *dev,
 
 	if (ustep_res_reg_value == 0xFF) {
 		return -EINVAL;
+	}
+	/* Add dual edge config if needed */
+	if (config->common.dual_edge) {
+		ustep_res_reg_value += TMC2130_DOUBLE_EDGE_OFFSET;
 	}
 	uint8_t tx_buffer1[5] = {TMC2130_CHOPCONF, 0x00, 0x00, 0x00, 0x00};
 	uint8_t rx_buffer[5];
@@ -192,7 +207,6 @@ tmc2130_spi_sd_stepper_get_micro_step_res(const struct device *dev,
 {
 	struct tmc2130_spi_sd_data *data = dev->data;
 	*micro_step_res = data->ustep_res;
-	// TODO: maybe read from register?
 	return 0;
 }
 
@@ -238,6 +252,10 @@ static int tmc2130_spi_sd_stepper_init(const struct device *dev)
 	struct tmc2130_spi_sd_data *data = dev->data;
 
 	uint8_t ustep_res_reg_value = tmc2130_spi_sd_ms_res_translator(data->ustep_res);
+	/* Dual Edge is configured in the same byte as microstep resolution */
+	if (config->common.dual_edge) {
+		ustep_res_reg_value += TMC2130_DOUBLE_EDGE_OFFSET;
+	}
 
 	// TODO: Replace some values with DT entries, and maybe move some parameters to config.
 
@@ -328,7 +346,6 @@ static int tmc2130_spi_sd_stepper_init(const struct device *dev)
 			LOG_ERR("%s: Failed to configure en_pin (error: %d)", dev->name, ret);
 			return ret;
 		}
-		// data->pin_states.en = 0U;
 	} else {
 		data->enabled = true;
 	}

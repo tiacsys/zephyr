@@ -153,6 +153,7 @@ extern "C" {
  */
 
 #define TMC2130_WRITE_BIT 0x80
+#define TMC2130_DOUBLE_EDGE_OFFSET (uint16_t)1 << 5
 
 #define TMC2130_GCONF      0x00
 #define TMC2130_IHOLD_IRUN 0x10

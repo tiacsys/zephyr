@@ -68,6 +68,7 @@
 		counter = <&counter2>;
 		timing-source = "counter-accel";
 		acceleration = <50>;
+		dual-edge-step;
 	};
 };
 

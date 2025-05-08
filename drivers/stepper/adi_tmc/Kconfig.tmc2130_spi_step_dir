@@ -5,6 +5,7 @@ config STEPPER_ADI_TMC2130_SPI_STEP_DIR
 	bool "Activate trinamic tmc2209 stepper driver"
 	depends on DT_HAS_ADI_TMC2130_SPI_STEP_DIR_ENABLED
 	select STEP_DIR_STEPPER
+	select STEPPER_ADI_TMC_SPI
 	default y
 	help
 	  Stepper driver for TMC2130, using the spi-step-dir interface.

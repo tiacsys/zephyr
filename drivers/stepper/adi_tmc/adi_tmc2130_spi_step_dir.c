@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "adi_tmc_reg.h"
 #define DT_DRV_COMPAT adi_tmc2130_spi_step_dir
 
+#include "adi_tmc_reg.h"
+#include "adi_tmc_spi.h"
 #include <zephyr/kernel.h>
 #include <zephyr/init.h>
 #include "zephyr/devicetree.h"
@@ -23,6 +24,8 @@
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(tmc2130, CONFIG_STEPPER_LOG_LEVEL);
+
+#define REG_INIT_NUMBER 6
 
 struct tmc2130_spi_sd_config {
 	struct step_dir_stepper_common_accel_config common;
@@ -134,8 +137,10 @@ tmc2130_spi_sd_stepper_set_micro_step_res(const struct device *dev,
 	const struct tmc2130_spi_sd_config *config = dev->config;
 	struct tmc2130_spi_sd_data *data = dev->data;
 	int ret;
+	uint32_t read_data;
+	uint32_t write_data;
 
-	uint8_t ustep_res_reg_value = tmc2130_spi_sd_ms_res_translator(micro_step_res);
+	uint32_t ustep_res_reg_value = tmc2130_spi_sd_ms_res_translator(micro_step_res);
 
 	if (ustep_res_reg_value == 0xFF) {
 		return -EINVAL;
@@ -144,55 +149,19 @@ tmc2130_spi_sd_stepper_set_micro_step_res(const struct device *dev,
 	if (config->common.dual_edge) {
 		ustep_res_reg_value += TMC2130_DOUBLE_EDGE_OFFSET;
 	}
-	uint8_t tx_buffer1[5] = {TMC2130_CHOPCONF, 0x00, 0x00, 0x00, 0x00};
-	uint8_t rx_buffer[5];
 
-	struct spi_buf spi_buffer_tx = {
-		.buf = &tx_buffer1,
-		.len = sizeof(tx_buffer1),
-	};
-	struct spi_buf_set spi_buffer_array_tx = {
-		.buffers = &spi_buffer_tx,
-		.count = 1U,
-	};
-
-	struct spi_buf spi_buffer_rx = {
-		.buf = &rx_buffer,
-		.len = sizeof(rx_buffer),
-	};
-	struct spi_buf_set spi_buffer_array_rx = {
-		.buffers = &spi_buffer_rx,
-		.count = 1U,
-	};
-
-	/* Double read, as read value of first command is transmitted on second command. */
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
+	ret = tmc_spi_read_register(&config->spi, 0, TMC2130_CHOPCONF, &read_data);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to read register 0x%x (error code: %d)", dev->name,
-			tx_buffer1[0], ret);
+			TMC2130_CHOPCONF, ret);
 		return ret;
 	}
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to read register 0x%x (error code: %d)", dev->name,
-			tx_buffer1[0], ret);
-		return ret;
-	}
+	write_data = read_data + (ustep_res_reg_value << 24);
 
-	/* Copy current configuration. */
-	tx_buffer1[2] = rx_buffer[2];
-	tx_buffer1[3] = rx_buffer[3];
-	tx_buffer1[4] = rx_buffer[4];
-
-	/* Set new ustep resolution and enable write. */
-	tx_buffer1[1] = ustep_res_reg_value;
-	tx_buffer1[0] += TMC2130_WRITE_BIT;
-
-	/* Write new ustep resolution. */
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
+	ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, TMC2130_CHOPCONF, write_data);
 	if (ret != 0) {
 		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer1[0], ret);
+			TMC2130_CHOPCONF, ret);
 		return ret;
 	}
 
@@ -250,6 +219,7 @@ static int tmc2130_spi_sd_stepper_init(const struct device *dev)
 {
 	const struct tmc2130_spi_sd_config *config = dev->config;
 	struct tmc2130_spi_sd_data *data = dev->data;
+	int ret;
 
 	uint8_t ustep_res_reg_value = tmc2130_spi_sd_ms_res_translator(data->ustep_res);
 	/* Dual Edge is configured in the same byte as microstep resolution */
@@ -259,84 +229,26 @@ static int tmc2130_spi_sd_stepper_init(const struct device *dev)
 
 	// TODO: Replace some values with DT entries, and maybe move some parameters to config.
 
-	uint8_t tx_buffer1[5] = {
-		TMC2130_WRITE_BIT + TMC2130_CHOPCONF, ustep_res_reg_value, 0x01, 0x00,
-		0xC3}; // CHOPCONF: TOFF=3, HSTRT=4, HEND=1, TBL=2, CHM=0 (SpreadCycle), MRES=8
-	uint8_t tx_buffer2[5] = {
-		TMC2130_WRITE_BIT + TMC2130_IHOLD_IRUN, 0x00, data->iholddelay, data->irun,
-		data->ihold}; // IHOLD_IRUN: IHOLD=10, IRUN=31 (max. current), IHOLDDELAY=6
-	uint8_t tx_buffer3[5] = {
-		TMC2130_WRITE_BIT + TMC2130_TPOWERDOWN, 0x00, 0x00, 0x00,
-		data->tpowerdown}; // TPOWERDOWN=10: Delay before power down in stand still
-	uint8_t tx_buffer4[5] = {TMC2130_WRITE_BIT + TMC2130_GCONF, 0x00, 0x00, 0x00,
-				 0x04}; // EN_PWM_MODE=1 enables StealthChop (with default PWMCONF)
-	uint8_t tx_buffer5[5] = {
-		TMC2130_WRITE_BIT + TMC2130_TPWMTHRS, 0x00, 0x00, 0x01,
-		0xF4}; // TPWM_THRS=500 yields a switching velocity about 35000 = ca. 30RPM
-	uint8_t tx_buffer6[5] = {
-		TMC2130_WRITE_BIT + TMC2130_PWMCONF, 0x00, 0x04, 0x01,
-		0xC8}; // PWMCONF: AUTO=1, 2/1024 Fclk, Switch amplitude limit=200, Grad=1
+	uint32_t data_1 = (ustep_res_reg_value << 24) + (0x01 << 16) + (0x00 << 8) + 0xC3;
+	uint32_t data_2 = (0x00 << 24) + (data->iholddelay << 16) + (data->irun << 8) + data->ihold;
+	uint32_t data_3 = (0x00 << 24) + (0x00 << 16) + (0x00 << 8) + data->tpowerdown;
+	uint32_t data_4 = (0x00 << 24) + (0x00 << 16) + (0x00 << 8) + 0x04;
+	uint32_t data_5 = (0x00 << 24) + (0x00 << 16) + (0x01 << 8) + 0xF4;
+	uint32_t data_6 = (0x00 << 24) + (0x04 << 16) + (0x01 << 8) + 0xC8;
 
-	uint8_t rx_buffer[5];
+	uint8_t reg_addr[REG_INIT_NUMBER] = {TMC2130_CHOPCONF,   TMC2130_IHOLD_IRUN,
+					     TMC2130_TPOWERDOWN, TMC2130_GCONF,
+					     TMC2130_TPWMTHRS,   TMC2130_PWMCONF};
+	uint32_t reg_data[REG_INIT_NUMBER] = {data_1, data_2, data_3, data_4, data_5, data_6};
 
-	struct spi_buf spi_buffer_tx = {
-		.buf = &tx_buffer1,
-		.len = sizeof(tx_buffer1),
-	};
-	struct spi_buf_set spi_buffer_array_tx = {
-		.buffers = &spi_buffer_tx,
-		.count = 1U,
-	};
-
-	struct spi_buf spi_buffer_rx = {
-		.buf = &rx_buffer,
-		.len = sizeof(rx_buffer),
-	};
-	struct spi_buf_set spi_buffer_array_rx = {
-		.buffers = &spi_buffer_rx,
-		.count = 1U,
-	};
-
-	int ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer1[0], ret);
-		return ret;
-	}
-	spi_buffer_tx.buf = &tx_buffer2;
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer2[0], ret);
-		return ret;
-	}
-	spi_buffer_tx.buf = &tx_buffer3;
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer3[0], ret);
-		return ret;
-	}
-	spi_buffer_tx.buf = &tx_buffer4;
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer4[0], ret);
-		return ret;
-	}
-	spi_buffer_tx.buf = &tx_buffer5;
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer5[0], ret);
-		return ret;
-	}
-	spi_buffer_tx.buf = &tx_buffer6;
-	ret = spi_transceive_dt(&config->spi, &spi_buffer_array_tx, &spi_buffer_array_rx);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			tx_buffer6[0], ret);
-		return ret;
+	for (int i = 0; i < REG_INIT_NUMBER; i++) {
+		ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, reg_addr[i],
+					     reg_data[i]);
+		if (ret != 0) {
+			LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
+				reg_addr[i], ret);
+			return ret;
+		}
 	}
 
 	/* Configure enable pin if it is available */

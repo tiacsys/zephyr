@@ -27,6 +27,14 @@ LOG_MODULE_REGISTER(tmc2130, CONFIG_STEPPER_LOG_LEVEL);
 
 #define REG_INIT_NUMBER 6
 
+/* Initial register values derived from the "Getting Started" Chapter of the TMC2130 datasheet*/
+#define TMC2130_CHOPCONF_INIT                                                                      \
+	0x000100C3 /* ms_res=256, TOFF=3, HSTRT=4, HEND=1, TBL=2, CHM=0 (SpreadCycle) */
+#define TMC2130_GCONF_INIT    0x00000004 /* en_pwm_mode=1 - StealthChop enabled */
+#define TMC2130_TPWMTHRS_INIT 0x000001F4 /* TPWM_THRS=500 */
+#define TMC2130_PWMCONF_INIT                                                                       \
+	0x000401C8 /* AUTO=1, 2/1024 Fclk, Switch amplitude limit=200, Grad=1 */
+
 struct tmc2130_spi_sd_config {
 	struct step_dir_stepper_common_accel_config common;
 	struct gpio_dt_spec en_pin;
@@ -96,38 +104,39 @@ static int tmc2130_spi_sd_stepper_enable(const struct device *dev, bool enable)
 		return -ENOTSUP;
 	}
 
-	if (enable) {
-		ret = gpio_pin_set_dt(&config->en_pin, 1);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to set en_pin (error: %d)", dev->name, ret);
-			return ret;
-		}
-	} else {
-		ret = gpio_pin_set_dt(&config->en_pin, 0);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to set en_pin (error: %d)", dev->name, ret);
-			return ret;
-		}
-	}
-
-	if (!enable) {
-		ret = step_dir_stepper_common_accel_stop(dev);
-		if (ret != 0) {
-			LOG_ERR("%s: Failed to stop stepper (error: %d)", dev->name, ret);
-			return ret;
-		}
-		if (!config->common.dual_edge) {
-			ret = gpio_pin_set_dt(&config->common.step_pin, 0);
+	K_SPINLOCK((struct k_spinlock *)&data->common.lock) {
+		if (enable) {
+			ret = gpio_pin_set_dt(&config->en_pin, 1);
 			if (ret != 0) {
-				LOG_ERR("%s: Failed to set step_pin (error: %d)", dev->name, ret);
-				return ret;
+				LOG_ERR("%s: Failed to set en_pin (error: %d)", dev->name, ret);
+				K_SPINLOCK_BREAK;
+			}
+		} else {
+			ret = gpio_pin_set_dt(&config->en_pin, 0);
+			if (ret != 0) {
+				LOG_ERR("%s: Failed to set en_pin (error: %d)", dev->name, ret);
+				K_SPINLOCK_BREAK;
+			}
+			ret = step_dir_stepper_common_accel_stop(dev);
+			if (ret != 0) {
+				LOG_ERR("%s: Failed to stop stepper (error: %d)", dev->name, ret);
+				K_SPINLOCK_BREAK;
+			}
+			if (!config->common.dual_edge) {
+				ret = gpio_pin_set_dt(&config->common.step_pin, 0);
+				if (ret != 0) {
+					LOG_ERR("%s: Failed to set step_pin (error: %d)", dev->name,
+						ret);
+					K_SPINLOCK_BREAK;
+				}
 			}
 		}
+		data->enabled = enable;
 	}
 
 	data->enabled = enable;
 
-	return 0;
+	return ret;
 }
 
 static int
@@ -137,37 +146,37 @@ tmc2130_spi_sd_stepper_set_micro_step_res(const struct device *dev,
 	const struct tmc2130_spi_sd_config *config = dev->config;
 	struct tmc2130_spi_sd_data *data = dev->data;
 	int ret;
-	uint32_t read_data;
-	uint32_t write_data;
+	uint32_t reg_value;
 
 	uint32_t ustep_res_reg_value = tmc2130_spi_sd_ms_res_translator(micro_step_res);
 
 	if (ustep_res_reg_value == 0xFF) {
 		return -EINVAL;
 	}
-	/* Add dual edge config if needed */
-	if (config->common.dual_edge) {
-		ustep_res_reg_value += TMC2130_DOUBLE_EDGE_OFFSET;
+
+	K_SPINLOCK((struct k_spinlock *)&data->common.lock) {
+		ret = tmc_spi_read_register(&config->spi, TMC2130_ADDRESS_MASK, TMC2130_CHOPCONF,
+					    &reg_value);
+		if (ret != 0) {
+			LOG_ERR("%s: Failed to read register 0x%x (error code: %d)", dev->name,
+				TMC2130_CHOPCONF, ret);
+			K_SPINLOCK_BREAK;
+		}
+		reg_value &= ~TMC2130_CHOPCONF_MRES_MASK;
+		reg_value |= (ustep_res_reg_value << TMC2130_CHOPCONF_MRES_SHIFT);
+
+		ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, TMC2130_CHOPCONF,
+					     reg_value);
+		if (ret != 0) {
+			LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
+				TMC2130_CHOPCONF, ret);
+			K_SPINLOCK_BREAK;
+		}
+
+		data->ustep_res = micro_step_res;
 	}
 
-	ret = tmc_spi_read_register(&config->spi, 0, TMC2130_CHOPCONF, &read_data);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to read register 0x%x (error code: %d)", dev->name,
-			TMC2130_CHOPCONF, ret);
-		return ret;
-	}
-	write_data = read_data + (ustep_res_reg_value << 24);
-
-	ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, TMC2130_CHOPCONF, write_data);
-	if (ret != 0) {
-		LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-			TMC2130_CHOPCONF, ret);
-		return ret;
-	}
-
-	data->ustep_res = micro_step_res;
-
-	return 0;
+	return ret;
 }
 
 static int
@@ -227,26 +236,23 @@ static int tmc2130_spi_sd_stepper_init(const struct device *dev)
 		ustep_res_reg_value += TMC2130_DOUBLE_EDGE_OFFSET;
 	}
 
-	// TODO: Replace some values with DT entries, and maybe move some parameters to config.
-
-	uint32_t data_1 = (ustep_res_reg_value << 24) + (0x01 << 16) + (0x00 << 8) + 0xC3;
-	uint32_t data_2 = (0x00 << 24) + (data->iholddelay << 16) + (data->irun << 8) + data->ihold;
-	uint32_t data_3 = (0x00 << 24) + (0x00 << 16) + (0x00 << 8) + data->tpowerdown;
-	uint32_t data_4 = (0x00 << 24) + (0x00 << 16) + (0x00 << 8) + 0x04;
-	uint32_t data_5 = (0x00 << 24) + (0x00 << 16) + (0x01 << 8) + 0xF4;
-	uint32_t data_6 = (0x00 << 24) + (0x04 << 16) + (0x01 << 8) + 0xC8;
-
-	uint8_t reg_addr[REG_INIT_NUMBER] = {TMC2130_CHOPCONF,   TMC2130_IHOLD_IRUN,
-					     TMC2130_TPOWERDOWN, TMC2130_GCONF,
-					     TMC2130_TPWMTHRS,   TMC2130_PWMCONF};
-	uint32_t reg_data[REG_INIT_NUMBER] = {data_1, data_2, data_3, data_4, data_5, data_6};
+	/* No bitmasking/setting operations are needed for ustep_res, as we know that that field is
+	 * 0*/
+	uint32_t reg_combined[REG_INIT_NUMBER][2] = {
+		{TMC2130_CHOPCONF, TMC2130_CHOPCONF_INIT + (ustep_res_reg_value << 24)},
+		{TMC2130_IHOLD_IRUN,
+		 0x00000000 + (data->iholddelay << 16) + (data->irun << 8) + data->ihold},
+		{TMC2130_TPOWERDOWN, 0x00000000 + data->tpowerdown},
+		{TMC2130_GCONF, TMC2130_GCONF_INIT},
+		{TMC2130_TPWMTHRS, TMC2130_TPWMTHRS_INIT},
+		{TMC2130_PWMCONF, TMC2130_PWMCONF_INIT}};
 
 	for (int i = 0; i < REG_INIT_NUMBER; i++) {
-		ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, reg_addr[i],
-					     reg_data[i]);
+		ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, reg_combined[i][0],
+					     reg_combined[i][1]);
 		if (ret != 0) {
 			LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
-				reg_addr[i], ret);
+				reg_combined[i][0], ret);
 			return ret;
 		}
 	}

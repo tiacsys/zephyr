@@ -6,9 +6,13 @@
 #include "step_dir_stepper_stm_timer.h"
 #include "zephyr/drivers/pinctrl.h"
 #include <stdlib.h>
+#include <zephyr/drivers/counter.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(step_dir_stepper_stm_timer, CONFIG_STEPPER_LOG_LEVEL);
+
+// #define COUNTER_BASE_FREQUENCY 32000000   // TODO: Get it per counter somehow
+// #define COUNTER_MAX_VALUE      UINT16_MAX // TODO: Get it per counter somehow
 
 /** Maximum number of timer channels : some stm32 soc have 6 else only 4 */
 #if defined(LL_TIM_CHANNEL_CH6)
@@ -91,12 +95,11 @@ static void step_dir_stepper_stm_timer_count_reached(const struct device *dev, v
 	int ret;
 
 	if (data->run_mode == STEPPER_RUN_MODE_POSITION) {
-		data->counter_running = false;
 		ret = counter_stop(config->step_generator);
 		if (ret < 0) {
 			LOG_ERR("Could not stop step generator counter (%d)", ret);
 		}
-		stepper_trigger_callback_stm_timer(stepper, STEPPER_EVENT_STEPS_COMPLETED);
+		data->counter_running = false;
 	}
 
 	if (data->direction == STEPPER_DIRECTION_POSITIVE) {
@@ -105,6 +108,10 @@ static void step_dir_stepper_stm_timer_count_reached(const struct device *dev, v
 		atomic_sub(&data->actual_position, data->cfg_count.ticks);
 	}
 	LL_TIM_SetCounter(config->tim_count, 0);
+
+	if (data->run_mode == STEPPER_RUN_MODE_POSITION) {
+		stepper_trigger_callback_stm_timer(stepper, STEPPER_EVENT_STEPS_COMPLETED);
+	}
 }
 
 int step_dir_stepper_stm_timer_init(const struct device *dev)
@@ -129,6 +136,14 @@ int step_dir_stepper_stm_timer_init(const struct device *dev)
 		LOG_ERR("Step-Dir pinctrl setup failed (%d)", ret);
 		return ret;
 	}
+
+	data->counter_gen_max_value = counter_get_max_top_value(config->step_generator);
+	LOG_INF("Max Top Value: %u", data->counter_gen_max_value);
+	/* We have exclusive access to the counter and can thus expect a prescalar of 0/1 thus this
+	 * being the base frequency of the counter.
+	 * //TODO: Add this to documentation.
+	 */
+	data->counter_gen_base_freq = counter_get_frequency(config->step_generator);
 
 	LL_TIM_EnableAllOutputs(config->tim_gen);
 
@@ -176,7 +191,7 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 	}
 
 	K_SPINLOCK(&data->lock) {
-		/* Stop step signal, no error handling, as counter driver always returns 0 */
+		/* Stop step signal */
 		ret = counter_stop(config->step_generator);
 		if (ret < 0) {
 			LOG_ERR("Could not stop step generator counter (%d)", ret);
@@ -221,7 +236,8 @@ int step_dir_stepper_stm_timer_move_by(const struct device *dev, const int32_t m
 		data->cfg_count.ticks = abs(micro_steps);
 		ret = counter_set_top_value(config->step_counter, &data->cfg_count);
 		if (ret < 0) {
-			LOG_ERR("Could not update step counter (%d)", ret);
+			LOG_ERR("Could not update step counter %s (%d)", config->step_counter->name,
+				ret);
 			K_SPINLOCK_BREAK;
 		}
 
@@ -256,12 +272,20 @@ int step_dir_stepper_stm_timer_set_microstep_interval(const struct device *dev,
 	K_SPINLOCK(&data->lock) {
 		data->microstep_interval_ns = microstep_interval_ns;
 
-		ticks = (uint32_t)((counter_get_frequency(config->step_generator)*microstep_interval_ns)/NSEC_PER_SEC);
+		ticks = (uint32_t)((data->counter_gen_base_freq * microstep_interval_ns) /
+				   NSEC_PER_SEC);
 		if (ticks == 0) {
 			LOG_ERR("Counter ticks cannot be zero");
 			ret = -EINVAL;
 			K_SPINLOCK_BREAK;
 		}
+
+		uint16_t prescalar = 0;
+		if (ticks > data->counter_gen_max_value) {
+			prescalar = ticks / data->counter_gen_max_value;
+			ticks = ticks / (prescalar + 1);
+		}
+		LL_TIM_SetPrescaler(config->tim_gen, prescalar);
 		data->cfg_gen.ticks = ticks;
 		ret = counter_set_top_value(config->step_generator, &data->cfg_gen);
 		if (ret < 0) {
@@ -383,10 +407,11 @@ int step_dir_stepper_stm_timer_run(const struct device *dev, const enum stepper_
 		 * stop. Note that reaching that point causes integer over/underflow, but that is an
 		 * api limitation.
 		 */
-		data->cfg_count.ticks = UINT32_MAX;
+		data->cfg_count.ticks = UINT16_MAX;
 		ret = counter_set_top_value(config->step_counter, &data->cfg_count);
 		if (ret < 0) {
-			LOG_ERR("Could not update step counter (%d)", ret);
+			LOG_ERR("Could not update step counter %s (%d)", config->step_counter->name,
+				ret);
 			K_SPINLOCK_BREAK;
 		}
 

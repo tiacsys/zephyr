@@ -82,6 +82,8 @@ struct step_dir_stepper_stm_timer_data {
 	bool counter_running;
 	struct counter_top_cfg cfg_gen;
 	struct counter_top_cfg cfg_count;
+	uint32_t counter_gen_max_value;
+	uint32_t counter_gen_base_freq;
 
 #ifdef CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS
 	struct k_work event_callback_work;

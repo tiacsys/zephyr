@@ -7,15 +7,20 @@ description: |
   (pure) Spi Driver Interfaces are not supported.
 
   Example:
-  tmc2209: tmc2209 {
-      compatible = "adi,tmc2209";
-      enable-gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
-      msx-gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>,
-                  <&gpio0 2 GPIO_ACTIVE_HIGH>;
-      step-gpios = <&gpio0 3 GPIO_ACTIVE_HIGH>;
-      dir-gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
-      dual-edge-step;
-  }
+  stepper_motor: tmc2130@0 {
+    compatible = "adi,tmc2130-spi-step-dir";
+    reg = <0>;
+    spi-max-frequency = <DT_FREQ_M(1)>; /* Maximum SPI bus frequency */
+
+    dir-gpios = <&arduino_header 14 0>; /* D8 */
+    step-gpios = <&arduino_header 15 0>; /* D9 */
+    en-gpios  = <&mikroe_stepper_gpios 0 GPIO_ACTIVE_LOW>; /* D8 */
+    counter = <&counter2>;
+    timing-source = "counter-accel";
+    irun = <20>;
+    ihold = <20>;
+    stealth-chop-enabled;
+  };
 
 compatible: "adi,tmc2130-spi-step-dir"
 
@@ -25,34 +30,54 @@ include:
   - name: adi,trinamic-gconf.yaml
     property-allowlist:
       - i-scale-analog
+  - name: adi,trinamic-ramp-generator.yaml
+    property-allowlist:
+      - ihold
+      - irun
+
 
 properties:
-#Replace with include
-  ihold:
-    type: int
-    default: 31
-    description: |
-      Standstill current (0=1/32…31=32/32)
-
-#Replace with include
-  irun:
-    type: int
-    default: 31
-    description: |
-      Motor run current (0=1/32…31=32/32)
-
-#Replace with include 
+#Replace with include upstream
   iholddelay:
     type: int
     default: 15
     description: |
-      Number of clock cycles after standstill after which motor is powered down. TODO: Adjust description
+      Controls the number of clock cycles for motorpower down after a motion as soon as standstill
+      is detected (stst=1) and TPOWERDOWN has expired. The smooth transition avoids a motor jerk upon
+      power down.
       Value of 0-15, 0: instant power down, 1-15: Delay per current reduction step in multiple
       of 2^18 clock cycles
-      NOTE: Add TPOWERDOWN and reference it
 
   dual-edge-step:
     type: boolean
     description: |
       If present, the stepper motor controller supports dual edge step signals.
       This means that the step signal can be toggled on both the rising and falling edge.
+
+  stealth-chop-enabled:
+    type: boolean
+    description: |
+      Enables stealth-chop for lower motor noise and vibrations at lower speeds. Note that some motors 
+      have issues with a combination of stealth-chop and high current, forcing a reduction of irun
+  
+  tpwmthrs:
+    type: int
+    default: 500
+    description: |
+      Step intervalls larger than this value use stealth-chop, smaller oned do not. Note that this value is
+      based on the clock of the TMC2130. Using the TMC2130s internal clock, a step interval of 11000000ns is
+      equivalent to a threshold value of 511. Note that for this check is based on the theoretical
+      step-interval at micro step resolution of 256. For example, doubling the micro step resolution and
+      halving the step interval results in the same comparison value. TODO: rewrite, has 20bit length
+
+  tpowerdown:
+    type: int
+    default: 10
+    description: |
+      TPOWERDOWN sets the delay time after stand still (stst) of the
+      motor to motor current power down. Time range is about 0 to
+      4 seconds.
+      Attention: A minimum setting of 2 is required to allow
+      automatic tuning of StealthChop PWM_OFS_AUTO.
+      Reset Default = 10
+      0…((2^8)-1) * 2^18 tCLK

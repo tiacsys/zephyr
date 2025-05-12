@@ -25,30 +25,36 @@
 
 LOG_MODULE_REGISTER(tmc2130, CONFIG_STEPPER_LOG_LEVEL);
 
-#define REG_INIT_NUMBER 6
+#define REG_INIT_NUMBER      6
+#define TPWMTHRS_MAX_VALUE   1048575
+#define TPOWERDOWN_MAX_VALUE 255
+#define IRUN_MAX_VALUE       31
+#define IHOLD_MAX_VALUE      31
+#define IHOLDDELAY_MAX_VALUE 15
 
 /* Initial register values derived from the "Getting Started" Chapter of the TMC2130 datasheet*/
 #define TMC2130_CHOPCONF_INIT                                                                      \
 	0x000100C3 /* ms_res=256, TOFF=3, HSTRT=4, HEND=1, TBL=2, CHM=0 (SpreadCycle) */
-#define TMC2130_GCONF_INIT    0x00000004 /* en_pwm_mode=1 - StealthChop enabled */
-#define TMC2130_TPWMTHRS_INIT 0x000001F4 /* TPWM_THRS=500 */
 #define TMC2130_PWMCONF_INIT                                                                       \
-	0x000401C8 /* AUTO=1, 2/1024 Fclk, Switch amplitude limit=200, Grad=1 */
+	0x000504C8 /* AUTO=1, 2/683 Fclk, Switch amplitude limit=200, Grad=4                       \
+		    */
 
 struct tmc2130_spi_sd_config {
 	struct step_dir_stepper_common_accel_config common;
 	struct gpio_dt_spec en_pin;
 	struct spi_dt_spec spi;
+	bool stealth_chop_enabled;
+	uint32_t tpwmthrs;
+	uint8_t irun;
+	uint8_t ihold;
+	uint8_t iholddelay;
+	uint8_t tpowerdown;
 };
 
 struct tmc2130_spi_sd_data {
 	const struct step_dir_stepper_common_accel_data common;
 	bool enabled;
 	enum stepper_micro_step_resolution ustep_res;
-	uint8_t irun;
-	uint8_t ihold;
-	uint8_t iholddelay;
-	uint8_t tpowerdown;
 };
 
 static uint8_t tmc2130_spi_sd_ms_res_translator(int32_t ms_res)
@@ -236,20 +242,61 @@ static int tmc2130_spi_sd_stepper_init(const struct device *dev)
 		ustep_res_reg_value += TMC2130_DOUBLE_EDGE_OFFSET;
 	}
 
-	/* No bitmasking/setting operations are needed for ustep_res, as we know that that field is
-	 * 0*/
+	/* Read GSTAT register to clear any errors. */
+	uint32_t gstat_data;
+	tmc_spi_read_register(&config->spi, TMC2130_ADDRESS_MASK, TMC2130_GSTAT, &gstat_data);
+	LOG_DBG("GSTAT: %x", gstat_data);
+
+	/* Check max values of properties. */
+	/* tpwmthrs is 20bit in length, so check the value. */
+	if (config->tpwmthrs > TPWMTHRS_MAX_VALUE) {
+		LOG_ERR("%s: tpwthrs is to large, maximum valid value is %u", dev->name,
+			TPWMTHRS_MAX_VALUE);
+		return -EINVAL;
+	}
+	/* iholddelay is 4bit in length, so check the value. */
+	if (config->iholddelay > IHOLDDELAY_MAX_VALUE) {
+		LOG_ERR("%s: iholddelay is to large, maximum valid value is %u", dev->name,
+			IHOLDDELAY_MAX_VALUE);
+		return -EINVAL;
+	}
+	/* tpowerdown is 8bit in length, so check the value. */
+	if (config->tpowerdown > TPOWERDOWN_MAX_VALUE) {
+		LOG_ERR("%s: tpowerdown is to large, maximum valid value is %u", dev->name,
+			TPOWERDOWN_MAX_VALUE);
+		return -EINVAL;
+	}
+	/* ihold is 5bit in length, so check the value. */
+	if (config->ihold > IHOLD_MAX_VALUE) {
+		LOG_ERR("%s: ihold is to large, maximum valid value is %u", dev->name,
+			IHOLD_MAX_VALUE);
+		return -EINVAL;
+	}
+	/* ihold is 5bit in length, so check the value. */
+	if (config->irun > IRUN_MAX_VALUE) {
+		LOG_ERR("%s: irun is to large, maximum valid value is %u", dev->name,
+			IRUN_MAX_VALUE);
+		return -EINVAL;
+	}
+
+	/* No bitmasking/setting operations are needed for parameters, as we know that these fields
+	 * are
+	 * 0
+	 */
 	uint32_t reg_combined[REG_INIT_NUMBER][2] = {
 		{TMC2130_CHOPCONF, TMC2130_CHOPCONF_INIT + (ustep_res_reg_value << 24)},
 		{TMC2130_IHOLD_IRUN,
-		 0x00000000 + (data->iholddelay << 16) + (data->irun << 8) + data->ihold},
-		{TMC2130_TPOWERDOWN, 0x00000000 + data->tpowerdown},
-		{TMC2130_GCONF, TMC2130_GCONF_INIT},
-		{TMC2130_TPWMTHRS, TMC2130_TPWMTHRS_INIT},
+		 0x00000000 + (config->iholddelay << 16) + (config->irun << 8) + config->ihold},
+		{TMC2130_TPOWERDOWN, 0x00000000 + config->tpowerdown},
+		{TMC2130_GCONF,
+		 0x00000000 + (config->stealth_chop_enabled << TMC2130_STEALTH_CHOP_SHIFT)},
+		{TMC2130_TPWMTHRS, 0x00000000 + config->tpwmthrs},
 		{TMC2130_PWMCONF, TMC2130_PWMCONF_INIT}};
 
 	for (int i = 0; i < REG_INIT_NUMBER; i++) {
 		ret = tmc_spi_write_register(&config->spi, TMC2130_WRITE_BIT, reg_combined[i][0],
 					     reg_combined[i][1]);
+		LOG_INF("Reg Adress: %x", reg_combined[i][0]);
 		if (ret != 0) {
 			LOG_ERR("%s: Failed to write register 0x%x (error code: %d)", dev->name,
 				reg_combined[i][0], ret);
@@ -300,13 +347,16 @@ static DEVICE_API(stepper, tmc2130_spi_sd_stepper_api) = {
 					    (SPI_OP_MODE_MASTER | SPI_TRANSFER_MSB |               \
 					     SPI_MODE_CPOL | SPI_MODE_CPHA | SPI_WORD_SET(8)),     \
 					    0),                                                    \
+		.tpwmthrs = DT_INST_PROP(inst, tpwmthrs),                                          \
+		.irun = DT_INST_PROP(inst, irun),                                                  \
+		.ihold = DT_INST_PROP(inst, ihold),                                                \
+		.iholddelay = DT_INST_PROP(inst, iholddelay),                                      \
+		.tpowerdown = DT_INST_PROP(inst, tpowerdown),                                      \
+		.stealth_chop_enabled = DT_INST_PROP(inst, stealth_chop_enabled),                  \
 	};                                                                                         \
 	static struct tmc2130_spi_sd_data tmc2130_spi_sd_data_##inst = {                           \
 		.common = STEP_DIR_STEPPER_DT_INST_COMMON_ACCEL_DATA_INIT(inst),                   \
 		.ustep_res = DT_INST_PROP(inst, micro_step_res),                                   \
-		.irun = DT_INST_PROP(inst, irun),                                                  \
-		.ihold = DT_INST_PROP(inst, ihold),                                                \
-		.iholddelay = DT_INST_PROP(inst, iholddelay),                                      \
 	};                                                                                         \
 	DEVICE_DT_INST_DEFINE(inst, tmc2130_spi_sd_stepper_init, NULL,                             \
 			      &tmc2130_spi_sd_data_##inst, &tmc2130_spi_sd_config_##inst,          \

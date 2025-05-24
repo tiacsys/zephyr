@@ -422,6 +422,11 @@ def get_catalog(
             doc_page_path = doc_page.relative_to(ZEPHYR_BASE).as_posix()
         else:
             doc_page_path = None
+            if doc_page and not doc_page.is_relative_to(ZEPHYR_BASE):
+                logger.warning(f"Skip foreign shield (from external, not in Zephyr): {shield.name}")
+                continue
+            else:
+                logger.warning(f"Skip undocumented shield in Zephyr: {shield.name}")
 
         shield_catalog[shield.name] = {
             "name": shield.name,

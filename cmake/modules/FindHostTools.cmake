@@ -113,7 +113,7 @@ if("${ZEPHYR_TOOLCHAIN_VARIANT}" MATCHES "^([^/]+)/([^/]+)$")
 endif()
 
 # Set cached ZEPHYR_TOOLCHAIN_VARIANT.
-set(ZEPHYR_TOOLCHAIN_VARIANT ${ZEPHYR_TOOLCHAIN_VARIANT} CACHE STRING "Zephyr toolchain variant")
+set(ZEPHYR_TOOLCHAIN_VARIANT ${ZEPHYR_TOOLCHAIN_VARIANT} CACHE STRING "Zephyr toolchain variant" FORCE)
 
 # Configure the toolchain based on what SDK/toolchain is in use.
 include(${TOOLCHAIN_ROOT}/cmake/toolchain/${ZEPHYR_TOOLCHAIN_VARIANT}/generic.cmake)

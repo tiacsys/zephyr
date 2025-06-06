@@ -168,6 +168,11 @@ union step_dir_stepper_data {
 	struct step_dir_stepper_common_data common;
 };
 
+struct step_dir_stepper_wrapper_config{
+        union step_dir_stepper_config config;
+        const struct step_dir_stepper_api *api;
+};
+
 /**
  * @brief Validate the offset of the common data structures.
  *

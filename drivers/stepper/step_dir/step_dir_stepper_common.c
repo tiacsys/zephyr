@@ -212,6 +212,12 @@ int step_dir_stepper_common_init(const struct device *dev)
 		}
 	}
 
+	ret = config->timing_source->register_step_handler(dev, stepper_handle_timing_signal);
+	if (ret < 0) {
+		LOG_ERR("Failed to register step handler: %d", ret);
+		return ret;
+	}
+
 #ifdef CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS
 	struct step_dir_stepper_common_data *data = dev->data;
 

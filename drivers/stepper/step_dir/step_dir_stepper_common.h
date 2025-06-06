@@ -76,6 +76,7 @@ struct step_dir_stepper_common_data {
 	int32_t step_count;
 	stepper_event_callback_t callback;
 	void *event_cb_user_data;
+	step_dir_step_handler handler;
 
 	struct k_work_delayable stepper_dwork;
 

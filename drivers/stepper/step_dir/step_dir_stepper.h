@@ -183,18 +183,101 @@ union step_dir_stepper_data {
 extern const struct step_dir_stepper_api step_dir_stepper_common_api;
 
 #define STEP_DIR_STEPPER_SELECT(node_id)                                                           \
-	(COND_CODE_1(DT_ENUM_HAS_VALUE(node_id, step_dir, common),(&step_dir_stepper_common_api),()))
+	COND_CODE_1(DT_ENUM_HAS_VALUE(node_id, step_dir, common),(&step_dir_stepper_common_api),())
 
 #define STEP_DIR_STEPPER_CONFIG(node_id)                                                           \
 	COND_CODE_1(DT_ENUM_HAS_VALUE(node_id, step_dir, common),				   \
-			(.step_dir_config.common = STEP_DIR_STEPPER_DT_INST_COMMON_CONFIG_INIT(node_id),),())
+			(.step_dir_config.common = STEP_DIR_STEPPER_DT_COMMON_CONFIG_INIT(node_id)),())
 
 #define STEP_DIR_STEPPER_DATA(node_id)                                                             \
 	COND_CODE_1(DT_ENUM_HAS_VALUE(node_id, step_dir, common),				   \
-			(.step_dir_data.common = STEP_DIR_STEPPER_DT_INST_COMMON_DATA_INIT(node_id),),())
+			(.step_dir_data.common = STEP_DIR_STEPPER_DT_COMMON_DATA_INIT(node_id)),())
 
 #define STEP_DIR_STEPPER_SELECT_INST(inst) STEP_DIR_STEPPER_SELECT(DT_DRV_INST(inst))
 #define STEP_DIR_STEPPER_CONFIG_INST(inst) STEP_DIR_STEPPER_CONFIG(DT_DRV_INST(inst))
-#define STEP_DIR_STEPPER_DATA_INST(inst) STEP_DIR_STEPPER_DATA(DT_DRV_INST(inst))
+#define STEP_DIR_STEPPER_DATA_INST(inst)   STEP_DIR_STEPPER_DATA(DT_DRV_INST(inst))
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_move_by to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param micro_steps Number of micro_steps to move. Can be positive or negative.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_move_by_wrapper(const struct device *dev, const int32_t micro_steps);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_set_microstep_interval to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param microstep_interval_ns The step interval in nanoseconds.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_set_microstep_interval_wrapper(const struct device *dev,
+						    const uint64_t microstep_interval_ns);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_set_reference_position to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param value The reference position value to set.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_set_reference_position_wrapper(const struct device *dev, const int32_t value);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_get_actual_position to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param value Pointer to a variable where the position value will be stored.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_get_actual_position_wrapper(const struct device *dev, int32_t *value);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_move_to to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param value The target position to set.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_move_to_wrapper(const struct device *dev, const int32_t value);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_is_moving to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param is_moving Pointer to a boolean where the movement status will be stored.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_is_moving_wrapper(const struct device *dev, bool *is_moving);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_run to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param direction The direction of movement (positive or negative).
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_run_wrapper(const struct device *dev, const enum stepper_direction direction);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_stop to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_stop_wrapper(const struct device *dev);
+
+/**
+ * @brief Wrapper function for assigning step_dir_stepper_set_event_callback to the stepper api.
+ *
+ * @param dev Pointer to the device structure.
+ * @param callback The callback function to set.
+ * @param user_data Pointer to user-defined data that will be passed to the callback.
+ * @return 0 on success, or a negative error code on failure.
+ */
+int step_dir_stepper_set_event_callback_wrapper(const struct device *dev,
+						stepper_event_callback_t callback, void *user_data);
 
 #endif /* ZEPHYR_DRIVER_STEPPER_STEP_DIR_STEPPER_H_ */

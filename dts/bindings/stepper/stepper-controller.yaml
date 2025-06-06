@@ -45,7 +45,7 @@ properties:
     type: phandle
     description: Counter used for generating step-accurate pulse signals.
 
-step-dir:
+  step-dir:
     type: string
     description: Identifier of the step-dir implementation used by step-dir drivers.
     enum:

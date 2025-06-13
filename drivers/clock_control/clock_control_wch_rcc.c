@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2024 Michael Hope
+ * Copyright (c) 2025 TiaC Systems
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -90,6 +91,14 @@ static void clock_control_wch_rcc_setup_flash(void)
 	} else {
 		latency = FLASH_ACTLR_LATENCY_1;
 	}
+#elif defined(CONFIG_SOC_CH32X035)
+	if (WCH_RCC_SYSCLK <= 12000000) {
+		latency = FLASH_ACTLR_LATENCY_0;
+	} else if (WCH_RCC_SYSCLK <= 24000000) {
+		latency = FLASH_ACTLR_LATENCY_1;
+	} else {
+		latency = FLASH_ACTLR_LATENCY_2;
+	}
 #elif defined(CONFIG_SOC_SERIES_CH32V00X)
 	if (WCH_RCC_SYSCLK <= 15000000) {
 		latency = FLASH_ACTLR_LATENCY_0;
@@ -122,10 +131,17 @@ static int clock_control_wch_rcc_init(const struct device *dev)
 		RCC->CTLR &= ~RCC_PLLON;
 	}
 
+/*
+ * TODO: - add new binding 'wch,ch32v00x-lsi-clock.yaml'
+ *       - extend all SoC device tree include files
+ *       - use here 'IS_ENABLED(CONFIG_DT_HAS_WCH_CH32V00X_LSI_CLOCK_ENABLED)'
+ */
+#if !defined(CONFIG_SOC_CH32X035)
 	/* Always enable the LSI. */
 	RCC->RSTSCKR |= RCC_LSION;
 	while ((RCC->RSTSCKR & RCC_LSIRDY) == 0) {
 	}
+#endif
 
 	if (IS_ENABLED(CONFIG_DT_HAS_WCH_CH32V00X_HSI_CLOCK_ENABLED)) {
 		RCC->CTLR |= RCC_HSION;

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2024 Dhiru Kholia
+ * Copyright (c) 2025 TiaC Systems
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -25,8 +26,11 @@
 #if defined(CONFIG_SOC_SERIES_QINGKE_V4C)
 #if defined(CONFIG_SOC_CH32V208)
 #define CH32V20x_D8W 1
-#endif
 #define CH32V20x 1
+#endif
+#if defined(CONFIG_SOC_CH32X035)
+#define CH32X03x 1
+#endif
 #include <ch32fun.h>
 #endif
 

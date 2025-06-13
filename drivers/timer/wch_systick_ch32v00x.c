@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2024 Michael Hope
+ * Copyright (c) 2025 TiaC Systems
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -40,7 +41,11 @@ static void ch32v00x_systick_irq(const void *unused)
 
 uint32_t sys_clock_cycle_get_32(void)
 {
+#ifdef CONFIG_SOC_CH32X035
+	return ch32v00x_systick_count + SYSTICK->CNTL;
+#else
 	return ch32v00x_systick_count + SYSTICK->CNT;
+#endif
 }
 
 uint32_t sys_clock_elapsed(void)
@@ -53,8 +58,13 @@ static int ch32v00x_systick_init(void)
 	IRQ_CONNECT(DT_INST_IRQN(0), 0, ch32v00x_systick_irq, NULL, 0);
 
 	SYSTICK->SR = 0;
+#ifdef CONFIG_SOC_CH32X035
+	SYSTICK->CMPL = CYCLES_PER_TICK;
+	SYSTICK->CMPH = SYSTICK->CNTL = SYSTICK->CNTH = 0;
+#else
 	SYSTICK->CMP = CYCLES_PER_TICK;
 	SYSTICK->CNT = 0;
+#endif
 	SYSTICK->CTLR = STK_STRE | STK_STCLK | STK_STIE | STK_STE;
 
 	irq_enable(DT_INST_IRQN(0));

@@ -72,7 +72,7 @@ class MiniChLinkBinaryRunner(ZephyrBinaryRunner):
     def flash(self):
         self.ensure_output("bin")
 
-        cmd = [self.minichlink, "-a"]
+        cmd = [self.minichlink, "-A"]
 
         if self.erase:
             cmd.append("-E")

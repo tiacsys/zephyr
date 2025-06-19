@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2024 Michael Hope
+ * Copyright (c) 2025 TiaC Systems
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -32,36 +33,53 @@ static int gpio_ch32v00x_configure(const struct device *dev, gpio_pin_t pin, gpi
 	const struct gpio_ch32v00x_config *config = dev->config;
 	GPIO_TypeDef *regs = config->regs;
 	uint32_t cnf_mode;
-	uint32_t bshr = 0;
+	uint32_t bsbr = 0;
 
 	if ((flags & GPIO_OUTPUT) != 0) {
-		cnf_mode = 0x01;
+		cnf_mode = GPIO_CFGLR_OUT_10Mhz_PP;
 		if ((flags & GPIO_OUTPUT_INIT_HIGH) != 0) {
-			bshr = 1 << pin;
+			bsbr = 1 << pin;
 		} else if ((flags & GPIO_OUTPUT_INIT_LOW) != 0) {
-			bshr = 1 << (16 + pin);
+			bsbr = 1 << (16 + pin);
 		}
 	} else if ((flags & GPIO_INPUT) != 0) {
 		if ((flags & GPIO_PULL_UP) != 0) {
 			cnf_mode = GPIO_CFGLR_IN_PUPD;
-			bshr = 1 << pin;
+			bsbr = 1 << pin;
 		} else if ((flags & GPIO_PULL_DOWN) != 0) {
 			cnf_mode = GPIO_CFGLR_IN_PUPD;
-			bshr = 1 << (16 + pin);
+			bsbr = 1 << (16 + pin);
 		} else {
 			cnf_mode = GPIO_CFGLR_IN_FLOAT;
 		}
 	} else {
-		cnf_mode = 0x00;
+		cnf_mode = GPIO_CFGLR_IN_ANALOG;
 	}
 
+#if !defined(CONFIG_SOC_CH32X035)
 	if (pin < 8) {
 		regs->CFGLR = (regs->CFGLR & ~(0x0F << (4 * pin))) | (cnf_mode << (4 * pin));
 	} else {
-		regs->CFGHR =
-			(regs->CFGHR & ~(0x0F << ((pin - 8) * 4))) | (cnf_mode << ((pin - 8) * 4));
+		regs->CFGHR = (regs->CFGHR & ~(0x0F << (4 * (pin - 8)))) |
+			      (cnf_mode << (4 * (pin - 8)));
 	}
-	regs->BSHR = bshr;
+	regs->BSHR = bsbr;
+#else
+	if (pin < 8) {
+		regs->CFGLR = (regs->CFGLR & ~(0x0F << (4 * pin))) | (cnf_mode << (4 * pin));
+	} else if (pin < 16) {
+		regs->CFGHR = (regs->CFGHR & ~(0x0F << (4 * (pin - 8)))) |
+			      (cnf_mode << (4 * (pin - 8)));
+	} else {
+		regs->CFGXR = (regs->CFGXR & ~(0x0F << (4 * (pin - 16)))) |
+			      (cnf_mode << (4 * (pin - 16)));
+	}
+	if (pin < 16) {
+		regs->BSHR = bsbr;
+	} else {
+		regs->BSXR = bsbr;
+	}
+#endif
 
 	return 0;
 }

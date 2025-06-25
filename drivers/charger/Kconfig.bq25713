@@ -6,6 +6,8 @@ config CHARGER_BQ25713
 	bool "BQ25713 Battery Charger"
 	default y
 	depends on DT_HAS_TI_BQ25713_ENABLED
-	select I2C
+	#Check if this works
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_TI_BQ25713),i2c)
+	select SMBUS if $(dt_compat_on_bus,$(DT_COMPAT_TI_BQ25713),smbus)
 	help
 	  Enable BQ25713 battery charger driver.

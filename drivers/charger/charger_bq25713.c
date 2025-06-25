@@ -11,142 +11,17 @@
 #include <errno.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/charger.h>
-#include <zephyr/drivers/i2c.h>
 #include <zephyr/sys/byteorder.h>
+#include "bq25713.h"
+#include <zephyr/drivers/smbus.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(ti_bq25713, CONFIG_CHARGER_LOG_LEVEL);
 
-/* Charge Option 0 */
-#define BQ25713_REG_CO0_LOW          0x00
-#define BQ25713_REG_CO0_INHIBIT      0x01
-#define BQ25713_REG_CO0_INHIBIT_MASK BIT(0)
-
-/* Charge Current */
-#define BQ25713_REG_CC_LOW                    0x02
-#define BQ25713_REG_CC_CHARGE_CURRENT_MASK    GENMASK(12, 6)
-#define BQ25713_REG_CC_CHARGE_CURRENT_STEP_UA 64000
-#define BQ25713_REG_CC_CHARGE_CURRENT_MIN_UA  0
-#define BQ25713_REG_CC_CHARGE_CURRENT_MAX_UA  8128000
-
-/* Charger Status */
-#define BQ25713_REG_CS_HIGH            0x21
-#define BQ25713_REG_CS_AC_STAT         0x01
-#define BQ25713_REG_CS_AC_STAT_MASK    BIT(7)
-#define BQ25713_REG_CS_PRE_FAST_CHARGE GENMASK(2, 1)
-#define BQ25713_REG_CS_PRECHARGE       BIT(1)
-#define BQ25713_REG_CS_FASTCHARGE      BIT(2)
-
-/* Max Charge Voltage */
-#define BQ25713_REG_CV_LOW                    0x04
-#define BQ25713_REG_CV_CHARGE_VOLTAGE_MASK    GENMASK(14, 3)
-#define BQ25713_REG_CV_CHARGE_VOLTAGE_STEP_UV 8000
-#define BQ25713_REG_CV_CHARGE_VOLTAGE_MIN_UV  1024000
-#define BQ25713_REG_CV_CHARGE_VOLTAGE_MAX_UV  19200000
-
-/* Input current set by host IDPM */
-#define BQ25713_REG_IIN_HOST_HIGH    0x0F
-#define BQ25713_REG_IIN_HOST_MASK    GENMASK(7, 0)
-#define BQ25713_REG_IIN_HOST_STEP_UA 50000
-#define BQ25713_REG_IIN_HOST_MIN_UV  BQ25713_REG_IIN_HOST_STEP_UA
-#define BQ25713_REG_IIN_HOST_MAX_UV  6400000
-
-/*  Input voltage IDPM */
-#define BQ25713_REG_IIN_DPM_HIGH    0x25
-#define BQ25713_REG_IIN_DPM_MASK    BQ25713_REG_IIN_HOST_MASK
-#define BQ25713_REG_IIN_DPM_STEP_UA BQ25713_REG_IIN_HOST_STEP_UA
-
-/* Mininum system voltage */
-#define BQ25713_REG_MIN_SYS_VOLTAGE_HI      0x0D
-#define BQ25713_REG_MIN_SYS_VOLTAGE_MASK    GENMASK(5, 0)
-#define BQ25713_REG_MIN_SYS_VOLTAGE_STEP_UV 256000
-#define BQ25713_REG_MIN_SYS_VOLTAGE_MIN_UV  1024000
-#define BQ25713_REG_MIN_SYS_VOLTAGE_MAX_UV  16128000
-
-/*  Input voltage VDPM */
-#define BQ25713_REG_VIN_LOW                0x0A
-#define BQ25713_REG_VIN_DPM_MASK           GENMASK(13, 6)
-#define BQ25713_REG_VIN_DPM_STEP_UV        64000
-#define BQ25713_REG_VIN_DPM_OFFSET_UV      3200000
-#define BQ25713_REG_VIN_DPM_VOLTAGE_MIN_UV BQ25713_REG_VIN_DPM_OFFSET_UV
-#define BQ25713_REG_VIN_DPM_VOLTAGE_MAX_UV 195200000
-
-/* Manufacture ID */
-#define BQ25713_REG_ID_LOW       0x2E
-#define BQ25713_REG_ID_PN_25713  0x4088
-#define BQ25713_REG_ID_PN_25713B 0x408A
-
-#define BQ25713_FACTOR_U_TO_M 1000
-
-struct bq25713_config {
-	struct i2c_dt_spec i2c;
-	uint32_t vsys_min_uv;
-	uint32_t ichg_ua;
-	uint32_t vreg_uv;
-};
-
-static inline int bq25713_write8(const struct device *dev, uint8_t reg, uint8_t value)
-{
-	const struct bq25713_config *const config = dev->config;
-
-	return i2c_reg_write_byte_dt(&config->i2c, reg, value);
-}
-
-static inline int bq25713_read8(const struct device *dev, uint8_t reg, uint8_t *value)
-{
-	const struct bq25713_config *const config = dev->config;
-	int ret;
-
-	ret = i2c_reg_read_byte_dt(&config->i2c, reg, value);
-	if (ret < 0) {
-		LOG_ERR("Unable to read register");
-	}
-	return ret;
-}
-
-static inline int bq25713_update8(const struct device *dev, uint8_t reg, uint8_t mask,
-				  uint8_t value)
-{
-	const struct bq25713_config *const config = dev->config;
-	int ret;
-
-	ret = i2c_reg_update_byte_dt(&config->i2c, reg, mask, value);
-	if (ret < 0) {
-		LOG_ERR("Unable to update register");
-	}
-	return ret;
-}
-
-static inline int bq25713_write16(const struct device *dev, uint8_t reg, uint16_t value)
-{
-	const struct bq25713_config *const config = dev->config;
-	uint8_t buf[3];
-
-	buf[0] = reg;
-	sys_put_le16(value, &buf[1]);
-
-	return i2c_write_dt(&config->i2c, buf, sizeof(buf));
-}
-
-static inline int bq25713_read16(const struct device *dev, uint8_t reg, uint16_t *value)
-{
-	const struct bq25713_config *config = dev->config;
-	uint8_t i2c_data[2];
-	int ret;
-
-	ret = i2c_burst_read_dt(&config->i2c, reg, i2c_data, sizeof(i2c_data));
-	if (ret < 0) {
-		LOG_ERR("Unable to read register");
-		return ret;
-	}
-
-	*value = sys_get_be16(i2c_data);
-
-	return 0;
-}
-
 static int bq25713_set_minimum_system_voltage(const struct device *dev, uint32_t voltage_uv)
 {
+	const struct bq25713_config *const config = dev->config;
+
 	if (!IN_RANGE(voltage_uv, BQ25713_REG_MIN_SYS_VOLTAGE_MIN_UV,
 		      BQ25713_REG_MIN_SYS_VOLTAGE_MAX_UV)) {
 		LOG_WRN("minimum system voltage out of range: %umV, "
@@ -160,11 +35,14 @@ static int bq25713_set_minimum_system_voltage(const struct device *dev, uint32_t
 			   BQ25713_REG_MIN_SYS_VOLTAGE_MAX_UV);
 	v = voltage_uv / BQ25713_REG_MIN_SYS_VOLTAGE_STEP_UV;
 	v = FIELD_PREP(BQ25713_REG_MIN_SYS_VOLTAGE_MASK, v);
-	return bq25713_write8(dev, BQ25713_REG_MIN_SYS_VOLTAGE_HI, v);
+	v = v << BQ25713_REG_UPPER_SHIFT;
+	return config->bus_io->update(dev, BQ25713_REG_MIN_SYS_VOLTAGE_HI, BQ25713_REG_UPPER_MASK,v);
 }
 
 static int bq25713_set_constant_charge_current(const struct device *dev, uint32_t current_ua)
 {
+	const struct bq25713_config *const config = dev->config;
+
 	if (current_ua > BQ25713_REG_CC_CHARGE_CURRENT_MAX_UA) {
 		LOG_WRN("charging current out of range: %umA, "
 			"clamping to the nearest limit",
@@ -177,11 +55,13 @@ static int bq25713_set_constant_charge_current(const struct device *dev, uint32_
 	v = current_ua / BQ25713_REG_CC_CHARGE_CURRENT_STEP_UA;
 	v = FIELD_PREP(BQ25713_REG_CC_CHARGE_CURRENT_MASK, v);
 
-	return bq25713_write16(dev, BQ25713_REG_CC_LOW, v);
+	return config->bus_io->write(dev, BQ25713_REG_CC_LOW, v);
 }
 
 static int bq25713_set_constant_charge_voltage(const struct device *dev, uint32_t voltage_uv)
 {
+	const struct bq25713_config *const config = dev->config;
+
 	if (!IN_RANGE(voltage_uv, BQ25713_REG_CV_CHARGE_VOLTAGE_MIN_UV,
 		      BQ25713_REG_CV_CHARGE_VOLTAGE_MAX_UV)) {
 		LOG_WRN("charging voltage out of range: %umV, "
@@ -195,11 +75,13 @@ static int bq25713_set_constant_charge_voltage(const struct device *dev, uint32_
 			   BQ25713_REG_CV_CHARGE_VOLTAGE_MAX_UV);
 	v = voltage_uv / BQ25713_REG_CV_CHARGE_VOLTAGE_STEP_UV;
 	v = FIELD_PREP(BQ25713_REG_CV_CHARGE_VOLTAGE_MASK, v);
-	return bq25713_write16(dev, BQ25713_REG_CV_LOW, v);
+	return config->bus_io->write(dev, BQ25713_REG_CV_LOW, v);
 }
 
 static int bq25713_set_iindpm(const struct device *dev, uint32_t current_ua)
 {
+	const struct bq25713_config *const config = dev->config;
+
 	if (!IN_RANGE(current_ua, BQ25713_REG_IIN_HOST_MIN_UV, BQ25713_REG_IIN_HOST_MAX_UV)) {
 		LOG_WRN("input current regulation out of range: %umA, "
 			"clamping to the nearest limit",
@@ -211,11 +93,14 @@ static int bq25713_set_iindpm(const struct device *dev, uint32_t current_ua)
 	current_ua = CLAMP(current_ua, BQ25713_REG_IIN_HOST_MIN_UV, BQ25713_REG_IIN_HOST_MAX_UV);
 	v = current_ua / BQ25713_REG_IIN_HOST_STEP_UA;
 	v = FIELD_PREP(BQ25713_REG_IIN_HOST_MASK, v);
-	return bq25713_write8(dev, BQ25713_REG_IIN_HOST_HIGH, v);
+	v = v << BQ25713_REG_UPPER_SHIFT;
+	return config->bus_io->update(dev, BQ25713_REG_IIN_HOST_HIGH, BQ25713_REG_UPPER_MASK, v);
 }
 
 static int bq25713_set_vindpm(const struct device *dev, uint32_t voltage_ua)
 {
+	const struct bq25713_config *const config = dev->config;
+
 	if (!IN_RANGE(voltage_ua, BQ25713_REG_VIN_DPM_VOLTAGE_MIN_UV,
 		      BQ25713_REG_VIN_DPM_VOLTAGE_MAX_UV)) {
 		LOG_WRN("input voltage regulation of range: %umV, "
@@ -229,15 +114,16 @@ static int bq25713_set_vindpm(const struct device *dev, uint32_t voltage_ua)
 			   BQ25713_REG_VIN_DPM_VOLTAGE_MAX_UV);
 	v = (voltage_ua - BQ25713_REG_VIN_DPM_OFFSET_UV) / BQ25713_REG_VIN_DPM_STEP_UV;
 	v = FIELD_PREP(BQ25713_REG_VIN_DPM_MASK, v);
-	return bq25713_write16(dev, BQ25713_REG_VIN_LOW, v);
+	return config->bus_io->write(dev, BQ25713_REG_VIN_LOW, v);
 }
 
 static int bq25713_get_constant_charge_current(const struct device *dev, uint32_t *current_ua)
 {
+	const struct bq25713_config *const config = dev->config;
 	uint16_t v;
 	int ret;
 
-	ret = bq25713_read16(dev, BQ25713_REG_CC_LOW, &v);
+	ret = config->bus_io->read(dev, BQ25713_REG_CC_LOW, &v);
 	if (ret < 0) {
 		return ret;
 	}
@@ -251,10 +137,11 @@ static int bq25713_get_constant_charge_current(const struct device *dev, uint32_
 
 static int bq25713_get_constant_charge_voltage(const struct device *dev, uint32_t *voltage_uv)
 {
+	const struct bq25713_config *const config = dev->config;
 	uint16_t value;
 	int ret;
 
-	ret = bq25713_read16(dev, BQ25713_REG_CV_LOW, &value);
+	ret = config->bus_io->read(dev, BQ25713_REG_CV_LOW, &value);
 	if (ret < 0) {
 		return ret;
 	}
@@ -267,10 +154,11 @@ static int bq25713_get_constant_charge_voltage(const struct device *dev, uint32_
 
 static int bq25713_get_iindpm(const struct device *dev, uint32_t *current_ua)
 {
-	uint8_t value;
+	const struct bq25713_config *const config = dev->config;
+	uint16_t value;
 	int ret;
 
-	ret = bq25713_read8(dev, BQ25713_REG_IIN_DPM_HIGH, &value);
+	ret = config->bus_io->read(dev, BQ25713_REG_IIN_DPM_LOW, &value);
 	if (ret < 0) {
 		return ret;
 	}
@@ -283,10 +171,11 @@ static int bq25713_get_iindpm(const struct device *dev, uint32_t *current_ua)
 
 static int bq25713_get_vindpm(const struct device *dev, uint32_t *voltage_uv)
 {
+	const struct bq25713_config *const config = dev->config;
 	uint16_t value;
 	int ret;
 
-	ret = bq25713_read16(dev, BQ25713_REG_VIN_LOW, &value);
+	ret = config->bus_io->read(dev, BQ25713_REG_VIN_LOW, &value);
 	if (ret < 0) {
 		return ret;
 	}
@@ -299,10 +188,11 @@ static int bq25713_get_vindpm(const struct device *dev, uint32_t *voltage_uv)
 
 static int bq25713_get_status(const struct device *dev, enum charger_status *status)
 {
-	uint8_t charge_status;
+	const struct bq25713_config *const config = dev->config;
+	uint16_t charge_status;
 	int ret;
 
-	ret = bq25713_read8(dev, BQ25713_REG_CS_HIGH, &charge_status);
+	ret = config->bus_io->read(dev, BQ25713_REG_CS_LOW, &charge_status);
 	if (ret < 0) {
 		return ret;
 	}
@@ -323,10 +213,11 @@ static int bq25713_get_status(const struct device *dev, enum charger_status *sta
 
 static int bq25713_get_online(const struct device *dev, enum charger_online *online)
 {
-	uint8_t status;
+	const struct bq25713_config *const config = dev->config;
+	uint16_t status;
 	int ret;
 
-	ret = bq25713_read8(dev, BQ25713_REG_CS_HIGH, &status);
+	ret = config->bus_io->read(dev, BQ25713_REG_CS_LOW, &status);
 	if (ret < 0) {
 		return ret;
 	}
@@ -390,9 +281,11 @@ static int bq25713_set_prop(const struct device *dev, charger_prop_t prop,
 
 static int bq25713_charge_enable(const struct device *dev, const bool enable)
 {
+	const struct bq25713_config *const config = dev->config;
 	uint8_t value = enable ? 0 : BQ25713_REG_CO0_INHIBIT;
 
-	return bq25713_update8(dev, BQ25713_REG_CO0_LOW, BQ25713_REG_CO0_INHIBIT_MASK, value);
+	return config->bus_io->update(dev, BQ25713_REG_CO0_LOW, BQ25713_REG_CO0_INHIBIT_MASK,
+				       value);
 }
 
 static int bq25713_set_config(const struct device *dev)
@@ -420,10 +313,11 @@ static int bq25713_set_config(const struct device *dev)
 
 static int bq25713_init(const struct device *dev)
 {
+	const struct bq25713_config *const config = dev->config;
 	uint16_t value;
 	int ret;
 
-	ret = bq25713_read16(dev, BQ25713_REG_ID_LOW, &value);
+	ret = config->bus_io->read(dev, BQ25713_REG_ID_LOW, &value);
 	if (ret < 0) {
 		return ret;
 	}
@@ -447,13 +341,24 @@ static DEVICE_API(charger, bq7513_driver_api) = {
 	.charge_enable = bq25713_charge_enable,
 };
 
+/* Initializes a struct bq25713_config for an instance on a SMBus bus. */
+#define BQ25713_CONFIG_SMBUS(inst)                                                                 \
+	.bus.smbus = SMBUS_DT_SPEC_INST_GET(inst), .bus_io = &bq25713_bus_io_smbus,
+
+/* Initializes a struct bq25713_config for an instance on an I2C bus. */
+#define BQ25713_CONFIG_I2C(inst)                                                                   \
+	.bus.i2c = I2C_DT_SPEC_INST_GET(inst), .bus_io = &bq25713_bus_io_i2c,
+
 #define BQ25713_INIT(inst)                                                                         \
                                                                                                    \
 	static const struct bq25713_config bq25713_config_##inst = {                               \
-		.i2c = I2C_DT_SPEC_INST_GET(inst),                                                 \
-		.ichg_ua = DT_INST_PROP(inst, constant_charge_current_max_microamp),               \
-		.vreg_uv = DT_INST_PROP(inst, constant_charge_voltage_max_microvolt),              \
-		.vsys_min_uv = DT_INST_PROP(inst, system_voltage_min_threshold_microvolt),         \
+		COND_CODE_1(DT_INST_ON_BUS(inst, i2c),                                             \
+			    (BQ25713_CONFIG_I2C(inst)),                                            \
+			    (BQ25713_CONFIG_SMBUS(inst))) .ichg_ua =                               \
+				  DT_INST_PROP(inst, constant_charge_current_max_microamp),        \
+			 .vreg_uv = DT_INST_PROP(inst, constant_charge_voltage_max_microvolt),     \
+			 .vsys_min_uv =                                                            \
+				 DT_INST_PROP(inst, system_voltage_min_threshold_microvolt),       \
 	};                                                                                         \
                                                                                                    \
 	DEVICE_DT_INST_DEFINE(inst, bq25713_init, NULL, NULL, &bq25713_config_##inst, POST_KERNEL, \

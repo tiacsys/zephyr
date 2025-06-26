@@ -5,31 +5,31 @@
  *
  */
 
-#include "bq25713.h"
+#include "bq2571x.h"
 #include <zephyr/logging/log.h>
 
-#if BQ25713_BUS_SMBUS
+#if BQ2571X_BUS_SMBUS
 
-LOG_MODULE_REGISTER(ti_bq25710_smbus, CONFIG_CHARGER_LOG_LEVEL);
+LOG_MODULE_REGISTER(ti_bq2571x_smbus, CONFIG_CHARGER_LOG_LEVEL);
 
-static int bq25713_write_smbus(const struct device *dev, uint8_t reg, uint16_t value)
+static int bq2571x_write_smbus(const struct device *dev, uint8_t reg, uint16_t value)
 {
-	const struct bq25713_config *const config = dev->config;
+	const struct bq2571x_config *const config = dev->config;
 
 	return smbus_word_data_write(config->bus.smbus.bus, config->bus.smbus.addr, reg, value);
 }
 
-static int bq25713_read_smbus(const struct device *dev, uint8_t reg, uint16_t *value)
+static int bq2571x_read_smbus(const struct device *dev, uint8_t reg, uint16_t *value)
 {
-	const struct bq25713_config *config = dev->config;
+	const struct bq2571x_config *config = dev->config;
 
 	return smbus_word_data_read(config->bus.smbus.bus, config->bus.smbus.addr, reg, value);
 }
 
-static int bq25713_update_smbus(const struct device *dev, uint8_t reg, uint16_t mask,
+static int bq2571x_update_smbus(const struct device *dev, uint8_t reg, uint16_t mask,
 				uint16_t value)
 {
-	const struct bq25713_config *const config = dev->config;
+	const struct bq2571x_config *const config = dev->config;
 	uint16_t old_data;
 	uint16_t new_data;
 	int ret;
@@ -44,13 +44,14 @@ static int bq25713_update_smbus(const struct device *dev, uint8_t reg, uint16_t 
 	return smbus_word_data_write(config->bus.smbus.bus, config->bus.smbus.addr, reg, new_data);
 }
 
-const struct bq25713_bus_io bq25713_bus_io_smbus = {
-	.update = bq25713_update_smbus,
-	.write = bq25713_write_smbus,
-	.read = bq25713_read_smbus,
+const struct bq2571x_bus_io bq2571x_bus_io_smbus = {
+	.update = bq2571x_update_smbus,
+	.write = bq2571x_write_smbus,
+	.read = bq2571x_read_smbus,
 };
 
-uint8_t reg_lookup_smbus[9] = {BQ25710_REG_CO0,
+/* The smbus communication is used by the BQ25710. */
+uint8_t bq2571x_reg_lookup_smbus[9] = {BQ25710_REG_CO0,
 			       BQ25710_REG_CC,
 			       BQ25710_REG_CS,
 			       BQ25710_REG_CV,
@@ -60,4 +61,4 @@ uint8_t reg_lookup_smbus[9] = {BQ25710_REG_CO0,
 			       BQ25710_REG_VIN,
 			       BQ25710_REG_ID};
 
-#endif /* BQ25713_BUS_SMBUS */
+#endif /* BQ2571X_BUS_SMBUS */

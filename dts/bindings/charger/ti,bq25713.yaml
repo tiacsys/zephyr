@@ -10,7 +10,7 @@ description: |
   This charger is represented by device tree child node, e.g:
 
   charger: bq25713@6b {
-      compatible = "ti,bq25713";
+      compatible = "ti,bq2571x";
       reg = <0x6b>;
       status = "okay";
 
@@ -19,7 +19,6 @@ description: |
       system-voltage-min-threshold-microvolt = <3328000>;
   };
 
-include: [i2c-device.yaml, "ti,bq25713_base.yaml"]
+include: [i2c-device.yaml, "ti,bq2571x_base.yaml"]
 
-compatible: "ti,bq25713"
-
+compatible: "ti,bq2571x"

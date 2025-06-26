@@ -1,0 +1,13 @@
+# Copyright 2025 Palta Tech, S.A
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config CHARGER_BQ2571X
+	bool "BQ2571X Battery Charger"
+	default y
+	depends on DT_HAS_TI_BQ2571X_ENABLED
+	#Check if this works
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_TI_BQ2571X),i2c)
+	select SMBUS if $(dt_compat_on_bus,$(DT_COMPAT_TI_BQ2571X),smbus)
+	help
+	  Enable BQ2571X battery charger driver.

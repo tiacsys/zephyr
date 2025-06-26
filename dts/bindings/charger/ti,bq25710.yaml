@@ -4,14 +4,14 @@
 description: |
   BQ25710 SMBus battery charge controller IC.
 
-  BQ25713 targets 1s to 4s Cell, USB Power Delivery/Adapter Charger with
+  BQ25710 targets 1s to 4s Cell, USB Power Delivery/Adapter Charger with
   Narrow VDC Power Path Management and Processor Hot Monitor
 
   This charger is represented by device tree child node, e.g:
 
-  charger: bq25713@6b {
-      compatible = "ti,bq25713";
-      reg = <0x6b>;
+  charger: bq25710@12 {
+      compatible = "ti,bq2571x";
+      reg = <0x12>;
       status = "okay";
 
       constant-charge-current-max-microamp = <1000000>;
@@ -19,6 +19,6 @@ description: |
       system-voltage-min-threshold-microvolt = <3328000>;
   };
 
-include: [smbus-device.yaml, "ti,bq25713_base.yaml"]
+include: [smbus-device.yaml, "ti,bq2571x_base.yaml"]
 
-compatible: "ti,bq25713"
+compatible: "ti,bq2571x"

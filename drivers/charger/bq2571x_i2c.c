@@ -6,17 +6,17 @@
  *
  */
 
-#include "bq25713.h"
+#include "bq2571x.h"
 #include "zephyr/sys/byteorder.h"
 #include <zephyr/logging/log.h>
 
-#if BQ25713_BUS_I2C
+#if BQ2571X_BUS_I2C
 
-LOG_MODULE_REGISTER(ti_bq25713_i2c, CONFIG_CHARGER_LOG_LEVEL);
+LOG_MODULE_REGISTER(ti_bq2571x_i2c, CONFIG_CHARGER_LOG_LEVEL);
 
-static int bq25713_write16_i2c(const struct device *dev, uint8_t reg, uint16_t value)
+static int bq2571x_write16_i2c(const struct device *dev, uint8_t reg, uint16_t value)
 {
-	const struct bq25713_config *const config = dev->config;
+	const struct bq2571x_config *const config = dev->config;
 	uint8_t buf[3];
 
 	buf[0] = reg;
@@ -25,9 +25,9 @@ static int bq25713_write16_i2c(const struct device *dev, uint8_t reg, uint16_t v
 	return i2c_write_dt(&config->bus.i2c, buf, sizeof(buf));
 }
 
-static int bq25713_read16_i2c(const struct device *dev, uint8_t reg, uint16_t *value)
+static int bq2571x_read16_i2c(const struct device *dev, uint8_t reg, uint16_t *value)
 {
-	const struct bq25713_config *config = dev->config;
+	const struct bq2571x_config *config = dev->config;
 	uint8_t i2c_data[2];
 	int ret;
 
@@ -42,10 +42,10 @@ static int bq25713_read16_i2c(const struct device *dev, uint8_t reg, uint16_t *v
 	return 0;
 }
 
-static int bq25713_update16_i2c(const struct device *dev, uint8_t reg, uint16_t mask,
+static int bq2571x_update16_i2c(const struct device *dev, uint8_t reg, uint16_t mask,
 				uint16_t value)
 {
-	const struct bq25713_config *const config = dev->config;
+	const struct bq2571x_config *const config = dev->config;
 	uint8_t i2c_data[2];
 	uint8_t buf[3];
 	uint16_t old_data;
@@ -68,13 +68,14 @@ static int bq25713_update16_i2c(const struct device *dev, uint8_t reg, uint16_t 
 	return i2c_write_dt(&config->bus.i2c, buf, sizeof(buf));
 }
 
-const struct bq25713_bus_io bq25713_bus_io_i2c = {
-	.update = bq25713_update16_i2c,
-	.write = bq25713_write16_i2c,
-	.read = bq25713_read16_i2c,
+const struct bq2571x_bus_io bq2571x_bus_io_i2c = {
+	.update = bq2571x_update16_i2c,
+	.write = bq2571x_write16_i2c,
+	.read = bq2571x_read16_i2c,
 };
 
-uint8_t reg_lookup_i2c[9] = {BQ25713_REG_CO0_LOW,
+/* The i2c communication is used by the BQ25713/BQ25713B. */
+uint8_t bq2571x_reg_lookup_i2c[9] = {BQ25713_REG_CO0_LOW,
 			     BQ25713_REG_CC_LOW,
 			     BQ25713_REG_CS_LOW,
 			     BQ25713_REG_CV_LOW,

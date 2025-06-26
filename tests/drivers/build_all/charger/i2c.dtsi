@@ -47,8 +47,8 @@ sbs-charger@3 {
 	reg = <0x3>;
 };
 
-bq257130@4 {
-	compatible = "ti,bq25713";
+bq25713@4 {
+	compatible = "ti,bq2571x";
 	reg = <0x4>;
 	constant-charge-current-max-microamp = <1000000>;
 	constant-charge-voltage-max-microvolt = <3800000>;

@@ -1,8 +1,8 @@
-# Copyright 2025 Palta Tech, S.A
+# Copyright 2025 Navimatix GmbH
 # SPDX-License-Identifier: Apache-2.0
 
 description: |
-  BQ25713 I2C battery charge controller IC.
+  BQ25710 SMBus battery charge controller IC.
 
   BQ25713 targets 1s to 4s Cell, USB Power Delivery/Adapter Charger with
   Narrow VDC Power Path Management and Processor Hot Monitor
@@ -19,7 +19,6 @@ description: |
       system-voltage-min-threshold-microvolt = <3328000>;
   };
 
-include: [i2c-device.yaml, "ti,bq25713_base.yaml"]
+include: [smbus-device.yaml, "ti,bq25713_base.yaml"]
 
 compatible: "ti,bq25713"
-

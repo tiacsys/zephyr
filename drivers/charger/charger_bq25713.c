@@ -36,8 +36,8 @@ static int bq25713_set_minimum_system_voltage(const struct device *dev, uint32_t
 	v = voltage_uv / BQ25713_REG_MIN_SYS_VOLTAGE_STEP_UV;
 	v = FIELD_PREP(BQ25713_REG_MIN_SYS_VOLTAGE_MASK, v);
 	v = v << BQ25713_REG_UPPER_SHIFT;
-	return config->bus_io->update(dev, (*config->reg_lookup)[BQ25713_REG_MIN_SYS_VOLTAGE], BQ25713_REG_UPPER_MASK,
-				      v);
+	return config->bus_io->update(dev, (*config->reg_lookup)[BQ25713_REG_MIN_SYS_VOLTAGE],
+				      BQ25713_REG_UPPER_MASK, v);
 }
 
 static int bq25713_set_constant_charge_current(const struct device *dev, uint32_t current_ua)
@@ -95,7 +95,8 @@ static int bq25713_set_iindpm(const struct device *dev, uint32_t current_ua)
 	v = current_ua / BQ25713_REG_IIN_HOST_STEP_UA;
 	v = FIELD_PREP(BQ25713_REG_IIN_HOST_MASK, v);
 	v = v << BQ25713_REG_UPPER_SHIFT;
-	return config->bus_io->update(dev, (*config->reg_lookup)[BQ25713_REG_IIN_HOST], BQ25713_REG_UPPER_MASK, v);
+	return config->bus_io->update(dev, (*config->reg_lookup)[BQ25713_REG_IIN_HOST],
+				      BQ25713_REG_UPPER_MASK, v);
 }
 
 static int bq25713_set_vindpm(const struct device *dev, uint32_t voltage_ua)
@@ -285,8 +286,8 @@ static int bq25713_charge_enable(const struct device *dev, const bool enable)
 	const struct bq25713_config *const config = dev->config;
 	uint8_t value = enable ? 0 : BQ25713_REG_CO0_INHIBIT;
 
-	return config->bus_io->update(dev, (*config->reg_lookup)[BQ25713_REG_CO0], BQ25713_REG_CO0_INHIBIT_MASK,
-				      value);
+	return config->bus_io->update(dev, (*config->reg_lookup)[BQ25713_REG_CO0],
+				      BQ25713_REG_CO0_INHIBIT_MASK, value);
 }
 
 static int bq25713_set_config(const struct device *dev)
@@ -318,12 +319,17 @@ static int bq25713_init(const struct device *dev)
 	uint16_t value;
 	int ret;
 
+	// TODO: Check if SMBus gan get  manufacturer and device id in one go like this
 	ret = config->bus_io->read(dev, (*config->reg_lookup)[BQ25713_REG_ID], &value);
 	if (ret < 0) {
+		LOG_ERR("Unable to read Device ID Register 0x%02x",
+			(*config->reg_lookup)[BQ25713_REG_ID]);
 		return ret;
 	}
 
 	switch (value) {
+	case BQ25713_REG_ID_PN_25710:
+		__fallthrough;
 	case BQ25713_REG_ID_PN_25713:
 		__fallthrough;
 	case BQ25713_REG_ID_PN_25713B:
@@ -344,7 +350,8 @@ static DEVICE_API(charger, bq7513_driver_api) = {
 
 /* Initializes a struct bq25713_config for an instance on a SMBus bus. */
 #define BQ25713_CONFIG_SMBUS(inst)                                                                 \
-	.bus.smbus = SMBUS_DT_SPEC_INST_GET(inst), .bus_io = &bq25713_bus_io_smbus,
+	.bus.smbus = SMBUS_DT_SPEC_INST_GET(inst), .bus_io = &bq25713_bus_io_smbus,                \
+	.reg_lookup = &reg_lookup_smbus,
 
 /* Initializes a struct bq25713_config for an instance on an I2C bus. */
 #define BQ25713_CONFIG_I2C(inst)                                                                   \

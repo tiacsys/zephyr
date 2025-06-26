@@ -1,0 +1,31 @@
+# Copyright 2025 Palta Tech, S.A
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Common properties for the BQ25710 and BQ25713 battery charge controller IC.
+
+include: battery.yaml
+
+properties:
+  constant-charge-current-max-microamp:
+    required: true
+    description: |
+      The charge current target for the constant current phase of the charge profile.
+      This value will be set at initialization time. Range: 0 mA to 8.128 A.
+      The value specified will be rounded down to the closest implemented value.
+
+  constant-charge-voltage-max-microvolt:
+    required: true
+    description: |
+      The voltage regulation target for the constant voltage phase of the battery charging profile.
+      This value will be set at initialization time. Range: 4.2 V 1S to 16.8 V 4S.
+      The value specified will be rounded down to the closest implemented value.
+
+  system-voltage-min-threshold-microvolt:
+    type: int
+    required: true
+    description: |
+      Minimum system voltage.
+      Voltage that will be set above when the system voltage drops this level.
+      This value will be set at initialization time. Range: 1.024 V to 16.128 V.
+      The value specified will be rounded down to the closest implemented value.

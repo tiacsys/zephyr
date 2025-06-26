@@ -1,4 +1,5 @@
 /*
+ * Copyright 2025 Palta Tech, S.A
  * Copyright 2025 Navimatix GmbH
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -32,7 +33,7 @@ static int bq25713_read16_i2c(const struct device *dev, uint8_t reg, uint16_t *v
 
 	ret = i2c_burst_read_dt(&config->bus.i2c, reg, i2c_data, sizeof(i2c_data));
 	if (ret < 0) {
-		LOG_ERR("Unable to read register 0x%x", reg);
+		LOG_ERR("Unable to read register 0x%02x", reg);
 		return ret;
 	}
 
@@ -55,7 +56,7 @@ static int bq25713_update16_i2c(const struct device *dev, uint8_t reg, uint16_t 
 
 	ret = i2c_burst_read_dt(&config->bus.i2c, reg, i2c_data, sizeof(i2c_data));
 	if (ret < 0) {
-		LOG_ERR("Unable to read register 0x%x", reg);
+		LOG_ERR("Unable to read register 0x%02x", reg);
 		return ret;
 	}
 	old_data = sys_get_be16(i2c_data);

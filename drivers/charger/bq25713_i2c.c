@@ -32,7 +32,7 @@ static int bq25713_read16_i2c(const struct device *dev, uint8_t reg, uint16_t *v
 
 	ret = i2c_burst_read_dt(&config->bus.i2c, reg, i2c_data, sizeof(i2c_data));
 	if (ret < 0) {
-		LOG_ERR("Unable to read register");
+		LOG_ERR("Unable to read register 0x%x", reg);
 		return ret;
 	}
 
@@ -55,7 +55,7 @@ static int bq25713_update16_i2c(const struct device *dev, uint8_t reg, uint16_t 
 
 	ret = i2c_burst_read_dt(&config->bus.i2c, reg, i2c_data, sizeof(i2c_data));
 	if (ret < 0) {
-		LOG_ERR("Unable to update register");
+		LOG_ERR("Unable to read register 0x%x", reg);
 		return ret;
 	}
 	old_data = sys_get_be16(i2c_data);
@@ -72,5 +72,15 @@ const struct bq25713_bus_io bq25713_bus_io_i2c = {
 	.write = bq25713_write16_i2c,
 	.read = bq25713_read16_i2c,
 };
+
+uint8_t reg_lookup_i2c[9] = {BQ25713_REG_CO0_LOW,
+			     BQ25713_REG_CC_LOW,
+			     BQ25713_REG_CS_LOW,
+			     BQ25713_REG_CV_LOW,
+			     BQ25713_REG_IIN_HOST_LOW,
+			     BQ25713_REG_IIN_DPM_LOW,
+			     BQ25713_REG_MIN_SYS_VOLTAGE_LOW,
+			     BQ25713_REG_VIN_LOW,
+			     BQ25713_REG_ID_LOW};
 
 #endif /* BQ25713_BUS_I2C */

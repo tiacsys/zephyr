@@ -63,8 +63,8 @@ enum bq25713_reg_area {
 #define BQ25713_REG_CV_CHARGE_VOLTAGE_MIN_UV  1024000
 #define BQ25713_REG_CV_CHARGE_VOLTAGE_MAX_UV  19200000
 
-/* Input current set by host IDPM */
-#define BQ25713_REG_IIN_HOST_HIGH    0x0F
+/* Input current set by host IDPM */ //TODO: Check
+#define BQ25713_REG_IIN_HOST_LOW    0x0E
 #define BQ25713_REG_IIN_HOST_MASK    GENMASK(7, 0)
 #define BQ25713_REG_IIN_HOST_STEP_UA 50000
 #define BQ25713_REG_IIN_HOST_MIN_UV  BQ25713_REG_IIN_HOST_STEP_UA
@@ -76,7 +76,7 @@ enum bq25713_reg_area {
 #define BQ25713_REG_IIN_DPM_STEP_UA BQ25713_REG_IIN_HOST_STEP_UA
 
 /* Mininum system voltage */
-#define BQ25713_REG_MIN_SYS_VOLTAGE_HI      0x0D
+#define BQ25713_REG_MIN_SYS_VOLTAGE_LOW      0x0C
 #define BQ25713_REG_MIN_SYS_VOLTAGE_MASK    GENMASK(5, 0)
 #define BQ25713_REG_MIN_SYS_VOLTAGE_STEP_UV 256000
 #define BQ25713_REG_MIN_SYS_VOLTAGE_MIN_UV  1024000
@@ -133,6 +133,7 @@ struct bq25713_config {
 
 #if BQ25713_BUS_I2C
 extern const struct bq25713_bus_io bq25713_bus_io_i2c;
+extern uint8_t reg_lookup_i2c[9];
 #endif
 
 #endif /* ZEPHYR_DRIVERS_CHARGER_BQ25713_H_ */

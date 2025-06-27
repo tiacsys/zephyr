@@ -77,3 +77,12 @@ tests:
     platform_allow:
       - native_sim/native/64
       - qemu_x86_64/atom
+  drivers.stepper.stepper_api.generic:
+    extra_configs:
+      - CONFIG_GPIO=y
+      - CONFIG_COUNTER=y
+      - CONFIG_STEPPER_STEP_DIR_GENERATE_ISR_SAFE_EVENTS=y
+      - CONFIG_STEPPER_TEST_TIMING_TIMEOUT_TOLERANCE_PCT=10
+    platform_exclude:
+      - native_sim/native/64
+      - qemu_x86_64/atom

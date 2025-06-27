@@ -97,7 +97,13 @@ if(WEST OR ZEPHYR_MODULES)
     string(REGEX REPLACE "\"(.*)\":\".*\":\".*\"" "\\1" module_name ${module})
     list(APPEND ZEPHYR_MODULE_NAMES ${module_name})
   endforeach()
-
+  
+  # Modules can use build.settings.cmake_module in their module.yml to extend the CMAKE_MODULE_PATH.
+  foreach(cmake_module ${CMAKE_MODULE_ROOT})
+    message(DEBUG "Adding ${cmake_module} to CMAKE_MODULE_PATH")
+    list(PREPEND CMAKE_MODULE_PATH ${cmake_module})    
+  endforeach()
+  
   if(EXISTS ${cmake_sysbuild_file})
     file(STRINGS ${cmake_sysbuild_file} sysbuild_modules_txt ENCODING UTF-8)
   endif()

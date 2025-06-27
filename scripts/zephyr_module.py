@@ -88,6 +88,9 @@ mapping:
           board_root:
             required: false
             type: str
+          cmake_module_root:
+            required: false
+            type: str  
           dts_root:
             required: false
             type: str
@@ -313,7 +316,7 @@ def process_settings(module, meta):
     out_text = ""
 
     if build_settings is not None:
-        for root in ['board', 'dts', 'snippet', 'soc', 'arch', 'module_ext', 'sca']:
+        for root in ['board', 'dts', 'snippet', 'soc', 'arch', 'module_ext', 'sca', 'cmake_module']:
             setting = build_settings.get(root+'_root', None)
             if setting is not None:
                 root_path = PurePath(module) / setting

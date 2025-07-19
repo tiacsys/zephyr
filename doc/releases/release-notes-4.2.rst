@@ -771,7 +771,6 @@ New shields
 * :ref:`ST B-CAMS-IMX-MB1854 <st_b_cams_imx_mb1854>`
 * :ref:`ST MB1897 camera module <st_mb1897_cam>`
 * :ref:`ST STM32F4DIS CAM <st_stm32f4dis_cam>`
-* :ref:`Waveshare Pico LCD 1.14 <waveshare_pico_lcd_1_14>`
 * :ref:`Waveshare Pico OLED 1.3 <waveshare_pico_oled_1_3>`
 * :ref:`X-Nucleo-GFX01M2 <x_nucleo_gfx01m2_shield>`
 

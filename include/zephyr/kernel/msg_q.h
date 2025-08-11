@@ -131,8 +131,10 @@ struct k_msgq_attrs {
  * @param buffer Pointer to ring buffer that holds queued messages.
  * @param msg_size Message size (in bytes).
  * @param max_msgs Maximum number of messages that can be queued.
+ *
+ * @required-by{20-2}
  */
-void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
+ void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
 		 uint32_t max_msgs);
 
 /**

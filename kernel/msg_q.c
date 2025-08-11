@@ -5,10 +5,13 @@
  */
 
 /**
- * @file
- * @brief Message queues.
+ * @file msg_q.c
+ * Implementation of Kernel Message Queues
+ *
+ * @ingroup kernel_apis
+ * @addtogroup msgq_apis
+ * @{
  */
-
 
 #include <zephyr/kernel.h>
 #include <zephyr/kernel_structs.h>
@@ -32,17 +35,27 @@ static struct k_obj_type obj_type_msgq;
 static inline bool handle_poll_events(struct k_msgq *msgq)
 {
 #ifdef CONFIG_POLL
-	return z_handle_obj_poll_events(&msgq->poll_events,
-					K_POLL_STATE_MSGQ_DATA_AVAILABLE);
+	return z_handle_obj_poll_events(&msgq->poll_events, K_POLL_STATE_MSGQ_DATA_AVAILABLE);
 #else
 	ARG_UNUSED(msgq);
 	return false;
 #endif /* CONFIG_POLL */
 }
 
-void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
-		 uint32_t max_msgs)
+/**
+ *
+ * @details 
+ * 
+ * The function initializes the provided @c msgq from the remaining parameters.
+ * 
+ * No checks for NULL pointers are carried out, that means the function assumes that both pointers 
+ * passed in are pointing to a valid memory region.
+ * 
+ * Detailed workflow:
+ */
+void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size, uint32_t max_msgs)
 {
+	/** - (re-)initialize the provided @c msgq struct*/
 	msgq->msg_size = msg_size;
 	msgq->max_msgs = max_msgs;
 	msgq->buffer_start = buffer;
@@ -52,22 +65,26 @@ void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
 	msgq->used_msgs = 0;
 	msgq->flags = 0;
 	z_waitq_init(&msgq->wait_q);
-	msgq->lock = (struct k_spinlock) {};
+	msgq->lock = (struct k_spinlock){};
+
+	/** - If @kconfig{CONFIG_POLL}: also initialize poll_events. */
 #ifdef CONFIG_POLL
 	sys_dlist_init(&msgq->poll_events);
-#endif	/* CONFIG_POLL */
+#endif /* CONFIG_POLL */
 
+	/** - If @kconfig{CONFIG_OBJ_CORE_MSGQ}: register message queue with kernel object service. */
 #ifdef CONFIG_OBJ_CORE_MSGQ
 	k_obj_core_init_and_link(K_OBJ_CORE(msgq), &obj_type_msgq);
 #endif /* CONFIG_OBJ_CORE_MSGQ */
 
+	/** - If @kconfig{CONFIG_TRACING}: register message queue with tracing subsystem. */
 	SYS_PORT_TRACING_OBJ_INIT(k_msgq, msgq);
 
+	/** - Setup @c msgq to be accessible from userspace. */
 	k_object_init(msgq);
 }
 
-int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size,
-			    uint32_t max_msgs)
+int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size, uint32_t max_msgs)
 {
 	void *buffer;
 	int ret;
@@ -94,8 +111,7 @@ int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size,
 }
 
 #ifdef CONFIG_USERSPACE
-int z_vrfy_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size,
-			    uint32_t max_msgs)
+int z_vrfy_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size, uint32_t max_msgs)
 {
 	K_OOPS(K_SYSCALL_OBJ_NEVER_INIT(msgq, K_OBJ_MSGQ));
 
@@ -107,25 +123,31 @@ int z_vrfy_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size,
 int k_msgq_cleanup(struct k_msgq *msgq)
 {
 	SYS_PORT_TRACING_OBJ_FUNC_ENTER(k_msgq, cleanup, msgq);
-
+	
 	CHECKIF(z_waitq_head(&msgq->wait_q) != NULL) {
 		SYS_PORT_TRACING_OBJ_FUNC_EXIT(k_msgq, cleanup, msgq, -EBUSY);
-
+		
 		return -EBUSY;
 	}
-
+	
 	if ((msgq->flags & K_MSGQ_FLAG_ALLOC) != 0U) {
 		k_free(msgq->buffer_start);
 		msgq->flags &= ~K_MSGQ_FLAG_ALLOC;
 	}
-
+	
 	SYS_PORT_TRACING_OBJ_FUNC_EXIT(k_msgq, cleanup, msgq, 0);
-
+	
 	return 0;
 }
+/**
+ * @fn   k_msgq_put(struct k_msgq *msgq, const void *data, k_timeout_t timeout)
+ * @brief another test
+ *
+ * This will become the design specification of k_msgq_put
+ */
 
-static inline int put_msg_in_queue(struct k_msgq *msgq, const void *data,
-			k_timeout_t timeout, bool put_at_back)
+static inline int put_msg_in_queue(struct k_msgq *msgq, const void *data, k_timeout_t timeout,
+				   bool put_at_back)
 {
 	__ASSERT(!arch_is_in_isr() || K_TIMEOUT_EQ(timeout, K_NO_WAIT), "");
 
@@ -194,7 +216,7 @@ static inline int put_msg_in_queue(struct k_msgq *msgq, const void *data,
 		}
 
 		/* wait for put message success, failure, or timeout */
-		_current->base.swap_data = (void *) data;
+		_current->base.swap_data = (void *)data;
 
 		result = z_pend_curr(&msgq->lock, key, &msgq->wait_q, timeout);
 
@@ -222,11 +244,11 @@ static inline int put_msg_in_queue(struct k_msgq *msgq, const void *data,
 	return result;
 }
 
-
 int z_impl_k_msgq_put(struct k_msgq *msgq, const void *data, k_timeout_t timeout)
 {
 	return put_msg_in_queue(msgq, data, timeout, true);
 }
+
 
 int z_impl_k_msgq_put_front(struct k_msgq *msgq, const void *data, k_timeout_t timeout)
 {
@@ -234,8 +256,7 @@ int z_impl_k_msgq_put_front(struct k_msgq *msgq, const void *data, k_timeout_t t
 }
 
 #ifdef CONFIG_USERSPACE
-static inline int z_vrfy_k_msgq_put(struct k_msgq *msgq, const void *data,
-				    k_timeout_t timeout)
+static inline int z_vrfy_k_msgq_put(struct k_msgq *msgq, const void *data, k_timeout_t timeout)
 {
 	K_OOPS(K_SYSCALL_OBJ(msgq, K_OBJ_MSGQ));
 	K_OOPS(K_SYSCALL_MEMORY_READ(data, msgq->msg_size));
@@ -245,7 +266,7 @@ static inline int z_vrfy_k_msgq_put(struct k_msgq *msgq, const void *data,
 #include <zephyr/syscalls/k_msgq_put_mrsh.c>
 
 static inline int z_vrfy_k_msgq_put_front(struct k_msgq *msgq, const void *data,
-				    k_timeout_t timeout)
+					  k_timeout_t timeout)
 {
 	K_OOPS(K_SYSCALL_OBJ(msgq, K_OBJ_MSGQ));
 	K_OOPS(K_SYSCALL_MEMORY_READ(data, msgq->msg_size));
@@ -263,8 +284,7 @@ void z_impl_k_msgq_get_attrs(struct k_msgq *msgq, struct k_msgq_attrs *attrs)
 }
 
 #ifdef CONFIG_USERSPACE
-static inline void z_vrfy_k_msgq_get_attrs(struct k_msgq *msgq,
-					   struct k_msgq_attrs *attrs)
+static inline void z_vrfy_k_msgq_get_attrs(struct k_msgq *msgq, struct k_msgq_attrs *attrs)
 {
 	K_OOPS(K_SYSCALL_OBJ(msgq, K_OBJ_MSGQ));
 	K_OOPS(K_SYSCALL_MEMORY_WRITE(attrs, sizeof(struct k_msgq_attrs)));
@@ -304,7 +324,7 @@ int z_impl_k_msgq_get(struct k_msgq *msgq, void *data, k_timeout_t timeout)
 			__ASSERT_NO_MSG(msgq->write_ptr >= msgq->buffer_start &&
 					msgq->write_ptr < msgq->buffer_end);
 			(void)memcpy(msgq->write_ptr, (char *)pending_thread->base.swap_data,
-			       msgq->msg_size);
+				     msgq->msg_size);
 			msgq->write_ptr += msgq->msg_size;
 			if (msgq->write_ptr == msgq->buffer_end) {
 				msgq->write_ptr = msgq->buffer_start;
@@ -343,8 +363,7 @@ int z_impl_k_msgq_get(struct k_msgq *msgq, void *data, k_timeout_t timeout)
 }
 
 #ifdef CONFIG_USERSPACE
-static inline int z_vrfy_k_msgq_get(struct k_msgq *msgq, void *data,
-				    k_timeout_t timeout)
+static inline int z_vrfy_k_msgq_get(struct k_msgq *msgq, void *data, k_timeout_t timeout)
 {
 	K_OOPS(K_SYSCALL_OBJ(msgq, K_OBJ_MSGQ));
 	K_OOPS(K_SYSCALL_MEMORY_WRITE(data, msgq->msg_size));
@@ -445,8 +464,7 @@ void z_impl_k_msgq_purge(struct k_msgq *msgq)
 	SYS_PORT_TRACING_OBJ_FUNC(k_msgq, purge, msgq);
 
 	/* wake up any threads that are waiting to write */
-	for (pending_thread = z_unpend_first_thread(&msgq->wait_q);
-	     pending_thread != NULL;
+	for (pending_thread = z_unpend_first_thread(&msgq->wait_q); pending_thread != NULL;
 	     pending_thread = z_unpend_first_thread(&msgq->wait_q)) {
 		arch_thread_return_value_set(pending_thread, -ENOMSG);
 		z_ready_thread(pending_thread);
@@ -492,8 +510,7 @@ static int init_msgq_obj_core_list(void)
 {
 	/* Initialize msgq object type */
 
-	z_obj_type_init(&obj_type_msgq, K_OBJ_TYPE_MSGQ_ID,
-			offsetof(struct k_msgq, obj_core));
+	z_obj_type_init(&obj_type_msgq, K_OBJ_TYPE_MSGQ_ID, offsetof(struct k_msgq, obj_core));
 
 	/* Initialize and link statically defined message queues */
 
@@ -504,7 +521,8 @@ static int init_msgq_obj_core_list(void)
 	return 0;
 };
 
-SYS_INIT(init_msgq_obj_core_list, PRE_KERNEL_1,
-	 CONFIG_KERNEL_INIT_PRIORITY_OBJECTS);
+SYS_INIT(init_msgq_obj_core_list, PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_OBJECTS);
 
 #endif /* CONFIG_OBJ_CORE_MSGQ */
+
+/** @} */

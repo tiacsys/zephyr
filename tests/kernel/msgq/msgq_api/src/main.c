@@ -5,7 +5,7 @@
  */
 
 /**
- * @defgroup kernel_message_queue_tests Message Queue
+ * @defgroup kernel_message_queue_tests Message Queue Tests
  * @ingroup all_tests
  * @{
  * @}

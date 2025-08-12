@@ -60,6 +60,16 @@ static void msgq_api_test_1cpu_after(void *data)
 	ztest_simple_1cpu_after(data);
 }
 
+/**
+ * @defgroup msgq_api Message Queue API (ZTestsuite)
+ * @ingroup kernel_message_queue_tests
+ * 
+ */
 ZTEST_SUITE(msgq_api, NULL, msgq_api_setup, NULL, msgq_api_test_after, NULL);
+
+/**
+ * @defgroup msgq_api_1cpu Message Queue API single-core (ZTestsuite)
+ * @ingroup kernel_message_queue_tests
+ */
 ZTEST_SUITE(msgq_api_1cpu, NULL, msgq_api_setup,
 	    ztest_simple_1cpu_before, msgq_api_test_1cpu_after, NULL);

@@ -137,7 +137,26 @@ static int sbs_charger_get_prop(const struct device *dev, const charger_prop_t p
 static int sbs_charger_set_prop(const struct device *dev, const charger_prop_t prop,
 				const union charger_propval *val)
 {
-	return -ENOTSUP;
+	int ret;
+
+	switch (prop) {
+	case CHARGER_PROP_CONSTANT_CHARGE_CURRENT_UA:
+		ret = sbs_cmd_reg_write(dev, SBS_CHARGER_REG_CHARGING_CURRENT,
+					val->const_charge_current_ua);
+		if (ret < 0) {
+			return ret;
+		}
+		return 0;
+	case CHARGER_PROP_CONSTANT_CHARGE_VOLTAGE_UV:
+		ret = sbs_cmd_reg_write(dev, SBS_CHARGER_REG_CHARGING_VOLTAGE,
+					val->const_charge_voltage_uv);
+		if (ret < 0) {
+			return ret;
+		}
+		return 0;
+	default:
+		return -ENOTSUP;
+	}
 }
 
 /**

@@ -28,6 +28,8 @@ struct sbs_charger_emul_cfg {
 /** Run-time data used by the emulator */
 struct sbs_charger_emul_data {
 	uint16_t reg_charger_mode;
+	uint16_t reg_current;
+	uint16_t reg_voltage;
 };
 
 static int emul_sbs_charger_reg_write(const struct emul *target, int reg, int val)
@@ -39,6 +41,12 @@ static int emul_sbs_charger_reg_write(const struct emul *target, int reg, int va
 	case SBS_CHARGER_REG_CHARGER_MODE:
 		data->reg_charger_mode = val;
 		break;
+	case SBS_CHARGER_REG_CHARGING_CURRENT:
+		data->reg_current = val;
+		break;
+	case SBS_CHARGER_REG_CHARGING_VOLTAGE:
+		data->reg_voltage = val;
+		break;
 	default:
 		LOG_ERR("Unknown write %x", reg);
 		return -EIO;
@@ -49,10 +57,20 @@ static int emul_sbs_charger_reg_write(const struct emul *target, int reg, int va
 
 static int emul_sbs_charger_reg_read(const struct emul *target, int reg, int *val)
 {
+	struct sbs_charger_emul_data *data = target->data;
+
 	switch (reg) {
-	case SBS_CHARGER_REG_SPEC_INFO:
 	case SBS_CHARGER_REG_CHARGER_MODE:
 	case SBS_CHARGER_REG_STATUS:
+		*val = data->reg_charger_mode;
+		break;
+	case SBS_CHARGER_REG_CHARGING_CURRENT:
+		*val = data->reg_current;
+		break;
+	case SBS_CHARGER_REG_CHARGING_VOLTAGE:
+		*val = data->reg_voltage;
+		break;
+	case SBS_CHARGER_REG_SPEC_INFO:
 	case SBS_CHARGER_REG_ALARM_WARNING:
 		/* Arbitrary stub value. */
 		*val = 1;

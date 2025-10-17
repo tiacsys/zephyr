@@ -1,0 +1,18 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2025 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2025 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * FRDM-RW612, based on the FlexComm SPI driver "nxp,lpc-spi"
+ * should by used with hardware controlled CS pins. Moreover,
+ * unlike the Arduino connector with CS0, the second CS1 is
+ * used on this board at the MicroBus connector. This means
+ * that the CAN controller node must be completely rebuilt
+ * with the reg index 1.
+ */
+
+#include "hw_ctrl_cs.dtsi"
+#include "can_at_cs1.dtsi"

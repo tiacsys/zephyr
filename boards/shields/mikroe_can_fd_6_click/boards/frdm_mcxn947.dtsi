@@ -1,0 +1,16 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2025 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2025 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* MikroBus signal AN can not be used as GPIO input for nWKRQ. */
+&tcan4x5x_mikroe_can_fd_6_click {
+	/delete-property/ device-state-gpios;
+};
+
+/* Avoid SPI signal conflicts on line P3_20 and P3_21 with SAI1. */
+&sai1 {
+	status = "disabled";
+};

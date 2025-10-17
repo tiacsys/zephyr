@@ -1,0 +1,14 @@
+/*
+ * Copyright (c) 2025 Navimatix GmbH
+ * Copyright (c) 2025 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * FRDM-MCXA153, based on the Low Power SPI driver "nxp,lpspi"
+ * should by used with hardware controlled CS pins, due to reset
+ * issues.
+ */
+
+#include "hw_ctrl_cs.dtsi"

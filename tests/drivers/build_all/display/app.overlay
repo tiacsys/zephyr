@@ -167,7 +167,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_st75256: st75256@10 {
+			test_mipi_dbi_st75256: st75256@a {
 				compatible = "sitronix,st75256";
 				mipi-max-frequency = <10000000>;
 				reg = <10>;
@@ -182,7 +182,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_ssd1320: ssd1320@11 {
+			test_mipi_dbi_ssd1320: ssd1320@b {
 				compatible = "solomon,ssd1320";
 				reg = <11>;
 				mipi-max-frequency = <10000000>;
@@ -199,7 +199,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_sh1122: sh1122@12 {
+			test_mipi_dbi_sh1122: sh1122@c {
 				compatible = "sinowealth,sh1122";
 				reg = <12>;
 				mipi-max-frequency = <10000000>;
@@ -217,7 +217,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_ssd1331: ssd1331@13 {
+			test_mipi_dbi_ssd1331: ssd1331@d {
 				compatible = "solomon,ssd1331";
 				reg = <13>;
 				mipi-max-frequency = <10000000>;
@@ -238,7 +238,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_ssd1351: ssd1351@14 {
+			test_mipi_dbi_ssd1351: ssd1351@e {
 				compatible = "solomon,ssd1351";
 				mipi-max-frequency = <10000000>;
 				reg = <14>;
@@ -257,7 +257,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_ssd1363: ssd1363@15 {
+			test_mipi_dbi_ssd1363: ssd1363@f {
 				compatible = "solomon,ssd1363";
 				reg = <15>;
 				mipi-max-frequency = <100000000>;
@@ -274,7 +274,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_ssd1357: ssd1357@16 {
+			test_mipi_dbi_ssd1357: ssd1357@10 {
 				compatible = "solomon,ssd1357";
 				mipi-max-frequency = <10000000>;
 				reg = <16>;
@@ -293,7 +293,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_gooddisplay_epaper_gdew029i6fd: uc8151d@17 {
+			test_gooddisplay_epaper_gdew029i6fd: uc8151d@11 {
 				compatible = "ultrachip,uc8151d";
 				reg = <17>;
 				mipi-max-frequency = <4000000>;
@@ -314,7 +314,7 @@
 				};
 			};
 
-			test_mipi_dbi_st7305: st7305@18 {
+			test_mipi_dbi_st7305: st7305@12 {
 				compatible = "sitronix,st7305";
 				mipi-max-frequency = <10000000>;
 				reg = <18>;
@@ -337,7 +337,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_st7306: st7306@19 {
+			test_mipi_dbi_st7306: st7306@13 {
 				compatible = "sitronix,st7306";
 				mipi-max-frequency = <10000000>;
 				reg = <19>;
@@ -360,7 +360,7 @@
 				mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
 			};
 
-			test_mipi_dbi_st7567: st7567@20 {
+			test_mipi_dbi_st7567: st7567@14 {
 				compatible = "sitronix,st7567";
 				mipi-max-frequency = <1000000>;
 				reg = <20>;
@@ -695,7 +695,7 @@
 
 			test_ssd1363: ssd1363@6 {
 				compatible = "solomon,ssd1363";
-				reg = <0x5>;
+				reg = <6>;
 				width = <256>;
 				height = <128>;
 				precharge-period = <0x0>;

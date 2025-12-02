@@ -67,9 +67,9 @@
 				reset-gpios = <&test_gpio 0 0>;
 			};
 
-			test_i2c_pcal6408a: pcal6408a@1 {
+			test_i2c_pcal6408a: pcal6408a@20 {
 				compatible = "nxp,pcal6408a";
-				reg = <0x01>;
+				reg = <0x20>;
 				gpio-controller;
 				#gpio-cells = <2>;
 				ngpios = <8>;
@@ -77,9 +77,9 @@
 				reset-gpios = <&test_gpio 0 0>;
 			};
 
-			test_i2c_pcal6416a: pcal6416a@2 {
+			test_i2c_pcal6416a: pcal6416a@21 {
 				compatible = "nxp,pcal6416a";
-				reg = <0x02>;
+				reg = <0x21>;
 				gpio-controller;
 				#gpio-cells = <2>;
 				ngpios = <16>;
@@ -488,6 +488,9 @@
 				    &test_gpio 0 0
 				    &test_gpio 0 0
 				    &test_gpio 0 0
+				    &test_gpio 0 0
+				    &test_gpio 0 0
+				    &test_gpio 0 0
 				    &test_gpio 0 0>;
 
 			test_spi_mcp23s17: mcp23s17@0 {
@@ -690,10 +693,10 @@
 				en-gpios = <&test_gpio 0 0>;
 			};
 
-			test_spi_max14917: max14917@d {
+			test_spi_max14917: max14917@e {
 				compatible = "adi,max14917-gpio";
 				status = "okay";
-				reg = <0x0d>;
+				reg = <0x0e>;
 				spi-max-frequency = <0>;
 				gpio-controller;
 				#gpio-cells = <2>;

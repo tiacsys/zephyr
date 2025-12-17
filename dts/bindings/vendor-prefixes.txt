@@ -700,6 +700,7 @@ tfc	Three Five Corp
 thine	THine Electronics, Inc.
 thingyjp	thingy.jp
 ti	Texas Instruments
+tiac	TiaC Systems
 tianma	Tianma Micro-electronics Co., Ltd.
 titanmec	Shenzhen Titan Micro Electronics Co., Ltd.
 tlm	Trusted Logic Mobility

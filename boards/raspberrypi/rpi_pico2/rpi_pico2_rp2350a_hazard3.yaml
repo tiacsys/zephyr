@@ -7,6 +7,10 @@ ram: 520
 toolchain:
   - zephyr
 supported:
+  - pico_gpio
+  - pico_i2c
+  - pico_spi
+  - pico_serial
   - adc
   - clock
   - counter

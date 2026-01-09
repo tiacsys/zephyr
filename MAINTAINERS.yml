@@ -1320,6 +1320,7 @@ Documentation Infrastructure:
   files:
     - boards/shields/canis_canpico/
     - boards/shields/mcp2515/
+    - boards/shields/mikroe_mcp251xfd_click/
     - boards/shields/tcan4550evm/
     - doc/connectivity/canbus/
     - doc/hardware/peripherals/can/

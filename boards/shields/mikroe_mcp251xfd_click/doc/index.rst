@@ -87,6 +87,48 @@ for example:
    :shield: mikroe_mcp2518fd_click
    :goals: build flash
 
+.. _mikroe_mcp251863_click_shield:
+
+MikroElektronika MCP251863 Click shield
+***************************************
+
+Overview
+--------
+
+The MCP251863 Click shield has a `MCP251863`_ CAN FD controller via a SPI
+interface with an integrated high-speed `ATA6563`_ CAN transceiver. This
+CAN FD controller is software compatible with the stand-alone `MCP2518FD`_
+CAN FD controller.
+
+More information about the shield can be found at
+`Mikroe MCP251863 click`_.
+
+.. figure:: mcp251863_click.webp
+   :align: center
+   :alt: MikroElektronika MCP251863 Click
+
+   MikroElektronika MCP251863 Click (Credit: MikroElektronika)
+
+Requirements
+------------
+
+The shield uses a mikroBUS interface. The target board must define the
+``mikrobus_spi`` and ``mikrobus_header``  node labels (see :ref:`shields`
+for more details). The target board must also support level triggered
+interrupts and SPI clock frequency of up to 18 MHz.
+
+Programming
+-----------
+
+Set ``--shield mikroe_mcp251863_click`` when you invoke ``west build``,
+for example:
+
+.. zephyr-app-commands::
+   :zephyr-app: samples/drivers/can/counter
+   :board: lpcxpresso55s28
+   :shield: mikroe_mcp251863_click
+   :goals: build flash
+
 References
 **********
 
@@ -107,8 +149,14 @@ References
 .. _MCP2518FD:
    https://www.microchip.com/en-us/product/MCP2518FD
 
+.. _MCP251863:
+   https://www.microchip.com/en-us/product/MCP251863
+
 .. _Mikroe MCP2517FD click:
    https://www.mikroe.com/mcp2517fd-click
 
 .. _Mikroe MCP2518FD click:
    https://www.mikroe.com/mcp2518fd-click
+
+.. _Mikroe MCP251863 click:
+   https://www.mikroe.com/mcp251863-click

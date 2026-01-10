@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+# SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+# SPDX-License-Identifier: Apache-2.0
+
+shield:
+  name: mikroe_mcp25625_click
+  full_name: MikroElektronika MCP25625 Click shield
+  vendor: mikroe
+  supported_features:
+    - can

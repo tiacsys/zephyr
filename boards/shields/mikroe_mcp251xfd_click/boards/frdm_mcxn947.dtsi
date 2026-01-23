@@ -1,0 +1,16 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* MikroBus SPI bus needs to be enabled. */
+&mikrobus_spi {
+	status = "okay";
+};
+
+/* Avoid SPI signal conflicts on line P3_20 and P3_21 with SAI1. */
+&sai1 {
+	status = "disabled";
+};

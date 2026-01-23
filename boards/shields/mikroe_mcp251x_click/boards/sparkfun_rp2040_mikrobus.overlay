@@ -1,0 +1,16 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Set RST on mikroBus pin 1 to high. */
+&gpio0 {
+	boot-hogs-reset {
+		gpio-hog;
+		gpios = <13 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "reset";
+	};
+};

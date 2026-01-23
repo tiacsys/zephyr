@@ -1,0 +1,19 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* STBY on mikroBus pin 0 not usable on this board (analog input only). */
+
+/delete-node/ &transceiver0;
+
+&mcp25625_mikroe_mcp25625_click {
+
+	/delete-property/ phys;
+
+	can-transceiver {
+		max-bitrate = <1000000>;
+	};
+};

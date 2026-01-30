@@ -1,0 +1,33 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	/*
+	 * The battery voltage rail on this board is gated by a power switch
+	 * with enable signal hooked up to a GPIO pin rather than a permanent
+	 * positive voltage rail to decouple the ADC input from VBAT or save
+	 * on power. This will enable the ADC input channel gate on board
+	 * initialization. Application code can switch it off later on demand.
+	 */
+	battery_adc_enable: battery-adc-enable {
+		compatible = "regulator-fixed";
+		status = "okay";
+
+		enable-gpios = <&gpio0 19 GPIO_ACTIVE_HIGH>;
+		regulator-name = "battery_adc_enable";
+		regulator-boot-on;
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+battery_adc: &zephyr_adc {
+	status = "okay";
+};

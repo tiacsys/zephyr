@@ -1,0 +1,130 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/adc/adc.h>
+
+#include "xiao_rp2350-pinctrl.dtsi"
+
+/ {
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,console = &zephyr_serial;
+		zephyr,shell-uart = &zephyr_serial;
+		zephyr,entropy = &rng;
+	};
+
+	aliases {
+		watchdog0 = &wdt0;
+	};
+
+	zephyr,user {
+		io-channels = <&zephyr_adc 0>, /* XIAO (1:1) */
+			      <&zephyr_adc 1>, /* XIAO (1:1) */
+			      <&zephyr_adc 2>, /* XIAO (1:1) */
+			      <&zephyr_adc 3>; /* VBAT (1:2) */
+	};
+};
+
+&timer0 {
+	status = "okay";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+&rng {
+	status = "okay";
+};
+
+gpio0_lo: &gpio0 {
+	status = "okay";
+};
+
+zephyr_serial0: &uart0 {
+	status = "okay";		/* enable for default console */
+	current-speed = <115200>;	/* speed for default console */
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-names = "default";
+};
+
+zephyr_serial: &zephyr_serial0 {};
+
+zephyr_serial1: &uart1 {
+	pinctrl-0 = <&uart1_default>;
+	pinctrl-names = "default";
+};
+
+zephyr_i2c0: &i2c1 {
+	pinctrl-0 = <&i2c1_default>;
+	pinctrl-names = "default";
+};
+
+zephyr_i2c: &zephyr_i2c0 {};
+
+zephyr_i2c1: &i2c0 {
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+};
+
+zephyr_spi0: &spi0 {
+	pinctrl-0 = <&spi0_default>;
+	pinctrl-names = "default";
+};
+
+zephyr_spi: &zephyr_spi0 {};
+
+zephyr_spi1: &spi1 {
+	pinctrl-0 = <&spi1_default>;
+	pinctrl-names = "default";
+};
+
+zephyr_adc: &adc {
+	pinctrl-0 = <&adc_default>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@2 {
+		reg = <2>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@3 {
+		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+};
+
+&die_temp {
+	status = "okay";
+};
+
+zephyr_udc0: &usbd {
+	status = "okay";
+};

@@ -1,0 +1,18 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	model = "Seeed Studio XIAO RP2350";
+	compatible = "seeed,xiao-rp2350";
+};
+
+#include "xiao_rp2350-common.dtsi"
+#include "xiao_rp2350-flash.dtsi"
+#include "xiao_rp2350-led.dtsi"
+#include "xiao_rp2350-ws2812.dtsi"
+#include "xiao_rp2350-charge.dtsi"
+#include "xiao_rp2350-expand.dtsi"
+#include "xiao_rp2350-xiao.dtsi"

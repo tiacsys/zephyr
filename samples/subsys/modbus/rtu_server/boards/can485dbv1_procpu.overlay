@@ -1,0 +1,50 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * Mocking the reference to serial interface that the sample will use.
+ * Required only for this sample, even though the board does not have
+ * an Arduino UNO R3 header.
+ */
+arduino_serial: &zephyr_rs485 {};
+
+/* Mocking sample's LED control, this board has no monochrome LEDs. */
+/ {
+	aliases {
+		led0 = &dummy_led_0;
+		led1 = &dummy_led_1;
+		led2 = &dummy_led_2;
+	};
+
+	dummy-leds {
+		compatible = "gpio-leds";
+
+		dummy_led_0: dummy-led-0 {
+			gpios = <&dummy_gpio 0 0>;
+		};
+
+		dummy_led_1: dummy-led-1 {
+			gpios = <&dummy_gpio 1 0>;
+		};
+
+		dummy_led_2: dummy-led-2 {
+			gpios = <&dummy_gpio 2 0>;
+		};
+	};
+
+	dummy-io {
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		dummy_gpio: dummy-gpio@deadbeef {
+			compatible = "zephyr,gpio-emul";
+			gpio-controller;
+			reg = <0xdeadbeef 0x1000>;
+			#gpio-cells = <0x2>;
+			status = "okay";
+		};
+	};
+};

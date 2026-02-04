@@ -1,0 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * Mocking the reference to serial interface that the sample will use.
+ * Required only for this sample, even though the board does not have
+ * an Arduino UNO R3 header.
+ */
+arduino_serial: &zephyr_rs485 {};

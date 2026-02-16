@@ -690,6 +690,11 @@ Stepper
 * :dtcompatible:`adi,tmc50xx-stepper-drv` and :dtcompatible:`adi,tmc51xx-stepper-drv` drivers implement
   :c:group:`stepper_drv_interface`.
 
+* Individual Kconfig symbols of the pattern ``CONFIG_STEPPER_*_GENERATE_ISR_SAFE_EVENTS`` and
+  ``CONFIG_STEPPER_*_EVENT_QUEUE_LEN`` have been replaced by the API wide Kconfig symbols
+  ``CONFIG_STEPPER_CONTROLLER_ISR_SAFE_EVENTS`` and ``CONFIG_STEPPER_CONTROLLER_EVENT_QUEUE_LEN`` to make
+  them more consistent with other APIs.
+
 STM32
 =====
 

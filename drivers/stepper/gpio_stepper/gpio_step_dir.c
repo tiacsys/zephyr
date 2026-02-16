@@ -10,6 +10,7 @@
 #include <step_dir_stepper_common.h>
 
 #include <gpio_stepper_common.h>
+#include <stepper_ctrl_event_handler.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(gpio_step_dir_stepper_ctrl, CONFIG_STEPPER_LOG_LEVEL);
@@ -130,7 +131,8 @@ static int gpio_step_dir_stepper_ctrl_move_by(const struct device *dev, const in
 	}
 
 	if (micro_steps == 0) {
-		gpio_stepper_trigger_callback(data->common.dev, STEPPER_CTRL_EVENT_STEPS_COMPLETED);
+		stepper_ctrl_event_handler_process_cb(
+			data->common.event_common.dev, STEPPER_CTRL_EVENT_STEPS_COMPLETED);
 		config->common.timing_source->stop(dev);
 		return 0;
 	}
@@ -228,7 +230,7 @@ int gpio_step_dir_stepper_ctrl_stop(const struct device *dev)
 		}
 	}
 
-	gpio_stepper_trigger_callback(dev, STEPPER_CTRL_EVENT_STOPPED);
+	stepper_ctrl_event_handler_process_cb(dev, STEPPER_CTRL_EVENT_STOPPED);
 
 	return 0;
 }
@@ -279,7 +281,7 @@ static DEVICE_API(stepper_ctrl, gpio_step_dir_stepper_ctrl_api) = {
 	.is_moving = gpio_stepper_common_is_moving,
 	.set_reference_position = gpio_stepper_common_set_reference_position,
 	.get_actual_position = gpio_stepper_common_get_actual_position,
-	.set_event_cb = gpio_stepper_common_set_event_cb,
+	.set_event_cb = stepper_ctrl_event_handler_set_event_cb,
 	.set_microstep_interval = gpio_step_dir_stepper_ctrl_set_microstep_interval,
 	.run = gpio_step_dir_stepper_ctrl_run,
 	.stop = gpio_step_dir_stepper_ctrl_stop,
@@ -287,7 +289,7 @@ static DEVICE_API(stepper_ctrl, gpio_step_dir_stepper_ctrl_api) = {
 
 #define ZEPHYR_GPIO_STEP_DIR_CONTROLLER_DEFINE(inst)                                               \
 	static const struct zephyr_gpio_step_dir_stepper_ctrl_config gpio_step_dir_config_##inst = \
-	{                                                                                          \
+		{                                                                                  \
 			.common = GPIO_STEPPER_DT_INST_COMMON_CONFIG_INIT(inst),                   \
 			.common.timing_source_cb = stepper_handle_timing_signal,                   \
 			.step_pin = GPIO_DT_SPEC_INST_GET(inst, step_gpios),                       \

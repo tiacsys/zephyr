@@ -4,7 +4,8 @@
  */
 
 #include <zephyr/drivers/counter.h>
-#include "gpio_stepper_common.h"
+#include <gpio_stepper_common.h>
+#include <stepper_ctrl_event_handler.h>
 #include "stepper_timing_source.h"
 
 #include <zephyr/logging/log.h>
@@ -14,9 +15,9 @@ static void step_counter_top_interrupt(const struct device *dev, void *user_data
 {
 	ARG_UNUSED(dev);
 	struct gpio_stepper_common_data *data = user_data;
-	const struct gpio_stepper_common_config *config = data->dev->config;
+	const struct gpio_stepper_common_config *config = data->event_common.dev->config;
 
-	config->timing_source_cb(data->dev);
+	config->timing_source_cb(data->event_common.dev);
 }
 
 int step_counter_timing_source_update(const struct device *dev,

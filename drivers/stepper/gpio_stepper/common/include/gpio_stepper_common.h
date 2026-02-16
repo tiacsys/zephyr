@@ -18,6 +18,7 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/stepper/stepper_ctrl.h>
 #include <zephyr/drivers/counter.h>
+#include <stepper_ctrl_event_handler.h>
 
 #include "stepper_timing_source.h"
 
@@ -46,8 +47,8 @@ struct gpio_stepper_common_config {
 		.invert_direction = DT_PROP(node_id, invert_direction),                            \
 		.timing_source = COND_CODE_1(DT_NODE_HAS_PROP(node_id, counter),                   \
 						(&step_counter_timing_source_api),                 \
-						(&step_work_timing_source_api)),                   \
-	}
+						(&step_work_timing_source_api)),    \
+		}
 
 /**
  * @brief Initialize common GPIO stepper config from devicetree instance.
@@ -62,7 +63,7 @@ struct gpio_stepper_common_config {
  * This structure **must** be placed first in the driver's data structure.
  */
 struct gpio_stepper_common_data {
-	const struct device *dev;
+	struct stepper_ctrl_event_handler_data event_common;
 	struct k_spinlock lock;
 	enum stepper_ctrl_direction direction;
 	enum stepper_ctrl_run_mode run_mode;
@@ -70,21 +71,12 @@ struct gpio_stepper_common_data {
 	uint64_t timing_source_interval_ns;
 	atomic_t actual_position;
 	atomic_t step_count;
-	stepper_ctrl_event_callback_t callback;
-	void *event_cb_user_data;
 
 	struct k_work_delayable stepper_dwork;
 #ifdef CONFIG_GPIO_STEPPER_COUNTER_TIMING
 	struct counter_top_cfg counter_top_cfg;
 	bool counter_running;
 #endif /* CONFIG_GPIO_STEPPER_COUNTER_TIMING */
-
-#ifdef CONFIG_STEPPER_GPIO_STEPPER_GENERATE_ISR_SAFE_EVENTS
-	struct k_work event_callback_work;
-	struct k_msgq event_msgq;
-	uint8_t event_msgq_buffer[CONFIG_STEPPER_GPIO_STEPPER_EVENT_QUEUE_LEN *
-				  sizeof(enum stepper_ctrl_event)];
-#endif /* CONFIG_STEPPER_GPIO_STEPPER_GENERATE_ISR_SAFE_EVENTS */
 };
 
 /**
@@ -94,8 +86,10 @@ struct gpio_stepper_common_data {
  */
 #define GPIO_STEPPER_DT_COMMON_DATA_INIT(node_id)                                                  \
 	{                                                                                          \
-		.dev = DEVICE_DT_GET(node_id),                                                     \
+		.event_common = STEPPER_CTRL_EVENT_HANDLER_DT_DATA_INIT(node_id),             \
 	}
+
+STEPPER_CONTROLLER_EVENT_COMMON_STRUCT_CHECK(struct gpio_stepper_common_data);
 
 /**
  * @brief Initialize common GPIO stepper data from devicetree instance.
@@ -127,13 +121,6 @@ struct gpio_stepper_common_data {
  * @retval -errno Negative errno in case of failure.
  */
 int gpio_stepper_common_init(const struct device *dev);
-
-/**
- * @brief Trigger callback function for stepper events.
- * @param dev Pointer to the device structure.
- * @param event The stepper_ctrl_event to trigger the callback for.
- */
-void gpio_stepper_trigger_callback(const struct device *dev, enum stepper_ctrl_event event);
 
 /**
  * @brief Set the reference position of the stepper.
@@ -203,29 +190,6 @@ static inline int gpio_stepper_common_is_moving(const struct device *dev, bool *
 }
 
 /**
- * @brief Set a callback function for stepper events.
- *
- * This function sets a user-defined callback that will be invoked when a stepper motor event
- * occurs.
- *
- * @param dev Pointer to the device structure.
- * @param callback The callback function to set.
- * @param user_data Pointer to user-defined data that will be passed to the callback.
- * @return 0 on success, or a negative error code on failure.
- */
-static inline int gpio_stepper_common_set_event_cb(const struct device *dev,
-							 stepper_ctrl_event_callback_t callback,
-							 void *user_data)
-{
-	struct gpio_stepper_common_data *data = dev->data;
-
-	data->callback = callback;
-	data->event_cb_user_data = user_data;
-
-	return 0;
-}
-
-/**
  * @brief Update the direction of the stepper motor based on the step count.
  * @param dev Pointer to the device structure.
  */
@@ -269,8 +233,9 @@ static inline void gpio_stepper_common_position_mode_task(const struct device *d
 	if (config->timing_source->needs_reschedule(dev) && atomic_get(&data->step_count) != 0) {
 		(void)config->timing_source->start(dev);
 	} else if (atomic_get(&data->step_count) == 0) {
-		config->timing_source->stop(data->dev);
-		gpio_stepper_trigger_callback(data->dev, STEPPER_CTRL_EVENT_STEPS_COMPLETED);
+		config->timing_source->stop(data->event_common.dev);
+		stepper_ctrl_event_handler_process_cb(data->event_common.dev,
+							    STEPPER_CTRL_EVENT_STEPS_COMPLETED);
 	}
 }
 

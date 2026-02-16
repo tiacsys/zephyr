@@ -12,6 +12,7 @@
 #include <zephyr/drivers/stepper/stepper.h>
 
 #include <gpio_stepper_common.h>
+#include <stepper_ctrl_event_handler.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(h_bridge_stepper_ctrl, CONFIG_STEPPER_LOG_LEVEL);
@@ -109,10 +110,10 @@ static void stepper_work_step_handler(const struct device *dev)
 		switch (data->run_mode) {
 		case STEPPER_CTRL_RUN_MODE_POSITION:
 			gpio_stepper_common_update_remaining_steps(dev);
-			gpio_stepper_common_position_mode_task(data->dev);
+			gpio_stepper_common_position_mode_task(data->event_common.dev);
 			break;
 		case STEPPER_CTRL_RUN_MODE_VELOCITY:
-			gpio_stepper_common_velocity_mode_task(data->dev);
+			gpio_stepper_common_velocity_mode_task(data->event_common.dev);
 			break;
 		default:
 			LOG_WRN("Unsupported run mode %d", data->run_mode);
@@ -133,7 +134,8 @@ static int h_bridge_stepper_move_by(const struct device *dev, int32_t micro_step
 	}
 
 	if (micro_steps == 0) {
-		gpio_stepper_trigger_callback(dev, STEPPER_CTRL_EVENT_STEPS_COMPLETED);
+		stepper_ctrl_event_handler_process_cb(dev,
+							    STEPPER_CTRL_EVENT_STEPS_COMPLETED);
 		config->timing_source->stop(dev);
 		return 0;
 	}
@@ -158,7 +160,7 @@ static int h_bridge_stepper_move_by(const struct device *dev, int32_t micro_step
 }
 
 static int h_bridge_stepper_ctrl_set_microstep_interval(const struct device *dev,
-						   uint64_t microstep_interval_ns)
+							uint64_t microstep_interval_ns)
 {
 	const struct gpio_stepper_common_config *config = dev->config;
 	struct gpio_stepper_common_data *data = dev->data;
@@ -178,7 +180,7 @@ static int h_bridge_stepper_ctrl_set_microstep_interval(const struct device *dev
 }
 
 static int h_bridge_stepper_ctrl_run(const struct device *dev,
-				      const enum stepper_ctrl_direction direction)
+				     const enum stepper_ctrl_direction direction)
 {
 	const struct gpio_stepper_common_config *config = dev->config;
 	struct gpio_stepper_common_data *data = dev->data;
@@ -215,7 +217,7 @@ static int h_bridge_stepper_ctrl_stop(const struct device *dev)
 
 	K_SPINLOCK(&data->lock) {
 		err = config->timing_source->stop(dev);
-		gpio_stepper_trigger_callback(dev, STEPPER_CTRL_EVENT_STOPPED);
+		stepper_ctrl_event_handler_process_cb(dev, STEPPER_CTRL_EVENT_STOPPED);
 	}
 
 	return err;
@@ -223,11 +225,9 @@ static int h_bridge_stepper_ctrl_stop(const struct device *dev)
 
 static int h_bridge_stepper_init(const struct device *dev)
 {
-	struct gpio_stepper_common_data *data = dev->data;
 	const struct h_bridge_stepper_config *config = dev->config;
 	int err;
 
-	data->dev = dev;
 	LOG_DBG("Initializing %s h_bridge_stepper with %d pin", dev->name, NUM_CONTROL_PINS);
 	for (uint8_t n_pin = 0; n_pin < NUM_CONTROL_PINS; n_pin++) {
 		if (!gpio_is_ready_dt(&config->control_pins[n_pin])) {
@@ -247,7 +247,7 @@ static int h_bridge_stepper_init(const struct device *dev)
 static DEVICE_API(stepper_ctrl, h_bridge_stepper_ctrl_api) = {
 	.set_reference_position = gpio_stepper_common_set_reference_position,
 	.get_actual_position = gpio_stepper_common_get_actual_position,
-	.set_event_cb = gpio_stepper_common_set_event_cb,
+	.set_event_cb = stepper_ctrl_event_handler_set_event_cb,
 	.set_microstep_interval = h_bridge_stepper_ctrl_set_microstep_interval,
 	.move_by = h_bridge_stepper_move_by,
 	.move_to = gpio_stepper_common_move_to,
@@ -257,17 +257,19 @@ static DEVICE_API(stepper_ctrl, h_bridge_stepper_ctrl_api) = {
 };
 
 #define H_BRIDGE_STEPPER_DEFINE(inst)                                                              \
-	static const struct gpio_dt_spec h_bridge_stepper_ctrl_control_pins_##inst[] = {          \
+	static const struct gpio_dt_spec h_bridge_stepper_ctrl_control_pins_##inst[] = {           \
 		DT_INST_FOREACH_PROP_ELEM_SEP(inst, gpios, GPIO_DT_SPEC_GET_BY_IDX, (,)),          \
 	};                                                                                         \
-	BUILD_ASSERT(ARRAY_SIZE(h_bridge_stepper_ctrl_control_pins_##inst) == 4,                  \
+	BUILD_ASSERT(ARRAY_SIZE(h_bridge_stepper_ctrl_control_pins_##inst) == 4,                   \
 		     "h_bridge stepper driver currently supports only 4 wire configuration");      \
 	static const struct h_bridge_stepper_config h_bridge_stepper_config_##inst = {             \
 		.common = GPIO_STEPPER_DT_INST_COMMON_CONFIG_INIT(inst),                           \
 		.common.timing_source_cb = stepper_work_step_handler,                              \
 		.step_gap = DT_INST_PROP(inst, lut_step_gap),                                      \
-		.control_pins = h_bridge_stepper_ctrl_control_pins_##inst};                       \
-	static struct h_bridge_stepper_data h_bridge_stepper_data_##inst;                          \
+		.control_pins = h_bridge_stepper_ctrl_control_pins_##inst};                        \
+	static struct h_bridge_stepper_data h_bridge_stepper_data_##inst = {                       \
+		.common = GPIO_STEPPER_DT_INST_COMMON_DATA_INIT(inst),                             \
+	};                                                                                         \
 	DEVICE_DT_INST_DEFINE(inst, h_bridge_stepper_init, NULL, &h_bridge_stepper_data_##inst,    \
 			      &h_bridge_stepper_config_##inst, POST_KERNEL,                        \
 			      CONFIG_STEPPER_INIT_PRIORITY, &h_bridge_stepper_ctrl_api);

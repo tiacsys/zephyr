@@ -12,6 +12,7 @@ config STEPPER_ADI_TMC51XX
 config STEPPER_ADI_TMC51XX_STEPPER
 	bool "Activate trinamic tmc51xx motion controller"
 	depends on DT_HAS_ADI_TMC51XX_STEPPER_ENABLED && STEPPER_ADI_TMC51XX
+	depends on !STEPPER_CONTROLLER_ISR_SAFE_EVENTS
 	default y
 
 config STEPPER_ADI_TMC51XX_STEPPER_DRV

@@ -12,6 +12,7 @@
 #include <zephyr/drivers/stepper.h>
 
 #include <gpio_stepper_common.h>
+#include <stepper_controller_event_common.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(h_bridge_stepper, CONFIG_STEPPER_LOG_LEVEL);
@@ -109,10 +110,10 @@ static void stepper_work_step_handler(const struct device *dev)
 		switch (data->run_mode) {
 		case STEPPER_RUN_MODE_POSITION:
 			gpio_stepper_common_update_remaining_steps(dev);
-			gpio_stepper_common_position_mode_task(data->dev);
+			gpio_stepper_common_position_mode_task(data->event_common.dev);
 			break;
 		case STEPPER_RUN_MODE_VELOCITY:
-			gpio_stepper_common_velocity_mode_task(data->dev);
+			gpio_stepper_common_velocity_mode_task(data->event_common.dev);
 			break;
 		default:
 			LOG_WRN("Unsupported run mode %d", data->run_mode);
@@ -133,7 +134,8 @@ static int h_bridge_stepper_move_by(const struct device *dev, int32_t micro_step
 	}
 
 	if (micro_steps == 0) {
-		gpio_stepper_trigger_callback(dev, STEPPER_EVENT_STEPS_COMPLETED);
+		stepper_controller_event_common_trigger_callback(dev,
+								 STEPPER_EVENT_STEPS_COMPLETED);
 		config->timing_source->stop(dev);
 		return 0;
 	}
@@ -214,7 +216,7 @@ static int h_bridge_stepper_stop(const struct device *dev)
 
 	K_SPINLOCK(&data->lock) {
 		err = config->timing_source->stop(dev);
-		gpio_stepper_trigger_callback(dev, STEPPER_EVENT_STOPPED);
+		stepper_controller_event_common_trigger_callback(dev, STEPPER_EVENT_STOPPED);
 	}
 
 	return err;
@@ -226,7 +228,7 @@ static int h_bridge_stepper_init(const struct device *dev)
 	const struct h_bridge_stepper_config *config = dev->config;
 	int err;
 
-	data->dev = dev;
+	data->event_common.dev = dev;
 	LOG_DBG("Initializing %s h_bridge_stepper with %d pin", dev->name, NUM_CONTROL_PINS);
 	for (uint8_t n_pin = 0; n_pin < NUM_CONTROL_PINS; n_pin++) {
 		if (!gpio_is_ready_dt(&config->control_pins[n_pin])) {
@@ -246,7 +248,7 @@ static int h_bridge_stepper_init(const struct device *dev)
 static DEVICE_API(stepper, h_bridge_stepper_api) = {
 	.set_reference_position = gpio_stepper_common_set_reference_position,
 	.get_actual_position = gpio_stepper_common_get_actual_position,
-	.set_event_callback = gpio_stepper_common_set_event_callback,
+	.set_event_callback = stepper_controller_event_common_set_event_callback,
 	.set_microstep_interval = h_bridge_stepper_set_microstep_interval,
 	.move_by = h_bridge_stepper_move_by,
 	.move_to = gpio_stepper_common_move_to,

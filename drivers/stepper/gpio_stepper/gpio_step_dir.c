@@ -10,6 +10,7 @@
 #include <step_dir_stepper_common.h>
 
 #include <gpio_stepper_common.h>
+#include <stepper_controller_event_common.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(gpio_step_dir_stepper, CONFIG_STEPPER_LOG_LEVEL);
@@ -130,7 +131,8 @@ static int gpio_step_dir_move_by(const struct device *dev, const int32_t micro_s
 	}
 
 	if (micro_steps == 0) {
-		gpio_stepper_trigger_callback(data->common.dev, STEPPER_EVENT_STEPS_COMPLETED);
+		stepper_controller_event_common_trigger_callback(dev,
+								 STEPPER_EVENT_STEPS_COMPLETED);
 		config->common.timing_source->stop(dev);
 		return 0;
 	}
@@ -227,7 +229,7 @@ int gpio_step_dir_stepper_stop(const struct device *dev)
 		}
 	}
 
-	gpio_stepper_trigger_callback(dev, STEPPER_EVENT_STOPPED);
+	stepper_controller_event_common_trigger_callback(dev, STEPPER_EVENT_STOPPED);
 
 	return 0;
 }
@@ -278,7 +280,7 @@ static DEVICE_API(stepper, gpio_step_dir_stepper_api) = {
 	.is_moving = gpio_stepper_common_is_moving,
 	.set_reference_position = gpio_stepper_common_set_reference_position,
 	.get_actual_position = gpio_stepper_common_get_actual_position,
-	.set_event_callback = gpio_stepper_common_set_event_callback,
+	.set_event_callback = stepper_controller_event_common_set_event_callback,
 	.set_microstep_interval = gpio_step_dir_set_microstep_interval,
 	.run = gpio_step_dir_stepper_run,
 	.stop = gpio_step_dir_stepper_stop,

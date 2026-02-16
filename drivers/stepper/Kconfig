@@ -24,12 +24,29 @@ config STEPPER_SHELL
 	help
 	  Enable stepper shell for testing.
 
+config STEPPER_CONTROLLER_ISR_SAFE_EVENTS
+	bool "Guarantee that callbacks are executed in a non-ISR environment"
+	help
+	  Enable the dispatch of stepper_ctrl generated events via
+	  a message queue to guarantee that the event handler
+	  code is not run inside of an ISR. Can be disabled, but
+	  then registered stepper_ctrl event callbacks might run inside an ISR.
+
+config STEPPER_CONTROLLER_EVENT_QUEUE_LEN
+	int "Maximum number of pending stepper_ctrl events"
+	default 4
+	depends on STEPPER_CONTROLLER_ISR_SAFE_EVENTS
+	help
+	  The maximum number of stepper_ctrl events per driver instance that can
+	  be pending before new events are dropped.
+
 comment "Stepper Drivers"
 
 # zephyr-keep-sorted-start
 rsource "Kconfig.fake"
 rsource "adi_tmc/Kconfig"
 rsource "allegro/Kconfig"
+rsource "common/Kconfig"
 rsource "gpio_stepper/Kconfig"
 rsource "step_dir/Kconfig"
 rsource "ti/Kconfig"

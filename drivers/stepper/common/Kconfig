@@ -1,0 +1,7 @@
+# Copyright (c) 2026 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+config STEPPER_CONTROLLER_EVENT_COMMON
+	bool
+	help
+	  Enable library used for handling stepper_ctrl event callbacks.

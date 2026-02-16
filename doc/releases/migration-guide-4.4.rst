@@ -738,6 +738,10 @@ Stepper
 
 * :dtcompatible:`adi,tmc50xx` and :dtcompatible:`adi,tmc51xx` devices are now modeled as MFDs.
 
+* ``CONFIG_STEPPER_*_GENERATE_ISR_SAFE_EVENTS`` is replaced by ``CONFIG_STEPPER_CONTROLLER_ISR_SAFE_EVENTS``
+
+* ``CONFIG_STEPPER_*_EVENT_QUEUE_LEN`` is replaced by ``CONFIG_STEPPER_CONTROLLER_EVENT_QUEUE_LEN``
+
 STM32
 =====
 

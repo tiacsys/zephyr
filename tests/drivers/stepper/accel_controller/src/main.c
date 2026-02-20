@@ -7,9 +7,9 @@
 #include <zephyr/drivers/stepper.h>
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(cz_accel_controller_test, CONFIG_STEPPER_LOG_LEVEL);
+LOG_MODULE_REGISTER(controller_test, CONFIG_STEPPER_LOG_LEVEL);
 
-struct cz_accel_controller_fixture {
+struct accel_controller_fixture {
 	const struct device *dev;
 	stepper_event_callback_t callback;
 };
@@ -73,7 +73,7 @@ void *user_data_received;
 		} while (0);                                                                       \
 	})
 
-static void cz_accel_controller_print_event_callback(const struct device *dev,
+static void accel_controller_print_event_callback(const struct device *dev,
 						     enum stepper_event event, void *user_data)
 {
 	const struct device *dev_callback = user_data;
@@ -100,11 +100,11 @@ static void cz_accel_controller_print_event_callback(const struct device *dev,
 		dev_callback->name, dev->name);
 }
 
-static void *cz_accel_controller_setup(void)
+static void *accel_controller_setup(void)
 {
-	static struct cz_accel_controller_fixture fixture = {
+	static struct accel_controller_fixture fixture = {
 		.dev = DEVICE_DT_GET(DT_ALIAS(stepper)),
-		.callback = cz_accel_controller_print_event_callback,
+		.callback = accel_controller_print_event_callback,
 	};
 
 	k_poll_signal_init(&stepper_signal);
@@ -119,9 +119,9 @@ static void *cz_accel_controller_setup(void)
 	return &fixture;
 }
 
-static void cz_accel_controller_before(void *f)
+static void accel_controller_before(void *f)
 {
-	struct cz_accel_controller_fixture *fixture = f;
+	struct accel_controller_fixture *fixture = f;
 	zassert_ok(stepper_move_by(fixture->dev, 0));
 	(void)stepper_set_reference_position(fixture->dev, 0);
 
@@ -132,18 +132,18 @@ static void cz_accel_controller_before(void *f)
 	user_data_received = NULL;
 }
 
-static void cz_accel_controller_after(void *f)
+static void accel_controller_after(void *f)
 {
-	struct cz_accel_controller_fixture *fixture = f;
+	struct accel_controller_fixture *fixture = f;
 	zassert_ok(stepper_move_by(fixture->dev, 0));
 
 	k_msleep(1); // Sleep to account for event handling in another thread
 }
 
-ZTEST_SUITE(cz_accel_controller, NULL, cz_accel_controller_setup, cz_accel_controller_before,
-	    cz_accel_controller_after, NULL);
+ZTEST_SUITE(accel_controller, NULL, accel_controller_setup, accel_controller_before,
+	    accel_controller_after, NULL);
 
-ZTEST_F(cz_accel_controller, test_set_reference_position)
+ZTEST_F(accel_controller, test_set_reference_position)
 {
 	int position = 1;
 	zassert_ok(stepper_get_actual_position(fixture->dev, &position));
@@ -153,7 +153,7 @@ ZTEST_F(cz_accel_controller, test_set_reference_position)
 	zassert_equal(position, 12, "Actual position should be 12 but is %d", position);
 }
 
-ZTEST_F(cz_accel_controller, test_set_reference_position_fails_while_moving)
+ZTEST_F(accel_controller, test_set_reference_position_fails_while_moving)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_POSITIVE));
@@ -165,7 +165,7 @@ ZTEST_F(cz_accel_controller, test_set_reference_position_fails_while_moving)
 		-EBUSY, ret);
 }
 
-ZTEST_F(cz_accel_controller, test_is_moving)
+ZTEST_F(accel_controller, test_is_moving)
 {
 	bool moving = true;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -192,7 +192,7 @@ ZTEST_F(cz_accel_controller, test_is_moving)
 	zassert_true(moving, "Stepper should be moving after move_to function, but is not");
 }
 
-ZTEST_F(cz_accel_controller, test_run_positive_direction)
+ZTEST_F(accel_controller, test_run_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -201,7 +201,7 @@ ZTEST_F(cz_accel_controller, test_run_positive_direction)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_negative_direction)
+ZTEST_F(accel_controller, test_run_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -210,7 +210,7 @@ ZTEST_F(cz_accel_controller, test_run_negative_direction)
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_run_positive_direction_from_higher_speed)
+ZTEST_F(accel_controller, test_run_positive_direction_from_higher_speed)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 			      STEPPER_STEPS_HIGH_1_SEC + STEPPER_STEPS_LOW_TO_HIGH +
@@ -224,7 +224,7 @@ ZTEST_F(cz_accel_controller, test_run_positive_direction_from_higher_speed)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_negative_direction_from_higher_speed)
+ZTEST_F(accel_controller, test_run_negative_direction_from_higher_speed)
 {
 	int target_position =
 		-(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_HIGH_1_SEC +
@@ -238,7 +238,7 @@ ZTEST_F(cz_accel_controller, test_run_negative_direction_from_higher_speed)
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_run_positive_direction_from_lower_speed)
+ZTEST_F(accel_controller, test_run_positive_direction_from_lower_speed)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC +
 			      STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_HIGH_1_SEC;
@@ -251,7 +251,7 @@ ZTEST_F(cz_accel_controller, test_run_positive_direction_from_lower_speed)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_negative_direction_from_lower_speed)
+ZTEST_F(accel_controller, test_run_negative_direction_from_lower_speed)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC +
 				STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_HIGH_1_SEC);
@@ -264,7 +264,7 @@ ZTEST_F(cz_accel_controller, test_run_negative_direction_from_lower_speed)
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_run_direction_change_while_moving_positive_to_negative_fails)
+ZTEST_F(accel_controller, test_run_direction_change_while_moving_positive_to_negative_fails)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -279,7 +279,7 @@ ZTEST_F(cz_accel_controller, test_run_direction_change_while_moving_positive_to_
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_direction_change_while_moving_negative_to_positive_fails)
+ZTEST_F(accel_controller, test_run_direction_change_while_moving_negative_to_positive_fails)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -294,7 +294,7 @@ ZTEST_F(cz_accel_controller, test_run_direction_change_while_moving_negative_to_
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_stop_positive_direction)
+ZTEST_F(accel_controller, test_stop_positive_direction)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_POSITIVE));
@@ -314,7 +314,7 @@ ZTEST_F(cz_accel_controller, test_stop_positive_direction)
 		      "Position should not have changed after stopping, but it did");
 }
 
-ZTEST_F(cz_accel_controller, test_stop_negative_direction)
+ZTEST_F(accel_controller, test_stop_negative_direction)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_NEGATIVE));
@@ -334,7 +334,7 @@ ZTEST_F(cz_accel_controller, test_stop_negative_direction)
 		      "Position should not have changed after stopping, but it did");
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_positive_direction)
+ZTEST_F(accel_controller, test_move_by_positive_direction)
 {
 	int target_position = 20000;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -349,7 +349,7 @@ ZTEST_F(cz_accel_controller, test_move_by_positive_direction)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_negative_direction)
+ZTEST_F(accel_controller, test_move_by_negative_direction)
 {
 	int target_position = -20000;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -364,7 +364,7 @@ ZTEST_F(cz_accel_controller, test_move_by_negative_direction)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_positive_direction_insufficient_steps)
+ZTEST_F(accel_controller, test_move_by_positive_direction_insufficient_steps)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -379,7 +379,7 @@ ZTEST_F(cz_accel_controller, test_move_by_positive_direction_insufficient_steps)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_negative_direction_insufficient_steps)
+ZTEST_F(accel_controller, test_move_by_negative_direction_insufficient_steps)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -394,7 +394,7 @@ ZTEST_F(cz_accel_controller, test_move_by_negative_direction_insufficient_steps)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_positive_direction_insufficient_steps_while_moving_fails)
+ZTEST_F(accel_controller, test_move_by_positive_direction_insufficient_steps_while_moving_fails)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC / 2;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -409,7 +409,7 @@ ZTEST_F(cz_accel_controller, test_move_by_positive_direction_insufficient_steps_
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller,
+ZTEST_F(accel_controller,
 	test_move_by_positive_direction_insufficient_steps_while_moving_higher_speed)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF +
@@ -428,7 +428,7 @@ ZTEST_F(cz_accel_controller,
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_negative_direction_insufficient_steps_while_moving_fails)
+ZTEST_F(accel_controller, test_move_by_negative_direction_insufficient_steps_while_moving_fails)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC / 2);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -443,7 +443,7 @@ ZTEST_F(cz_accel_controller, test_move_by_negative_direction_insufficient_steps_
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller,
+ZTEST_F(accel_controller,
 	test_move_by_negative_direction_insufficient_steps_while_moving_higher_speed)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF +
@@ -462,7 +462,7 @@ ZTEST_F(cz_accel_controller,
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
-// ZTEST_F(cz_accel_controller, test_move_by_positive_direction_lower_speed_while_moving)
+// ZTEST_F(accel_controller, test_move_by_positive_direction_lower_speed_while_moving)
 // {
 // 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 // 			      STEPPER_STEPS_HIGH_1_SEC + 25000;
@@ -480,7 +480,7 @@ ZTEST_F(cz_accel_controller,
 // 		      position);
 // }
 
-// ZTEST_F(cz_accel_controller, test_move_by_negative_direction_lower_speed_while_moving)
+// ZTEST_F(accel_controller, test_move_by_negative_direction_lower_speed_while_moving)
 // {
 // 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 // 				STEPPER_STEPS_HIGH_1_SEC + 25000);
@@ -498,7 +498,7 @@ ZTEST_F(cz_accel_controller,
 // 		      position);
 // }
 
-// ZTEST_F(cz_accel_controller, test_move_by_positive_direction_higher_speed_while_moving)
+// ZTEST_F(accel_controller, test_move_by_positive_direction_higher_speed_while_moving)
 // {
 // 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC + 35000;
 // 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -515,7 +515,7 @@ ZTEST_F(cz_accel_controller,
 // 		      position);
 // }
 
-// ZTEST_F(cz_accel_controller, test_move_by_negative_direction_higher_speed_while_moving)
+// ZTEST_F(accel_controller, test_move_by_negative_direction_higher_speed_while_moving)
 // {
 // 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC + 35000);
 // 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -532,7 +532,7 @@ ZTEST_F(cz_accel_controller,
 // 		      position);
 // }
 
-ZTEST_F(cz_accel_controller, test_move_by_changing_microstep_interval_fails)
+ZTEST_F(accel_controller, test_move_by_changing_microstep_interval_fails)
 {
 	int target_position =
 		STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC + STEPPER_STEPS_0_TO_LOW;
@@ -554,7 +554,7 @@ ZTEST_F(cz_accel_controller, test_move_by_changing_microstep_interval_fails)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_direction_change_while_moving_positive_to_negative_fails)
+ZTEST_F(accel_controller, test_move_by_direction_change_while_moving_positive_to_negative_fails)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_POSITIVE));
@@ -572,7 +572,7 @@ ZTEST_F(cz_accel_controller, test_move_by_direction_change_while_moving_positive
 	zassert(position1 < position2, "Stepper should have continued to run but did not.");
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_direction_change_while_moving_negative_to_positive_fails)
+ZTEST_F(accel_controller, test_move_by_direction_change_while_moving_negative_to_positive_fails)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_NEGATIVE));
@@ -590,7 +590,7 @@ ZTEST_F(cz_accel_controller, test_move_by_direction_change_while_moving_negative
 	zassert(position1 > position2, "Stepper should have continued to run but did not.");
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_0_steps_immediate_stop_positive_direction)
+ZTEST_F(accel_controller, test_move_by_0_steps_immediate_stop_positive_direction)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_POSITIVE));
@@ -610,7 +610,7 @@ ZTEST_F(cz_accel_controller, test_move_by_0_steps_immediate_stop_positive_direct
 	zassert_equal(position1, position2, "Position should not have changed, but it did.");
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_0_steps_immediate_stop_negative_direction)
+ZTEST_F(accel_controller, test_move_by_0_steps_immediate_stop_negative_direction)
 {
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_run(fixture->dev, STEPPER_DIRECTION_NEGATIVE));
@@ -630,7 +630,7 @@ ZTEST_F(cz_accel_controller, test_move_by_0_steps_immediate_stop_negative_direct
 	zassert_equal(position1, position2, "Position should not have changed, but it did.");
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_fails_while_moving_positioning_mode)
+ZTEST_F(accel_controller, test_move_by_fails_while_moving_positioning_mode)
 {
 	int target_position =
 		STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC / 2 + STEPPER_STEPS_0_TO_LOW;
@@ -652,7 +652,7 @@ ZTEST_F(cz_accel_controller, test_move_by_fails_while_moving_positioning_mode)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_to_run_positive_direction)
+ZTEST_F(accel_controller, test_move_by_to_run_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC * 2;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -666,7 +666,7 @@ ZTEST_F(cz_accel_controller, test_move_by_to_run_positive_direction)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_to_run_negative_direction)
+ZTEST_F(accel_controller, test_move_by_to_run_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC * 2);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -680,7 +680,7 @@ ZTEST_F(cz_accel_controller, test_move_by_to_run_negative_direction)
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_to_positive_direction)
+ZTEST_F(accel_controller, test_move_to_positive_direction)
 {
 	int target_position = 20000;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -695,7 +695,7 @@ ZTEST_F(cz_accel_controller, test_move_to_positive_direction)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_to_negative_direction)
+ZTEST_F(accel_controller, test_move_to_negative_direction)
 {
 	int target_position = -20000;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -710,7 +710,7 @@ ZTEST_F(cz_accel_controller, test_move_to_negative_direction)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_to_positive_direction_insufficient_steps)
+ZTEST_F(accel_controller, test_move_to_positive_direction_insufficient_steps)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -725,7 +725,7 @@ ZTEST_F(cz_accel_controller, test_move_to_positive_direction_insufficient_steps)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_to_negative_direction_insufficient_steps)
+ZTEST_F(accel_controller, test_move_to_negative_direction_insufficient_steps)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -740,7 +740,7 @@ ZTEST_F(cz_accel_controller, test_move_to_negative_direction_insufficient_steps)
 		      position);
 }
 
-//  ZTEST_F(cz_accel_controller, test_move_to_positive_direction_lower_speed_while_moving)
+//  ZTEST_F(accel_controller, test_move_to_positive_direction_lower_speed_while_moving)
 //  {
 //  	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 //  			      STEPPER_STEPS_HIGH_1_SEC + 25000;
@@ -758,7 +758,7 @@ ZTEST_F(cz_accel_controller, test_move_to_negative_direction_insufficient_steps)
 // 		      position);
 // }
 
-ZTEST_F(cz_accel_controller, test_move_to_changing_microstep_interval_fails)
+ZTEST_F(accel_controller, test_move_to_changing_microstep_interval_fails)
 {
 	int target_position =
 		STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC + STEPPER_STEPS_0_TO_LOW;
@@ -780,7 +780,7 @@ ZTEST_F(cz_accel_controller, test_move_to_changing_microstep_interval_fails)
 		      position);
 }
 
-//  ZTEST_F(cz_accel_controller, test_move_to_negative_direction_lower_speed_while_moving)
+//  ZTEST_F(accel_controller, test_move_to_negative_direction_lower_speed_while_moving)
 //  {
 //  	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 //  				STEPPER_STEPS_HIGH_1_SEC + 25000);
@@ -798,7 +798,7 @@ ZTEST_F(cz_accel_controller, test_move_to_changing_microstep_interval_fails)
 // 		      position);
 // }
 
-//  ZTEST_F(cz_accel_controller, test_move_to_positive_direction_higher_speed_while_moving)
+//  ZTEST_F(accel_controller, test_move_to_positive_direction_higher_speed_while_moving)
 //  {
 //  	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC + 35000;
 //  	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -815,7 +815,7 @@ ZTEST_F(cz_accel_controller, test_move_to_changing_microstep_interval_fails)
 // 		      position);
 // }
 
-//  ZTEST_F(cz_accel_controller, test_move_to_negative_direction_higher_speed_while_moving)
+//  ZTEST_F(accel_controller, test_move_to_negative_direction_higher_speed_while_moving)
 //  {
 //  	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC + 35000);
 //  	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -832,7 +832,7 @@ ZTEST_F(cz_accel_controller, test_move_to_changing_microstep_interval_fails)
 // 		      position);
 // }
 
-ZTEST_F(cz_accel_controller, test_move_to_fails_while_moving_velocity_mode)
+ZTEST_F(accel_controller, test_move_to_fails_while_moving_velocity_mode)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC * 1.5;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
@@ -847,7 +847,7 @@ ZTEST_F(cz_accel_controller, test_move_to_fails_while_moving_velocity_mode)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_to_fails_while_moving_positioning_mode)
+ZTEST_F(accel_controller, test_move_to_fails_while_moving_positioning_mode)
 {
 	int target_position =
 		STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_1_SEC / 2 + STEPPER_STEPS_0_TO_LOW;
@@ -869,7 +869,7 @@ ZTEST_F(cz_accel_controller, test_move_to_fails_while_moving_positioning_mode)
 		      position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_acceleration_to_acceleration_positive_direction)
+ZTEST_F(accel_controller, test_run_acceleration_to_acceleration_positive_direction)
 {
 	int target_position =
 		STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_HIGH_1_SEC;
@@ -882,7 +882,7 @@ ZTEST_F(cz_accel_controller, test_run_acceleration_to_acceleration_positive_dire
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_acceleration_to_acceleration_negative_direction)
+ZTEST_F(accel_controller, test_run_acceleration_to_acceleration_negative_direction)
 {
 	int target_position =
 		-(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_HIGH_1_SEC);
@@ -895,7 +895,7 @@ ZTEST_F(cz_accel_controller, test_run_acceleration_to_acceleration_negative_dire
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_run_acceleration_to_deceleration_positive_direction)
+ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF +
 			      STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF + STEPPER_STEPS_LOW_1_SEC;
@@ -908,7 +908,7 @@ ZTEST_F(cz_accel_controller, test_run_acceleration_to_deceleration_positive_dire
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_acceleration_to_deceleration_negative_direction)
+ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF +
 				STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF + STEPPER_STEPS_LOW_1_SEC);
@@ -921,7 +921,7 @@ ZTEST_F(cz_accel_controller, test_run_acceleration_to_deceleration_negative_dire
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_run_deceleration_to_acceleration_positive_direction)
+ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 			      STEPPER_STEPS_LOW_TO_HIGH_UPPER_HALF +
@@ -937,7 +937,7 @@ ZTEST_F(cz_accel_controller, test_run_deceleration_to_acceleration_positive_dire
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_deceleration_to_acceleration_negative_direction)
+ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 				STEPPER_STEPS_LOW_TO_HIGH_UPPER_HALF +
@@ -953,7 +953,7 @@ ZTEST_F(cz_accel_controller, test_run_deceleration_to_acceleration_negative_dire
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_run_deceleration_to_deceleration_positive_direction)
+ZTEST_F(accel_controller, test_run_deceleration_to_deceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 			      STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_0_TO_LOW_UPPER_HALF +
@@ -969,7 +969,7 @@ ZTEST_F(cz_accel_controller, test_run_deceleration_to_deceleration_positive_dire
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_run_deceleration_to_deceleration_negative_direction)
+ZTEST_F(accel_controller, test_run_deceleration_to_deceleration_negative_direction)
 {
 	int target_position =
 		-(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH + STEPPER_STEPS_LOW_TO_HIGH +
@@ -985,7 +985,7 @@ ZTEST_F(cz_accel_controller, test_run_deceleration_to_deceleration_negative_dire
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_acceleration_positive_direction)
+ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + 35000;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -1003,7 +1003,7 @@ ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_acceleration_positive_
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_acceleration_negative_direction)
+ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + 35000);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -1021,7 +1021,7 @@ ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_acceleration_negative_
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_deceleration_positive_direction)
+ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF + 25000;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -1038,7 +1038,7 @@ ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_deceleration_positive_
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_deceleration_negative_direction)
+ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_negative_direction)
 {
 	int target_position =
 		-(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH_LOWER_HALF + 25000);
@@ -1056,7 +1056,7 @@ ZTEST_F(cz_accel_controller, test_move_by_acceleration_to_deceleration_negative_
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_acceleration_positive_direction)
+ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 			      STEPPER_STEPS_LOW_TO_HIGH_UPPER_HALF + 35000;
@@ -1077,7 +1077,7 @@ ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_acceleration_positive_
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_acceleration_negative_direction)
+ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 				STEPPER_STEPS_LOW_TO_HIGH_UPPER_HALF + 35000);
@@ -1098,7 +1098,7 @@ ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_acceleration_negative_
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_deceleration_positive_direction)
+ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 			      STEPPER_STEPS_LOW_TO_HIGH + 15000;
@@ -1118,7 +1118,7 @@ ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_deceleration_positive_
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_deceleration_negative_direction)
+ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 				STEPPER_STEPS_LOW_TO_HIGH + 15000);
@@ -1138,7 +1138,7 @@ ZTEST_F(cz_accel_controller, test_move_by_deceleration_to_deceleration_negative_
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_stop_from_acceleration_positive_direction)
+ZTEST_F(accel_controller, test_stop_from_acceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW;
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -1151,7 +1151,7 @@ ZTEST_F(cz_accel_controller, test_stop_from_acceleration_positive_direction)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_stop_from_acceleration_negative_direction)
+ZTEST_F(accel_controller, test_stop_from_acceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
@@ -1164,7 +1164,7 @@ ZTEST_F(cz_accel_controller, test_stop_from_acceleration_negative_direction)
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_stop_from_deceleration_positive_direction)
+ZTEST_F(accel_controller, test_stop_from_deceleration_positive_direction)
 {
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 			      STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH;
@@ -1180,7 +1180,7 @@ ZTEST_F(cz_accel_controller, test_stop_from_deceleration_positive_direction)
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_stop_from_deceleration_negative_direction)
+ZTEST_F(accel_controller, test_stop_from_deceleration_negative_direction)
 {
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH +
 				STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_LOW_TO_HIGH);
@@ -1196,7 +1196,7 @@ ZTEST_F(cz_accel_controller, test_stop_from_deceleration_negative_direction)
 	STEPPER_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
 
-ZTEST_F(cz_accel_controller, test_stop_movement_commands_fail_positive_direction)
+ZTEST_F(accel_controller, test_stop_movement_commands_fail_positive_direction)
 {
 	int ret = 0;
 	int target_position = STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW;
@@ -1226,7 +1226,7 @@ ZTEST_F(cz_accel_controller, test_stop_movement_commands_fail_positive_direction
 	STEPPER_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
-ZTEST_F(cz_accel_controller, test_stop_movement_commands_fail_negative_direction)
+ZTEST_F(accel_controller, test_stop_movement_commands_fail_negative_direction)
 {
 	int ret = 0;
 	int target_position = -(STEPPER_STEPS_0_TO_LOW + STEPPER_STEPS_0_TO_LOW);

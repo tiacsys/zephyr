@@ -74,7 +74,7 @@ void *user_data_received;
 	})
 
 static void accel_controller_print_event_callback(const struct device *dev,
-						     enum stepper_event event, void *user_data)
+						  enum stepper_event event, void *user_data)
 {
 	const struct device *dev_callback = user_data;
 	user_data_received = user_data;
@@ -125,7 +125,8 @@ static void accel_controller_before(void *f)
 	zassert_ok(stepper_move_by(fixture->dev, 0));
 	(void)stepper_set_reference_position(fixture->dev, 0);
 
-	k_msleep(10); // Sleep to account for event handling in another thread
+	/* Sleep to account for event handling in another thread. */
+	k_msleep(10);
 
 	k_poll_signal_reset(&stepper_signal);
 
@@ -137,7 +138,8 @@ static void accel_controller_after(void *f)
 	struct accel_controller_fixture *fixture = f;
 	zassert_ok(stepper_move_by(fixture->dev, 0));
 
-	k_msleep(10); // Sleep to account for event handling in another thread
+	/* Sleep to account for event handling in another thread. */
+	k_msleep(10);
 }
 
 ZTEST_SUITE(accel_controller, NULL, accel_controller_setup, accel_controller_before,
@@ -853,8 +855,9 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_positive_dir
 	k_msleep(STEPPER_TIMEOUT_0_TO_LOW_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_move_by(fixture->dev, 3500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_TIMEOUT_LOW_TO_HIGH_MS +
 				     STEPPER_TIMEOUT_LOW_TO_HIGH_MS + STEPPER_TIMEOUT_0_TO_LOW_MS +
@@ -874,8 +877,9 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_negative_dir
 	LOG_INF("Position: %d", pos);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_move_by(fixture->dev, -3500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_TIMEOUT_LOW_TO_HIGH_MS +
 				     STEPPER_TIMEOUT_LOW_TO_HIGH_MS + STEPPER_TIMEOUT_0_TO_LOW_MS +
@@ -892,8 +896,9 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_positive_dir
 	k_msleep(STEPPER_TIMEOUT_0_TO_LOW_MS + STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_move_by(fixture->dev, 2500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS +
 				     STEPPER_TIMEOUT_0_TO_LOW_MS + 890 +
@@ -910,8 +915,9 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_negative_dir
 	k_msleep(STEPPER_TIMEOUT_0_TO_LOW_MS + STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_move_by(fixture->dev, -2500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS +
 				     STEPPER_TIMEOUT_0_TO_LOW_MS + 890 +
@@ -930,8 +936,9 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_positive_dir
 	k_msleep(STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_move_by(fixture->dev, 3500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS +
 				     STEPPER_TIMEOUT_0_TO_LOW_MS + STEPPER_TIMEOUT_LOW_TO_HIGH_MS +
@@ -951,8 +958,9 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_negative_dir
 	k_msleep(STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_move_by(fixture->dev, -3500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_TIMEOUT_LOW_TO_HIGH_HALF_MS +
 				     STEPPER_TIMEOUT_0_TO_LOW_MS + STEPPER_TIMEOUT_LOW_TO_HIGH_MS +
@@ -972,8 +980,9 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_positive_dir
 	k_msleep(STEPPER_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL * 2));
 	zassert_ok(stepper_move_by(fixture->dev, 1500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(
 		stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 		K_MSEC(STEPPER_TIMEOUT_0_TO_LOW_MS + 1000 + STEPPER_TIMEOUT_TOLERANCE_MS));
@@ -992,8 +1001,9 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_negative_dir
 	k_msleep(STEPPER_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(stepper_set_microstep_interval(fixture->dev, STEPPER_LOW_SPEED_INTERVAL * 2));
 	zassert_ok(stepper_move_by(fixture->dev, -1500));
-	// Wait time is calculaed based on the original acceleration parameters and might need to be
-	// adapted for other ones
+	/* Wait time is calculaed based on the original acceleration parameters and might need to be
+	 * adapted for other ones
+	 */
 	POLL_AND_CHECK_SIGNAL(
 		stepper_signal, stepper_event, STEPPER_EVENT_STEPS_COMPLETED,
 		K_MSEC(STEPPER_TIMEOUT_0_TO_LOW_MS + 1000 + STEPPER_TIMEOUT_TOLERANCE_MS));

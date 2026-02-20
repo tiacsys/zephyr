@@ -22,9 +22,9 @@
 		compatible = "zephyr,accel-controller";
 
 		stepper-ctrl = <&step_dir_motion_control>;
-		accel-time-microstep = <66666>;
+		accel-time-microstep = <666666>;
 		update-interval = <10000000>;
-		delay = <32>;
+		delay = <10>;
 	};
 };
 

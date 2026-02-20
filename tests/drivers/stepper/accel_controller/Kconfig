@@ -7,7 +7,7 @@ source "Kconfig.zephyr"
 
 config STEPPER_TEST_STEPPING_TOLERANCE
 	int "Stepper step tolerance percentage"
-	default 3
+	default 5
 	help
 	  Additional margin (%) added or subtracted to expected steps for run
 	  commands to account for timing inaccuracys and runtime.

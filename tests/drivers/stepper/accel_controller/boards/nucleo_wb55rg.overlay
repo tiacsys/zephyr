@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2026 Navimatix GmbH
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	aliases {
+		stepper = &zephyr_accel_controller;
+	};
+
+	step_dir_motion_control: step_dir_motion_control {
+		compatible = "zephyr,gpio-step-dir-stepper";
+		step-gpios = <&gpioa 8 GPIO_ACTIVE_HIGH>;
+		dir-gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+		counter = <&counter2>;
+	};
+
+	zephyr_accel_controller: zephyr_accel_controller {
+		status = "okay";
+		compatible = "zephyr,accel-controller";
+
+		stepper-ctrl = <&step_dir_motion_control>;
+		accel-time-microstep = <66666>;
+		update-interval = <10000000>;
+		delay = <32>;
+	};
+};
+
+&timers2 {
+	status = "okay";
+	counter2: counter {
+		status = "okay";
+	};
+ };

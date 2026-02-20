@@ -1,0 +1,13 @@
+# Copyright (c) 2026 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "Accel Controller Test"
+
+source "Kconfig.zephyr"
+
+config STEPPER_TEST_STEPPING_TOLERANCE
+	int "Stepper step tolerance percentage"
+	default 3
+	help
+	  Additional margin (%) added or subtracted to expected steps for run
+	  commands to account for timing inaccuracys and runtime.

@@ -11,23 +11,25 @@
 #include <zephyr/drivers/stepper.h>
 
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(czag_accel_controller, CONFIG_STEPPER_LOG_LEVEL);
+LOG_MODULE_REGISTER(zephyr_accel_controller, CONFIG_STEPPER_LOG_LEVEL);
 
 #define STEPPER_RUN_MODE_STOP (STEPPER_RUN_MODE_VELOCITY + 25)
 
-K_THREAD_STACK_DEFINE(czag_accel_controller_work_queue_stack,
+/* We only need a single work queue for all driver instances, as multiple queues would have the same
+ * priority and thus would result in sequential execution anyway. */
+K_THREAD_STACK_DEFINE(zephyr_accel_controller_work_queue_stack,
 		      CONFIG_ZEPHYR_ACCEL_CONTROLLER_WORK_QUEUE_STACK_SIZE);
-static struct k_work_q czag_accel_controller_wq;
-bool wq_initialized = false;
+static struct k_work_q zephyr_accel_controller_wq;
+bool accel_controller_wq_initialized = false;
 
-struct czag_accel_controller_config {
+struct zephyr_accel_controller_config {
 	const struct device *stepper_ctrl;
 	uint64_t accel_decel_time_microstep_ns;
 	uint32_t update_interval_ns;
 	float accel_decel_mult;
 };
 
-struct czag_accel_controller_data {
+struct zephyr_accel_controller_data {
 	struct k_sem semaphore;
 	uint32_t step_width_ns;
 	struct k_work_delayable accel_work;
@@ -59,10 +61,10 @@ struct czag_accel_controller_data {
 	int target_pos;
 };
 
-void czag_callback_handler(const struct device *dev, const enum stepper_event event,
+void accel_controller_callback_handler(const struct device *dev, const enum stepper_event event,
 			   void *user_data)
 {
-	struct czag_accel_controller_data *data = user_data;
+	struct zephyr_accel_controller_data *data = user_data;
 
 	if (event == STEPPER_EVENT_STOPPED || event == STEPPER_EVENT_STEPS_COMPLETED) {
 		data->mode = STEPPER_RUN_MODE_HOLD;
@@ -75,22 +77,22 @@ void czag_callback_handler(const struct device *dev, const enum stepper_event ev
 	}
 }
 
-static void czag_event_callback_init(const struct device *dev)
+static void accel_controller_event_callback_init(const struct device *dev)
 {
-	const struct czag_accel_controller_config *config = dev->config;
-	struct czag_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
 
 	if (!data->callback_initialized) {
-		stepper_set_event_callback(config->stepper_ctrl, czag_callback_handler, data);
+		stepper_set_event_callback(config->stepper_ctrl, accel_controller_callback_handler, data);
 		data->callback_initialized = true;
 	}
 }
-static int czag_accel_controller_adjust_speed(const struct device *dev, const int32_t micro_steps,
+static int zephyr_accel_controller_adjust_speed(const struct device *dev, const int32_t micro_steps,
 					      uint32_t steps_s_start, uint32_t *accel_steps,
 					      uint32_t *decel_steps, uint32_t *new_steps_s)
 {
-	const struct czag_accel_controller_config *config = dev->config;
-	// struct czag_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = dev->config;
+	// struct zephyr_accel_controller_data *data = dev->data;
 
 	uint32_t decel_steps_base = ((uint64_t)steps_s_start * (uint64_t)steps_s_start *
 				     config->accel_decel_time_microstep_ns / NSEC_PER_SEC / 2) *
@@ -120,10 +122,10 @@ static int czag_accel_controller_adjust_speed(const struct device *dev, const in
 	return 0;
 }
 
-static int czag_accel_controller_move_by(const struct device *dev, const int32_t micro_steps)
+static int zephyr_accel_controller_move_by(const struct device *dev, const int32_t micro_steps)
 {
-	const struct czag_accel_controller_config *config = dev->config;
-	struct czag_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
 
 	bool running = false;
 	int ret = 0;
@@ -136,7 +138,7 @@ static int czag_accel_controller_move_by(const struct device *dev, const int32_t
 		return -EBUSY;
 	}
 
-	czag_event_callback_init(dev);
+	accel_controller_event_callback_init(dev);
 
 	k_sem_take(&data->semaphore, K_FOREVER);
 
@@ -186,10 +188,10 @@ static int czag_accel_controller_move_by(const struct device *dev, const int32_t
 	// TODO: Implement solution for this to work instead
 	if (accel_steps + decel_steps > abs(micro_steps)) {
 		// LOG_ERR("Step number to smal to perform acceleration and deceleration, is %d but
-		// " 	"needs to be at least %u", 	abs(micro_steps), accel_steps + decel_steps); ret =
-		// -EINVAL; goto end;
+		// " 	"needs to be at least %u", 	abs(micro_steps), accel_steps +
+		// decel_steps); ret = -EINVAL; goto end;
 		uint32_t new_steps_s = 0;
-		ret = czag_accel_controller_adjust_speed(dev, micro_steps, steps_s_start,
+		ret = zephyr_accel_controller_adjust_speed(dev, micro_steps, steps_s_start,
 							 &accel_steps, &decel_steps, &new_steps_s);
 		if (ret != 0) {
 			goto end;
@@ -226,14 +228,14 @@ static int czag_accel_controller_move_by(const struct device *dev, const int32_t
 
 	LOG_DBG("Started movement, Accel Steps: %u, Const Steps: %llu, Decel Steps: %u",
 		accel_steps, const_steps, decel_steps);
-	LOG_DBG("Accel Segments: %u, Decel Segments: %u",
-		data->start_segments, data->stop_segments);
+	LOG_DBG("Accel Segments: %u, Decel Segments: %u", data->start_segments,
+		data->stop_segments);
 	if (data->steps_s_current < data->steps_s) {
 		data->segment_index_start = 1;
 		if (!running) {
 			uint32_t target_steps_s =
-				((uint64_t)data->segment_index_start * 1000 + 500) *
-				data->steps_s / (data->start_segments * 1000);
+				((uint64_t)data->segment_index_start * 1000 + 500) * data->steps_s /
+				(data->start_segments * 1000);
 			uint64_t target_step_interval = NSEC_PER_SEC / target_steps_s;
 			// LOG_INF("T Step Int: %llu", target_step_interval);
 			stepper_set_microstep_interval(config->stepper_ctrl, target_step_interval);
@@ -266,11 +268,11 @@ end:
 	}
 }
 
-static int czag_accel_controller_set_microstep_interval(const struct device *dev,
+static int zephyr_accel_controller_set_microstep_interval(const struct device *dev,
 							const uint64_t microstep_interval_ns)
 {
-	struct czag_accel_controller_data *data = dev->data;
-	const struct czag_accel_controller_config *config = data->dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = data->dev->config;
 
 	if (data->mode == STEPPER_RUN_MODE_POSITION || data->mode == STEPPER_RUN_MODE_STOP) {
 		LOG_ERR("set_microstep_interval while run_mode is POSITION or STOP is not "
@@ -285,7 +287,7 @@ static int czag_accel_controller_set_microstep_interval(const struct device *dev
 
 	k_sem_give(&data->semaphore);
 
-	//TODO: Error handling
+	// TODO: Error handling
 	if (data->mode == STEPPER_RUN_MODE_VELOCITY) {
 		stepper_run(dev, data->direction);
 	}
@@ -297,12 +299,12 @@ static int czag_accel_controller_set_microstep_interval(const struct device *dev
 	return 0;
 }
 
-void czag_accel_controller_wq_accel_handler(struct k_work *work)
+void zephyr_accel_controller_wq_accel_handler(struct k_work *work)
 {
 	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
-	struct czag_accel_controller_data *data =
-		CONTAINER_OF(dwork, struct czag_accel_controller_data, accel_work);
-	const struct czag_accel_controller_config *config = data->dev->config;
+	struct zephyr_accel_controller_data *data =
+		CONTAINER_OF(dwork, struct zephyr_accel_controller_data, accel_work);
+	const struct zephyr_accel_controller_config *config = data->dev->config;
 
 	k_sem_take(&data->semaphore, K_FOREVER);
 	if (data->accel_cancel) {
@@ -349,12 +351,12 @@ end:
 	k_sem_give(&data->semaphore);
 }
 
-void czag_accel_controller_wq_decel_start_handler(struct k_work *work)
+void zephyr_accel_controller_wq_decel_start_handler(struct k_work *work)
 {
 	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
-	struct czag_accel_controller_data *data =
-		CONTAINER_OF(dwork, struct czag_accel_controller_data, decel_work_start);
-	const struct czag_accel_controller_config *config = data->dev->config;
+	struct zephyr_accel_controller_data *data =
+		CONTAINER_OF(dwork, struct zephyr_accel_controller_data, decel_work_start);
+	const struct zephyr_accel_controller_config *config = data->dev->config;
 
 	k_sem_take(&data->semaphore, K_FOREVER);
 
@@ -397,12 +399,12 @@ end:
 	k_sem_give(&data->semaphore);
 }
 
-void czag_accel_controller_wq_decel_handler(struct k_work *work)
+void zephyr_accel_controller_wq_decel_handler(struct k_work *work)
 {
 	struct k_work_delayable *dwork = k_work_delayable_from_work(work);
-	struct czag_accel_controller_data *data =
-		CONTAINER_OF(dwork, struct czag_accel_controller_data, decel_work);
-	const struct czag_accel_controller_config *config = data->dev->config;
+	struct zephyr_accel_controller_data *data =
+		CONTAINER_OF(dwork, struct zephyr_accel_controller_data, decel_work);
+	const struct zephyr_accel_controller_config *config = data->dev->config;
 	if (data->segment_index_stop == data->stop_segments) {
 		int32_t position;
 		stepper_get_actual_position(config->stepper_ctrl, &position);
@@ -449,9 +451,9 @@ end:
 	k_sem_give(&data->semaphore);
 }
 
-int czag_accel_controller_set_reference_position(const struct device *dev, const int32_t value)
+int zephyr_accel_controller_set_reference_position(const struct device *dev, const int32_t value)
 {
-	const struct czag_accel_controller_config *config = dev->config;
+	const struct zephyr_accel_controller_config *config = dev->config;
 
 	bool moving;
 	stepper_is_moving(config->stepper_ctrl, &moving);
@@ -463,15 +465,15 @@ int czag_accel_controller_set_reference_position(const struct device *dev, const
 	return stepper_set_reference_position(config->stepper_ctrl, value);
 }
 
-int czag_accel_controller_get_actual_position(const struct device *dev, int32_t *value)
+int zephyr_accel_controller_get_actual_position(const struct device *dev, int32_t *value)
 {
-	const struct czag_accel_controller_config *config = dev->config;
+	const struct zephyr_accel_controller_config *config = dev->config;
 	return stepper_get_actual_position(config->stepper_ctrl, value);
 }
 
-int czag_accel_controller_move_to(const struct device *dev, const int32_t value)
+int zephyr_accel_controller_move_to(const struct device *dev, const int32_t value)
 {
-	const struct czag_accel_controller_config *config = dev->config;
+	const struct zephyr_accel_controller_config *config = dev->config;
 
 	bool moving;
 	stepper_is_moving(config->stepper_ctrl, &moving);
@@ -484,21 +486,21 @@ int czag_accel_controller_move_to(const struct device *dev, const int32_t value)
 
 	stepper_get_actual_position(config->stepper_ctrl, &position);
 
-	return czag_accel_controller_move_by(dev, value - position);
+	return zephyr_accel_controller_move_by(dev, value - position);
 }
 
-int czag_accel_controller_is_moving(const struct device *dev, bool *is_moving)
+int zephyr_accel_controller_is_moving(const struct device *dev, bool *is_moving)
 {
-	const struct czag_accel_controller_config *config = dev->config;
+	const struct zephyr_accel_controller_config *config = dev->config;
 	return stepper_is_moving(config->stepper_ctrl, is_moving);
 }
 
-int czag_accel_controller_run(const struct device *dev, const enum stepper_direction direction)
+int zephyr_accel_controller_run(const struct device *dev, const enum stepper_direction direction)
 {
-	const struct czag_accel_controller_config *config = dev->config;
-	struct czag_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
 
-	czag_event_callback_init(dev);
+	accel_controller_event_callback_init(dev);
 
 	bool running = false;
 	int ret = 0;
@@ -571,22 +573,22 @@ end:
 	}
 }
 
-int czag_accel_controller_set_event_callback(const struct device *dev,
+int zephyr_accel_controller_set_event_callback(const struct device *dev,
 					     stepper_event_callback_t callback, void *user_data)
 {
-	struct czag_accel_controller_data *data = dev->data;
+	struct zephyr_accel_controller_data *data = dev->data;
 
 	data->callback = callback;
 	data->callback_data = user_data;
 	return 0;
 }
 
-int czag_accel_controller_stop(const struct device *dev)
+int zephyr_accel_controller_stop(const struct device *dev)
 {
-	const struct czag_accel_controller_config *config = dev->config;
-	struct czag_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
 
-	czag_event_callback_init(dev);
+	accel_controller_event_callback_init(dev);
 
 	if (data->mode == STEPPER_RUN_MODE_STOP) {
 		return 0;
@@ -623,17 +625,17 @@ int czag_accel_controller_stop(const struct device *dev)
 	return 0;
 }
 
-static int czag_accel_controller_init(const struct device *dev)
+static int zephyr_accel_controller_init(const struct device *dev)
 {
-	struct czag_accel_controller_data *data = dev->data;
+	struct zephyr_accel_controller_data *data = dev->data;
 
-	if (!wq_initialized) {
-		k_work_queue_init(&czag_accel_controller_wq);
+	if (!accel_controller_wq_initialized) {
+		k_work_queue_init(&zephyr_accel_controller_wq);
 
 		k_work_queue_start(
-			&czag_accel_controller_wq, czag_accel_controller_work_queue_stack,
-			K_THREAD_STACK_SIZEOF(czag_accel_controller_work_queue_stack), -5, NULL);
-		wq_initialized = true;
+			&zephyr_accel_controller_wq, zephyr_accel_controller_work_queue_stack,
+			K_THREAD_STACK_SIZEOF(zephyr_accel_controller_work_queue_stack), -5, NULL);
+		accel_controller_wq_initialized = true;
 	}
 
 	data->decelerate = false;
@@ -643,40 +645,40 @@ static int czag_accel_controller_init(const struct device *dev)
 	data->mode = STEPPER_RUN_MODE_HOLD;
 	k_sem_init(&data->semaphore, 1, 1);
 
-	k_work_init_delayable(&data->accel_work, czag_accel_controller_wq_accel_handler);
+	k_work_init_delayable(&data->accel_work, zephyr_accel_controller_wq_accel_handler);
 	k_work_init_delayable(&data->decel_work_start,
-			      czag_accel_controller_wq_decel_start_handler);
-	k_work_init_delayable(&data->decel_work, czag_accel_controller_wq_decel_handler);
+			      zephyr_accel_controller_wq_decel_start_handler);
+	k_work_init_delayable(&data->decel_work, zephyr_accel_controller_wq_decel_handler);
 
 	return 0;
 }
 
-static DEVICE_API(stepper, czag_accel_controller_api) = {
-	.move_by = czag_accel_controller_move_by,
-	.move_to = czag_accel_controller_move_to,
-	.is_moving = czag_accel_controller_is_moving,
-	.set_reference_position = czag_accel_controller_set_reference_position,
-	.get_actual_position = czag_accel_controller_get_actual_position,
-	.set_event_callback = czag_accel_controller_set_event_callback,
-	.set_microstep_interval = czag_accel_controller_set_microstep_interval,
-	.run = czag_accel_controller_run,
-	.stop = czag_accel_controller_stop,
+static DEVICE_API(stepper, zephyr_accel_controller_api) = {
+	.move_by = zephyr_accel_controller_move_by,
+	.move_to = zephyr_accel_controller_move_to,
+	.is_moving = zephyr_accel_controller_is_moving,
+	.set_reference_position = zephyr_accel_controller_set_reference_position,
+	.get_actual_position = zephyr_accel_controller_get_actual_position,
+	.set_event_callback = zephyr_accel_controller_set_event_callback,
+	.set_microstep_interval = zephyr_accel_controller_set_microstep_interval,
+	.run = zephyr_accel_controller_run,
+	.stop = zephyr_accel_controller_stop,
 };
 
-#define CZ_ACCEL_CONTROLLER_DEFINE(inst)                                                           \
-	static const struct czag_accel_controller_config czag_accel_controller_config_##inst = {   \
+#define ZEPHYR_ACCEL_CONTROLLER_DEFINE(inst)                                                           \
+	static const struct zephyr_accel_controller_config zephyr_accel_controller_config_##inst = {   \
 		.stepper_ctrl = DEVICE_DT_GET(DT_PHANDLE(DT_DRV_INST(inst), stepper_ctrl)),        \
 		.accel_decel_time_microstep_ns = DT_INST_PROP(inst, accel_time_microstep),         \
 		.update_interval_ns = DT_INST_PROP(inst, update_interval),                         \
-		.accel_decel_mult = 0.98f + (float)DT_INST_PROP(inst, delay) / 1000.0f,             \
+		.accel_decel_mult = 0.98f + (float)DT_INST_PROP(inst, delay) / 1000.0f,            \
 	};                                                                                         \
-	static struct czag_accel_controller_data czag_accel_controller_data_##inst = {             \
+	static struct zephyr_accel_controller_data zephyr_accel_controller_data_##inst = {             \
 		.dev = DEVICE_DT_INST_GET(inst),                                                   \
 		.callback_initialized = false,                                                     \
 	};                                                                                         \
-	DEVICE_DT_INST_DEFINE(inst, czag_accel_controller_init, NULL,                              \
-			      &czag_accel_controller_data_##inst,                                  \
-			      &czag_accel_controller_config_##inst, POST_KERNEL,                   \
-			      CONFIG_STEPPER_INIT_PRIORITY, &czag_accel_controller_api);
+	DEVICE_DT_INST_DEFINE(inst, zephyr_accel_controller_init, NULL,                              \
+			      &zephyr_accel_controller_data_##inst,                                  \
+			      &zephyr_accel_controller_config_##inst, POST_KERNEL,                   \
+			      CONFIG_STEPPER_INIT_PRIORITY, &zephyr_accel_controller_api);
 
-DT_INST_FOREACH_STATUS_OKAY(CZ_ACCEL_CONTROLLER_DEFINE)
+DT_INST_FOREACH_STATUS_OKAY(ZEPHYR_ACCEL_CONTROLLER_DEFINE)

@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  TODO
+
+  Example:
+  stepper_accel_controller: stepper_accel_controller {
+    status = "okay";
+    compatible = "zephyr,accel-controller";
+
+    stepper-ctrl = <&gpio-stepper-controller>;
+    accel-time-microstep = <5000000>;
+    update-interval = <10000000>;
+    delay = <12>;
+
+  };
+
+compatible: "zephyr,accel-controller"
+
+properties:
+  accel-time-microstep:
+    type: int
+    required: true
+    description: |
+      Time in nanoseconds to accelerate or decelerate by 1 microstep/s.
+
+  update-interval:
+    type: int
+    required: true
+    description: |
+      Time interval in nanoseconds with which to update step interval during
+      acceleration and deceleration.
+  
+  stepper-ctrl:
+    type: phandle
+    required: true
+    description: |
+      Reference to the stepper motion controller device (stepper api).
+      This controller is used by this meta controller to generate stepper control signals.
+  
+  delay:
+    type: int
+    required: true
+    description: |
+      TODO: Rework
+      Delay in  tenth of a Percent caused by calculation overhead during acceleration and deceleration.
+      This values gives the percentage of additional steps taken compared to the expected amount.
+      This does not influence the total amount of steps taken.
+      This value depends on the board and update-interval, with 0% being the recommended value for
+      the nucleo_wb55rg and an update-intervall of 10000000. Note that if this value is to large, it
+      can cause significant time-delays during deceleration, as a large number of steps will be
+      taken at minimal speed, where as a to small value can cause an abrupt stop during deceleration.
+      The driver uses a base multiplier of 98% to prevent the former issue with configurations that
+      cause no delay.

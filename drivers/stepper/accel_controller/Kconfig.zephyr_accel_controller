@@ -1,0 +1,20 @@
+# Copyright (c) 2026 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+config ZEPHYR_ACCEL_CONTROLLER
+	bool "Acceleration Controller for motion controllers"
+	default y
+	depends on DT_HAS_ZEPHYR_ACCEL_CONTROLLER_ENABLED
+	help
+	  Enable driver for czag acceleration motion controller.
+
+if ZEPHYR_ACCEL_CONTROLLER
+
+config ZEPHYR_ACCEL_CONTROLLER_WORK_QUEUE_STACK_SIZE
+        int
+        default 1024
+	help
+	  Recommended size: 1024 x Number of driver instances
+
+
+endif # ZEPHYR_ACCEL_CONTROLLER

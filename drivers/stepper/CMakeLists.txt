@@ -4,6 +4,7 @@
 zephyr_syscall_header(${ZEPHYR_BASE}/include/zephyr/drivers/stepper.h)
 
 # zephyr-keep-sorted-start
+add_subdirectory(accel_controller)
 add_subdirectory(adi_tmc)
 add_subdirectory(allegro)
 add_subdirectory(gpio_stepper)

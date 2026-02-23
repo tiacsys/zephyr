@@ -5,10 +5,13 @@
  */
 
 /**
- * @file
- * @brief Message queues.
+ * @file msg_q.c
+ * Implementation of Kernel Message Queues
+ *
+ * @ingroup kernel_apis
+ * @addtogroup msgq_apis
+ * @{
  */
-
 
 #include <zephyr/kernel.h>
 
@@ -40,6 +43,17 @@ static inline bool msgq_handle_poll_events(struct k_msgq *msgq)
 #endif /* CONFIG_POLL */
 }
 
+/**
+ *
+ * @details 
+ * 
+ * The function initializes the provided @c msgq from the remaining parameters.
+ * 
+ * No checks for NULL pointers are carried out, that means the function assumes that both pointers 
+ * passed in are pointing to a valid memory region.
+ * 
+ * Detailed workflow:
+ */
 void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
 		 uint32_t max_msgs)
 {
@@ -57,21 +71,26 @@ void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
 	msgq->flags = 0;
 	z_waitq_init(&msgq->wait_q);
 	msgq->lock = (struct k_spinlock) {};
+
+
+	/** - If @kconfig{CONFIG_POLL}: also initialize poll_events. */
 #ifdef CONFIG_POLL
 	sys_dlist_init(&msgq->poll_events);
-#endif	/* CONFIG_POLL */
+#endif /* CONFIG_POLL */
 
+	/** - If @kconfig{CONFIG_OBJ_CORE_MSGQ}: register message queue with kernel object service. */
 #ifdef CONFIG_OBJ_CORE_MSGQ
 	k_obj_core_init_and_link(K_OBJ_CORE(msgq), &obj_type_msgq);
 #endif /* CONFIG_OBJ_CORE_MSGQ */
 
+	/** - If @kconfig{CONFIG_TRACING}: register message queue with tracing subsystem. */
 	SYS_PORT_TRACING_OBJ_INIT(k_msgq, msgq);
 
+	/** - Setup @c msgq to be accessible from userspace. */
 	k_object_init(msgq);
 }
 
-int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size,
-			    uint32_t max_msgs)
+int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size, uint32_t max_msgs)
 {
 	void *buffer;
 	int ret;
@@ -93,6 +112,7 @@ int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size,
 	}
 
 	SYS_PORT_TRACING_OBJ_FUNC_EXIT(k_msgq, alloc_init, msgq, ret);
+
 	return ret;
 }
 
@@ -134,6 +154,12 @@ out:
 	SYS_PORT_TRACING_OBJ_FUNC_EXIT(k_msgq, cleanup, msgq, ret);
 	return ret;
 }
+/**
+ * @fn   k_msgq_put(struct k_msgq *msgq, const void *data, k_timeout_t timeout)
+ * @brief another test
+ *
+ * This will become the design specification of k_msgq_put
+ */
 
 int k_msgq_cleanup(struct k_msgq *msgq)
 {
@@ -247,11 +273,11 @@ static inline int put_msg_in_queue(struct k_msgq *msgq, const void *data,
 	return result;
 }
 
-
 int z_impl_k_msgq_put(struct k_msgq *msgq, const void *data, k_timeout_t timeout)
 {
 	return put_msg_in_queue(msgq, data, timeout, true);
 }
+
 
 int z_impl_k_msgq_put_front(struct k_msgq *msgq, const void *data)
 {
@@ -519,3 +545,5 @@ static inline uint32_t z_vrfy_k_msgq_num_used_get(struct k_msgq *msgq)
 #ifdef CONFIG_OBJ_CORE_MSGQ
 K_OBJ_TYPE_DEFINE(obj_type_msgq, k_msgq, K_OBJ_TYPE_MSGQ_ID, NULL);
 #endif /* CONFIG_OBJ_CORE_MSGQ */
+
+/** @} */

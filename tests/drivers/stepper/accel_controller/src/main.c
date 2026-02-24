@@ -126,7 +126,7 @@ static void accel_controller_before(void *f)
 	(void)stepper_set_reference_position(fixture->dev, 0);
 
 	/* Sleep to account for event handling in another thread. */
-	k_msleep(10);
+	k_msleep(20);
 
 	k_poll_signal_reset(&stepper_signal);
 
@@ -139,7 +139,7 @@ static void accel_controller_after(void *f)
 	zassert_ok(stepper_move_by(fixture->dev, 0));
 
 	/* Sleep to account for event handling in another thread. */
-	k_msleep(10);
+	k_msleep(20);
 }
 
 ZTEST_SUITE(accel_controller, NULL, accel_controller_setup, accel_controller_before,

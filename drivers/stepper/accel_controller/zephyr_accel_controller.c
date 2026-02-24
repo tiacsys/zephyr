@@ -17,6 +17,7 @@ LOG_MODULE_REGISTER(zephyr_accel_controller, CONFIG_STEPPER_LOG_LEVEL);
 
 /* We only need a single work queue for all driver instances, as multiple queues would have the same
  * priority and thus would result in sequential execution anyway. */
+// TODO: Every driver their own
 K_THREAD_STACK_DEFINE(zephyr_accel_controller_work_queue_stack,
 		      CONFIG_ZEPHYR_ACCEL_CONTROLLER_WORK_QUEUE_STACK_SIZE);
 static struct k_work_q zephyr_accel_controller_wq;
@@ -86,15 +87,24 @@ static void accel_controller_event_callback_init(const struct device *dev)
 		data->callback_initialized = true;
 	}
 }
+
+static inline uint32_t zephyr_accel_controller_decel_steps(const struct device *dev,
+							   uint64_t start_steps_s)
+{
+	const struct zephyr_accel_controller_config *config = dev->config;
+
+	return (start_steps_s * start_steps_s * config->accel_decel_time_microstep_ns /
+		NSEC_PER_SEC / 2) *
+	       config->accel_decel_mult;
+}
+
 static int zephyr_accel_controller_adjust_speed(const struct device *dev, const int32_t micro_steps,
 						uint32_t steps_s_start, uint32_t *accel_steps,
 						uint32_t *decel_steps, uint32_t *new_steps_s)
 {
 	const struct zephyr_accel_controller_config *config = dev->config;
 
-	uint32_t decel_steps_base = ((uint64_t)steps_s_start * (uint64_t)steps_s_start *
-				     config->accel_decel_time_microstep_ns / NSEC_PER_SEC / 2) *
-				    config->accel_decel_mult;
+	uint32_t decel_steps_base = zephyr_accel_controller_decel_steps(dev, steps_s_start);
 
 	if (decel_steps_base > abs(micro_steps)) {
 		LOG_ERR("Insufficient steps to decelerate, is %d but needs at least %u",
@@ -120,6 +130,15 @@ static int zephyr_accel_controller_adjust_speed(const struct device *dev, const 
 	return 0;
 }
 
+static inline uint32_t zephyr_accel_controller_start_segments(const struct device *dev)
+{
+	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
+
+	return (uint64_t)abs((int32_t)data->steps_s - (int32_t)data->steps_s_start) *
+	       config->accel_decel_time_microstep_ns / ((uint64_t)config->update_interval_ns);
+}
+
 static int zephyr_accel_controller_move_by(const struct device *dev, const int32_t micro_steps)
 {
 	const struct zephyr_accel_controller_config *config = dev->config;
@@ -139,8 +158,6 @@ static int zephyr_accel_controller_move_by(const struct device *dev, const int32
 	accel_controller_event_callback_init(dev);
 
 	k_sem_take(&data->semaphore, K_FOREVER);
-
-	// TODO: Consolidate code shared with run
 
 	stepper_is_moving(config->stepper_ctrl, &running);
 	if (!running) {
@@ -179,9 +196,7 @@ static int zephyr_accel_controller_move_by(const struct device *dev, const int32
 		(base_steps_s * abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
 		 config->accel_decel_time_microstep_ns / NSEC_PER_SEC) *
 			config->accel_decel_mult;
-	uint32_t decel_steps = ((uint64_t)data->shadow_steps_s * (uint64_t)data->shadow_steps_s *
-				config->accel_decel_time_microstep_ns / NSEC_PER_SEC / 2) *
-			       config->accel_decel_mult;
+	uint32_t decel_steps = zephyr_accel_controller_decel_steps(dev, data->shadow_steps_s);
 
 	if (accel_steps + decel_steps > abs(micro_steps)) {
 		uint32_t new_steps_s = 0;
@@ -200,9 +215,7 @@ static int zephyr_accel_controller_move_by(const struct device *dev, const int32
 	data->mode = STEPPER_RUN_MODE_POSITION;
 
 	data->steps_s_start = steps_s_start;
-	data->start_segments =
-		(uint64_t)abs((int32_t)data->steps_s - (int32_t)data->steps_s_start) *
-		config->accel_decel_time_microstep_ns / ((uint64_t)config->update_interval_ns);
+	data->start_segments = zephyr_accel_controller_start_segments(dev);
 	data->stop_segments = (data->steps_s) * config->accel_decel_time_microstep_ns /
 			      ((uint64_t)config->update_interval_ns);
 
@@ -463,6 +476,7 @@ int zephyr_accel_controller_move_to(const struct device *dev, const int32_t valu
 {
 	const struct zephyr_accel_controller_config *config = dev->config;
 
+	/* TODO: Comment*/
 	bool moving;
 	stepper_is_moving(config->stepper_ctrl, &moving);
 	if (moving) {
@@ -520,9 +534,7 @@ int zephyr_accel_controller_run(const struct device *dev, const enum stepper_dir
 		data->steps_s_start = data->steps_s_current;
 	}
 
-	data->start_segments =
-		(uint64_t)abs((int32_t)data->steps_s - (int32_t)data->steps_s_start) *
-		config->accel_decel_time_microstep_ns / ((uint64_t)config->update_interval_ns);
+	data->start_segments = zephyr_accel_controller_start_segments(dev);
 	data->direction = direction;
 
 	data->decelerate = false;
@@ -589,9 +601,7 @@ int zephyr_accel_controller_stop(const struct device *dev)
 	data->stopping = true;
 	data->mode = STEPPER_RUN_MODE_STOP;
 
-	int32_t decel_steps = ((uint64_t)data->steps_s_current * (uint64_t)data->steps_s_current *
-			       config->accel_decel_time_microstep_ns / NSEC_PER_SEC / 2) *
-			      config->accel_decel_mult;
+	int32_t decel_steps = zephyr_accel_controller_decel_steps(dev, data->steps_s_current);
 
 	data->stop_segments = ((uint64_t)data->steps_s_current) *
 			      config->accel_decel_time_microstep_ns /
@@ -620,6 +630,7 @@ static int zephyr_accel_controller_init(const struct device *dev)
 	if (!accel_controller_wq_initialized) {
 		k_work_queue_init(&zephyr_accel_controller_wq);
 
+		// TODO: Kconfig flag for priority
 		k_work_queue_start(
 			&zephyr_accel_controller_wq, zephyr_accel_controller_work_queue_stack,
 			K_THREAD_STACK_SIZEOF(zephyr_accel_controller_work_queue_stack), -5, NULL);

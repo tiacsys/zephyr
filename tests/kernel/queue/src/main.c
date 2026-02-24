@@ -22,6 +22,17 @@ void *queue_test_setup(void)
 	return NULL;
 }
 
+/**
+ * @defgroup queue_api Queue API ZTest suite
+ * @ingroup kernel_queue_tests
+ *
+ */
 ZTEST_SUITE(queue_api, NULL, queue_test_setup, NULL, NULL, NULL);
+
+/**
+ * @defgroup queue_api_1cpu Queue API 1CPU ZTest suite
+ * @ingroup kernel_queue_tests
+ *
+ */
 ZTEST_SUITE(queue_api_1cpu, NULL, queue_test_setup,
 		ztest_simple_1cpu_before, ztest_simple_1cpu_after, NULL);

@@ -930,49 +930,63 @@ ZTEST(queue_api_1cpu, test_queue_multithread_competition)
 	int old_prio = k_thread_priority_get(k_current_get());
 	int prio = 10;
 	uint32_t test_data[3];
-
+	/** Setup:
+	 *  - Assign priority 10 to test thread
+	 *  - Reserve priority 12 for high prio threads
+	 *  - Reserve priority 14 for low prio threads */
 	memset(test_data, 0, sizeof(test_data));
 	k_thread_priority_set(k_current_get(), prio);
 	k_queue_init(&queue);
 	zassert_true(k_queue_is_empty(&queue) != 0, " Initializing queue failed");
 
-	/* Set up some values */
+	/** Arange: */
+	/** Step 1 Set up some values to be added to the queue */
 	test_data[0] = 0xAAA;
 	test_data[1] = 0xBBB;
 	test_data[2] = 0xCCC;
 
+	/** Step 2 Start a low priority thread */
 	k_thread_create(&tdata, tstack, STACK_SIZE,
 			low_prio_wait_for_queue,
 			&queue, NULL, NULL,
 			prio + 4, 0, K_NO_WAIT);
 
+	/** Step 3 Start the first high priority thread */
 	k_thread_create(&tdata1, tstack1, STACK_SIZE,
 			high_prio_t1_wait_for_queue,
 			&queue, NULL, NULL,
 			prio + 2, 0, K_NO_WAIT);
 
-	/* Make thread tdata and tdata1 wait more time */
+	/** Step 4 Wait some time*/
 	k_sleep(K_MSEC(10));
 
+	/** Step 5 Start the second high priority thread */
 	k_thread_create(&tdata2, tstack2, STACK_SIZE,
 			high_prio_t2_wait_for_queue,
 			&queue, NULL, NULL,
 			prio + 2, 0, K_NO_WAIT);
 
-	/* Initialize them and block */
+	/** Step 6 Wait some more time to make sure all threads are blocking on the qeue */
 	k_sleep(K_MSEC(50));
 
-	/* Insert some data to wake up thread */
+	/** Act:
+	 *  1. Insert first data element that should go to the high prio thread that was started
+	 *            first */
 	k_queue_append(&queue, &test_data[0]);
+	/** 2. Insert second  data element that should go to the high prio thread that was started
+	 *            second */
 	k_queue_append(&queue, &test_data[1]);
+	/** 3. Insert third data element that should go to the low prio thread */
 	k_queue_append(&queue, &test_data[2]);
 
-	/* Wait for thread exiting */
-	k_thread_join(&tdata, K_FOREVER);
+	/** Assert:
+	 * 1. Wait for thread exiting */
+	k_thread_priority_setad_join(&tdata, K_FOREVER);
 	k_thread_join(&tdata1, K_FOREVER);
 	k_thread_join(&tdata2, K_FOREVER);
 
-	/* Revert priority of the main thread */
+	/** Teardown:
+	 *  Revert priority of the main thread */
 	k_thread_priority_set(k_current_get(), old_prio);
 }
 

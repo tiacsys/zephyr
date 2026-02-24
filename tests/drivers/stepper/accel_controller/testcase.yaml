@@ -9,3 +9,4 @@ tests:
   drivers.stepper.accel_controller:
     platform_allow:
       - nucleo_wb55rg
+      - rpi_pico

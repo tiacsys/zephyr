@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2024 Navimatix GmbH
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	zephyr,user {
+		pico-pit-controllers = <&rpi_pico_pit_controller 0>;
+	};
+};
+
+/ {
+	aliases {
+		stepper = &zephyr_accel_controller;
+	};
+
+	soc {
+		rpi_pico_pit_controller: rpi_pico_pit_controller@4005d000 {
+			status = "okay";
+			compatible = "raspberrypi,pico-pit";
+			reg = <0x4005d000 0x1000>;
+			clocks = <&clocks 0x5>;
+			interrupts = <0x4 0x3>;
+			interrupt-names = "PWM_IRQ_WRAP";
+			#pico-pit-controller-cells = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			rpi_pico_pit_channel_1: rpi_pico_pit_channel@3 {
+				status = "okay";
+				compatible = "raspberrypi,pico-pit-channel";
+				reg = <3>;
+
+				#pico-pit-channel-cells = <0>;
+			};
+		};
+	};
+
+	step_dir_motion_control: step_dir_motion_control {
+		compatible = "zephyr,gpio-step-dir-stepper";
+		step-gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
+		dir-gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+		counter = <&rpi_pico_pit_channel_1>;
+	};
+
+	zephyr_accel_controller: zephyr_accel_controller {
+		status = "okay";
+		compatible = "zephyr,accel-controller";
+
+		stepper-ctrl = <&step_dir_motion_control>;
+		accel-time-microstep = <666666>;
+		update-interval = <10000000>;
+		delay = <10>;
+	};
+};

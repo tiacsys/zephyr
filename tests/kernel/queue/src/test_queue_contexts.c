@@ -322,7 +322,10 @@ static void queue_poll_race_consume(void *p1, void *p2, void *p3)
 	}
 }
 
-/* There was a historical race in the queue internals when CONFIG_POLL
+/**
+ * @brief Test absence of race condition
+ *
+ * There was a historical race in the queue internals when CONFIG_POLL
  * was enabled -- it was possible to wake up a lower priority thread
  * with an insert but then steal it with a higher priority thread
  * before it got a chance to run, and the lower priority thread would
@@ -367,6 +370,7 @@ ZTEST(queue_api_1cpu, test_queue_poll_race)
 	k_thread_abort(&tdata1);
 }
 
+#define QUEUE_NUM 10
 /**
  * @brief Verify that multiple queues can be defined
  * simultaneously
@@ -377,7 +381,6 @@ ZTEST(queue_api_1cpu, test_queue_poll_race)
  *
  * @see k_queue_init()
  */
-#define QUEUE_NUM 10
 ZTEST(queue_api, test_multiple_queues)
 {
 	/*define multiple queues*/

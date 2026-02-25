@@ -792,6 +792,7 @@ ZTEST(queue_api_1cpu, test_queue_poll_race)
 	k_thread_abort(&tdata1);
 }
 
+#define QUEUE_NUM 10
 /**
  * @brief Verify multiple independent queues operate without interference.
  *

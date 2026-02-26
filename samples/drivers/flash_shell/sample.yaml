@@ -12,6 +12,8 @@ tests:
       - stm32h7s78_dk
       - gd32f350r_eval
     harness: shell
+    extra_args:
+      - platform:frdm_mcxn947/mcxn947/cpu0:SHIELD="mikroe_flash_6_click"
     extra_configs:
       - arch:posix:CONFIG_UART_NATIVE_PTY_0_ON_STDINOUT=y
     min_ram: 12

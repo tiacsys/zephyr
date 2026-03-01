@@ -1,0 +1,33 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	soc {
+		sram: sram@4000000 {
+			ranges = <0x4000000 0x4000000 0x20000000>;
+		};
+
+		peripheral: peripheral@40000000 {
+			ranges = <0x0 0x40000000 0x10000000>;
+		};
+	};
+};
+
+#include "nxp_lpc55S1x_common.dtsi"
+
+&iap {
+	status = "okay";
+};
+
+&flash0 {
+	reg = <0x0 DT_SIZE_K(128)>;
+};
+
+/* LPC55x14: RAMX: 16K, SRAM0: 32K, SRAM1: 16K, USBRAM: 16k */
+&sram2 {
+	status = "disabled";
+};

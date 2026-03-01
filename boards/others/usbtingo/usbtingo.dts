@@ -1,0 +1,163 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+ * SPDX-FileCopyrightText: Copyright (c) 2026 TiaC Systems
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <nxp/lpc/nxp_lpc55S14_ns.dtsi>
+#include <nxp/lpc/LPC5514JBD64-pinctrl.h>
+
+#include <mem.h>
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/ {
+	model = "USBtingo";
+	compatible = "usbtingo";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		zephyr,canbus = &can0;
+	};
+
+	aliases {
+		led0 = &red_led;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		red_led: led_0 {
+			gpios = <&gpio0 21 GPIO_ACTIVE_HIGH>;
+			label = "Red LED";
+		};
+	};
+
+	transceiver0: can-phy0 {
+		compatible = "microchip,mcp2542fd", "can-transceiver-gpio";
+		standby-gpios = <&gpio0 20 GPIO_ACTIVE_HIGH>;
+		max-bitrate = <8000000>;
+		#phy-cells = <0>;
+	};
+};
+
+&pinctrl {
+	pinmux_can0: pinmux_can0 {
+		group0 {
+			pinmux = <CAN0_RD_PIO1_3>,
+				 <CAN0_TD_PIO1_2>;
+			slew-rate = "standard";
+		};
+	};
+};
+
+/*
+ * Default for this board is to allocate SRAM0-1 for data. But the
+ * application can have an application specific device tree to
+ * allocate the SRAMs differently.
+ */
+&sram0 {
+	reg = <0x20000000 DT_SIZE_K(48)>;
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(32)>;
+			read-only;
+		};
+
+		slot0_partition: partition@c000 {
+			label = "image-0";
+			reg = <0x0000c000 DT_SIZE_K(84)>;
+		};
+		/* The last 12KB are reserved for PFR on the 128KB flash. */
+	};
+};
+
+zephyr_udc0: &usbhs {
+	phy-handle = <&usbphy1>;
+	status = "okay";
+};
+
+&usbphy1 {
+	tx-d-cal = <5>;
+	tx-cal-45-dp-ohms = <10>;
+	tx-cal-45-dm-ohms = <10>;
+	status = "okay";
+};
+
+&can0 {
+	pinctrl-0 = <&pinmux_can0>;
+	pinctrl-names = "default";
+	phys = <&transceiver0>;
+//	bosch,mram-cfg = <0x0 15 15 8 8 0 15 15>;
+	status = "okay";
+};
+
+&gpio0 {
+	gpio-line-names =
+		"",		"SSEL0",	/* 00..03 */
+		"",		"CAN-RX-MON",
+		"",		"ISPMODE",	/* 04..07 */
+		"SCK",		"",
+		"",		"",		/* 08..11 */
+		"",		"",
+		"",		"",		/* 12..15 */
+		"",		"",
+		"",		"",		/* 16..19 */
+		"",		"",
+		"CAN-STBY",	"",		/* 20..23 */
+		"",		"",
+		"",		"",		/* 24..27 */
+		"CLKOUT",	"",
+		"",		"HWMODE0",	/* 28..31 */
+		"HWMODE1",	"HWMODE2";
+
+	can-monitor {
+		line-name = "can-monitor";
+		gpio-hog;
+		gpios = <3 GPIO_ACTIVE_HIGH>;
+		input;
+	};
+
+	status = "okay";
+};
+
+&gint0 {
+	status = "okay";
+};
+
+&gpio1 {
+	gpio-line-names =
+		"",		"",		/* 00..03 */
+		"CAN-TX",	"CAN-RX",
+		"",		"",		/* 04..07 */
+		"",		"",
+		"",		"",		/* 08..11 */
+		"",		"",
+		"",		"",		/* 12..15 */
+		"",		"",
+		"",		"",		/* 16..19 */
+		"",		"",
+		"",		"",		/* 20..23 */
+		"",		"",
+		"",		"",		/* 24..27 */
+		"",		"",
+		"",		"",		/* 28..31 */
+		"",		"";
+
+	status = "okay";
+};
+
+&gint1 {
+	status = "okay";
+};

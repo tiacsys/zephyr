@@ -29,6 +29,7 @@ _names = [
     'amebaflash',
     'bflb_mcu_tool',
     'blackmagicprobe',
+    'blhost',
     'bossac',
     'canopen_program',
     'dediprog',

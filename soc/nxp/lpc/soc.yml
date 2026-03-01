@@ -17,7 +17,9 @@ family:
       - name: m0
   - name: lpc55xxx
     socs:
+    - name: lpc5514
     - name: lpc55s06
+    - name: lpc55s14
     - name: lpc55s16
     - name: lpc55s26
     - name: lpc55s28
@@ -34,7 +36,11 @@ runners:
       - all
       groups:
       - qualifiers:
+        - lpc5514
+      - qualifiers:
         - lpc55s06
+      - qualifiers:
+        - lpc55s14
       - qualifiers:
         - lpc55s16
       - qualifiers:
@@ -50,7 +56,11 @@ runners:
       - all
       groups:
       - qualifiers:
+        - lpc5514
+      - qualifiers:
         - lpc55s06
+      - qualifiers:
+        - lpc55s14
       - qualifiers:
         - lpc55s16
       - qualifiers:

@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  TODO
+
+  Example:
+  stepper_accel_controller: stepper_accel_controller {
+    status = "okay";
+    compatible = "zephyr,accel-controller";
+
+    stepper-ctrl = <&gpio-stepper-controller>;
+    accel-time-microstep = <5000000>;
+    update-interval = <10000000>;
+    delay = <12>;
+
+  };
+
+compatible: "zephyr,accel-controller"
+
+properties:
+  accel-time-microstep:
+    type: int
+    required: true
+    description: |
+      Time in nanoseconds to accelerate or decelerate by 1 microstep/s.
+
+  update-interval:
+    type: int
+    required: true
+    description: |
+      Time interval in nanoseconds with which to update step interval during
+      acceleration and deceleration.
+  
+  stepper-ctrl:
+    type: phandle
+    required: true
+    description: |
+      Reference to the stepper motion controller device (stepper api).
+      This controller is used by this meta controller to generate stepper control signals.
+  
+  step-adjustment:
+    type: int
+    required: true
+    description: |
+      Gives in tenth of a percent the percentage of calculated acceleration and deceleration steps to be
+      actually taken. A lower value causes faster acceleration and harsher stopping, while a higher value can
+      cause extended movement at minimal speed.
+      The optimal value depends on multiple factors such a SOC, used stepper motion controller, update-interval
+      and more. The recommended starting value is 980 (98.0%).

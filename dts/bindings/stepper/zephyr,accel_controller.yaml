@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 Navimatix GmbH
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Stepper Motion Controller that controls other motion controllers for the step signal generation.
+  It offers basic acceleration functionality, allowing for the use of acceleration with motion
+  controllers that do no support this functionality natively.
+
+compatible: "zephyr,accel-controller"
+
+properties:
+  accel-time-microstep:
+    type: int
+    required: true
+    description: |
+      Time in nanoseconds to accelerate or decelerate by 1 microstep/s.
+
+  update-interval:
+    type: int
+    required: true
+    description: |
+      Time interval in nanoseconds with which to update step interval during
+      acceleration and deceleration.
+  
+  stepper-ctrl:
+    type: phandle
+    required: true
+    description: |
+      Reference to a stepper motion controller device.
+      This controller is used by this controller to generate stepper control signals.
+  
+  step-adjustment:
+    type: int
+    required: true
+    description: |
+      Gives in tenth of a percent the percentage of calculated acceleration and deceleration steps to be
+      actually taken. A lower value causes faster acceleration and harsher stopping, while a higher value can
+      cause extended movement at minimal speed.
+      The optimal value depends on multiple factors such a SOC, used stepper motion controller, update-interval
+      and more. The recommended starting value is 980 (98.0%).
+
+examples:
+  - |
+    step_dir_motion_control: step_dir_motion_control {
+      compatible = "zephyr,gpio-step-dir-stepper";
+      step-gpios = <&gpioa 8 GPIO_ACTIVE_HIGH>;
+      dir-gpios = <&gpioa 4 GPIO_ACTIVE_HIGH>;
+      counter = <&counter2>;
+    };
+
+    zephyr_accel_controller: zephyr_accel_controller {
+      status = "okay";
+      compatible = "zephyr,accel-controller";
+      stepper-ctrl = <&step_dir_motion_control>;
+      accel-time-microstep = <666666>;
+      update-interval = <10000000>;
+      step-adjustment = <965>;
+    };

@@ -13,7 +13,13 @@ properties:
     type: int
     required: true
     description: |
-      Time in nanoseconds to accelerate or decelerate by 1 microstep/s.
+      Time in nanoseconds to accelerate by 1 microstep/s.
+  
+  decel-time-microstep:
+    type: int
+    required: true
+    description: |
+      Time in nanoseconds to decelerate by 1 microstep/s.
 
   update-interval:
     type: int

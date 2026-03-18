@@ -321,6 +321,7 @@ ZTEST_F(accel_controller, test_run_direction_change_while_moving_negative_to_pos
 
 ZTEST_F(accel_controller, test_stop_positive_direction)
 {
+	int32_t target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_STEPS_LOW_1_SEC/10 + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -339,11 +340,12 @@ ZTEST_F(accel_controller, test_stop_positive_direction)
 	zassert_ok(stepper_ctrl_get_actual_position(fixture->dev, &position2));
 	zassert_equal(position1, position2,
 		      "Position should not have changed after stopping, but it did");
-	//TODO: Check Position (same for negative)
+	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
 ZTEST_F(accel_controller, test_stop_negative_direction)
 {
+	int32_t target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_STEPS_LOW_1_SEC/10 + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -362,6 +364,7 @@ ZTEST_F(accel_controller, test_stop_negative_direction)
 	zassert_ok(stepper_ctrl_get_actual_position(fixture->dev, &position2));
 	zassert_equal(position1, position2,
 		      "Position should not have changed after stopping, but it did");
+	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
 ZTEST_F(accel_controller, test_move_by_positive_direction)
@@ -716,14 +719,14 @@ ZTEST_F(accel_controller, test_move_to_negative_direction)
 
 ZTEST_F(accel_controller, test_move_to_positive_direction_insufficient_steps_for_full_speed)
 {
-	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW;
+	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_move_to(fixture->dev, target_position));
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	int position = 0;
@@ -734,14 +737,14 @@ ZTEST_F(accel_controller, test_move_to_positive_direction_insufficient_steps_for
 
 ZTEST_F(accel_controller, test_move_to_negative_direction_insufficient_steps_for_full_speed)
 {
-	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW);
+	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_move_to(fixture->dev, target_position));
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	int position = 0;
@@ -753,7 +756,7 @@ ZTEST_F(accel_controller, test_move_to_negative_direction_insufficient_steps_for
 ZTEST_F(accel_controller, test_move_to_changing_microstep_interval_fails)
 {
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_STEPS_LOW_1_SEC +
-			      STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW;
+			      STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_move_to(fixture->dev, target_position));
@@ -767,10 +770,10 @@ ZTEST_F(accel_controller, test_move_to_changing_microstep_interval_fails)
 	/* Wait for the estimated end time of case of the microstep interval change going through.
 	 * Only then start polling for the steps completed event.
 	 */
-	k_msleep(1500);
+	k_msleep(1300);
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
-			      K_MSEC(500 + CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
+			      K_MSEC(200 + CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	int position = 0;
 	zassert_ok(stepper_ctrl_get_actual_position(fixture->dev, &position));
@@ -780,7 +783,7 @@ ZTEST_F(accel_controller, test_move_to_changing_microstep_interval_fails)
 
 ZTEST_F(accel_controller, test_move_to_fails_while_moving_velocity_mode)
 {
-	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_STEPS_LOW_1_SEC * 1.5;
+	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_STEPS_LOW_1_SEC;
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -788,32 +791,31 @@ ZTEST_F(accel_controller, test_move_to_fails_while_moving_velocity_mode)
 	int ret = stepper_ctrl_move_to(
 		fixture->dev,
 		STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW +
-			STEPPER_CTRL_STEPS_LOW_1_SEC *
-				((double)CONFIG_STEPPER_CTRL_TEST_STEPPING_TOLERANCE / 100.0) +
-			STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW);
+			STEPPER_CTRL_STEPS_LOW_1_SEC /10 +
+			STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_equal(ret, -EBUSY, "move_to should fail with %d while moving but returned %d",
 		      -EBUSY, ret);
-	k_msleep(500 + STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS);
+	k_msleep(500 + STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS);
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
 
 ZTEST_F(accel_controller, test_move_to_fails_while_moving_positioning_mode)
 {
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_STEPS_LOW_1_SEC / 2 +
-			      STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW;
+			      STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_move_by(fixture->dev, target_position));
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS);
 	int ret = stepper_ctrl_move_to(fixture->dev, STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW +
 							     STEPPER_CTRL_STEPS_LOW_1_SEC +
-							     STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW);
+							     STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_equal(ret, -EBUSY, "move_to should fail with %d while moving but returned %d",
 		      -EBUSY, ret);
 
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
-			      K_MSEC(500 + STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(500 + STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	int position = 0;
@@ -858,7 +860,7 @@ ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_positive_directi
 {
 	int target_position =
 		STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF +
-		STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF + STEPPER_CTRL_STEPS_LOW_1_SEC / 10;
+		STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_LOWER_HALF + STEPPER_CTRL_STEPS_LOW_1_SEC / 10;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -866,7 +868,7 @@ ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_positive_directi
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS + 100);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS + 100);
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
@@ -875,7 +877,7 @@ ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_negative_directi
 {
 	int target_position =
 		-(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF +
-		  STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF + STEPPER_CTRL_STEPS_LOW_1_SEC / 10);
+		  STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_LOWER_HALF + STEPPER_CTRL_STEPS_LOW_1_SEC / 10);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -883,7 +885,7 @@ ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_negative_directi
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS + 100);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS + 100);
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
@@ -891,7 +893,7 @@ ZTEST_F(accel_controller, test_run_acceleration_to_deceleration_negative_directi
 ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_positive_direction)
 {
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-			      STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_UPPER_HALF +
+			      STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_UPPER_HALF +
 			      STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_UPPER_HALF +
 			      STEPPER_CTRL_STEPS_HIGH_1_SEC / 10;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
@@ -901,7 +903,7 @@ ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_positive_directi
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS + 100);
@@ -913,7 +915,7 @@ ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_negative_directi
 {
 	int target_position =
 		-(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-		  STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_UPPER_HALF +
+		  STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_UPPER_HALF +
 		  STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_UPPER_HALF + STEPPER_CTRL_STEPS_HIGH_1_SEC / 10);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
@@ -922,7 +924,7 @@ ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_negative_directi
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS + 100);
@@ -932,9 +934,10 @@ ZTEST_F(accel_controller, test_run_deceleration_to_acceleration_negative_directi
 
 ZTEST_F(accel_controller, test_run_deceleration_to_deceleration_positive_direction)
 {
+	//TODO: Something is iffy with these two tests
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-			      STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-			      STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW_UPPER_HALF +
+			      STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW +
+			      STEPPER_CTRL_DECEL_STEPS_LOW_TO_0_UPPER_HALF +
 			      STEPPER_CTRL_STEPS_LOW_1_SEC / 10;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
@@ -943,10 +946,10 @@ ZTEST_F(accel_controller, test_run_deceleration_to_deceleration_positive_directi
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_LOW_SPEED_INTERVAL * 2));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_HALF_MS + 200);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_HALF_MS + 200);
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
@@ -955,7 +958,7 @@ ZTEST_F(accel_controller, test_run_deceleration_to_deceleration_negative_directi
 {
 	int target_position =
 		-(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-		  STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW_UPPER_HALF +
+		  STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0_UPPER_HALF +
 		  STEPPER_CTRL_STEPS_LOW_1_SEC / 10);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
@@ -964,32 +967,32 @@ ZTEST_F(accel_controller, test_run_deceleration_to_deceleration_negative_directi
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_LOW_SPEED_INTERVAL * 2));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_HALF_MS + 200);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_HALF_MS + 200);
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position);
 }
 
 ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_positive_direction)
 {
-	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + 3500;
+	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + 2000;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, 3500));
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, 2000));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS + 390 +
+				     STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS + 97 +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
@@ -997,7 +1000,7 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_positive_dir
 
 ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_negative_direction)
 {
-	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + 3500);
+	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + 2000);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -1006,15 +1009,15 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_negative_dir
 	stepper_ctrl_get_actual_position(fixture->dev, &pos);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, -3500));
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, -2000));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS + 390 +
+				     STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS + 97 +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position)
@@ -1023,7 +1026,7 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_acceleration_negative_dir
 ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_positive_direction)
 {
 	int target_position =
-		STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF + 1500;
+		STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF + 1000;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -1031,14 +1034,14 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_positive_dir
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, 1500));
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, 1000));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS + 224 +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS + 275 +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
 }
@@ -1046,7 +1049,7 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_positive_dir
 ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_negative_direction)
 {
 	int target_position =
-		-(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF + 1500);
+		-(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_LOWER_HALF + 1000);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -1054,14 +1057,14 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_negative_dir
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, -1500));
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, -1000));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS + 224 +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS + 275 +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position)
 }
@@ -1069,7 +1072,7 @@ ZTEST_F(accel_controller, test_move_by_acceleration_to_deceleration_negative_dir
 ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_positive_direction)
 {
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-			      STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_UPPER_HALF + 3500;
+			      STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_UPPER_HALF + 1500;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -1080,15 +1083,15 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_positive_dir
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, 3500));
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, 1500));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS + 580 +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_MS + 178 +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
@@ -1097,7 +1100,7 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_positive_dir
 ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_negative_direction)
 {
 	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-				STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH_UPPER_HALF + 3500);
+				STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_UPPER_HALF + 1500);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -1108,15 +1111,15 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_negative_dir
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, -3500));
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, -1500));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
 			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS + 580 +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_MS + 178 +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position)
@@ -1125,7 +1128,7 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_acceleration_negative_dir
 ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_positive_direction)
 {
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-			      STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH + 825;
+			      STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_UPPER_HALF + 1000;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -1133,16 +1136,14 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_positive_dir
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
-	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
-						       STEPPER_CTRL_LOW_SPEED_INTERVAL * 2));
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS);
 	zassert_ok(stepper_ctrl_move_by(fixture->dev, 825));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS + 100 +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS + 275 + STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
@@ -1151,7 +1152,7 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_positive_dir
 ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_negative_direction)
 {
 	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-				STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH + 825);
+				STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW_UPPER_HALF + 1000);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -1159,16 +1160,14 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_negative_dir
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
-	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
-						       STEPPER_CTRL_LOW_SPEED_INTERVAL * 2));
-	zassert_ok(stepper_ctrl_move_by(fixture->dev, -825));
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS);
+	zassert_ok(stepper_ctrl_move_by(fixture->dev, -1000));
 	/* Wait time is calculaed based on the original acceleration parameters and might need to be
 	 * adapted for other ones
 	 */
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event,
 			      STEPPER_CTRL_EVENT_STEPS_COMPLETED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS + 100 +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS + 275 + STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position);
@@ -1176,14 +1175,14 @@ ZTEST_F(accel_controller, test_move_by_deceleration_to_deceleration_negative_dir
 
 ZTEST_F(accel_controller, test_stop_from_acceleration_positive_direction)
 {
-	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW;
+	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS);
 	zassert_ok(stepper_ctrl_stop(fixture->dev));
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event, STEPPER_CTRL_EVENT_STOPPED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
@@ -1191,14 +1190,14 @@ ZTEST_F(accel_controller, test_stop_from_acceleration_positive_direction)
 
 ZTEST_F(accel_controller, test_stop_from_acceleration_negative_direction)
 {
-	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW);
+	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
 	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS);
 	zassert_ok(stepper_ctrl_stop(fixture->dev));
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event, STEPPER_CTRL_EVENT_STOPPED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position)
@@ -1207,7 +1206,7 @@ ZTEST_F(accel_controller, test_stop_from_acceleration_negative_direction)
 ZTEST_F(accel_controller, test_stop_from_deceleration_positive_direction)
 {
 	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-			      STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH;
+			      STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -1215,11 +1214,11 @@ ZTEST_F(accel_controller, test_stop_from_deceleration_positive_direction)
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS / 2);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS);
 	zassert_ok(stepper_ctrl_stop(fixture->dev));
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event, STEPPER_CTRL_EVENT_STOPPED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
@@ -1228,7 +1227,7 @@ ZTEST_F(accel_controller, test_stop_from_deceleration_positive_direction)
 ZTEST_F(accel_controller, test_stop_from_deceleration_negative_direction)
 {
 	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH +
-				STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_LOW_TO_HIGH);
+				STEPPER_CTRL_DECEL_STEPS_HIGH_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_ok(stepper_ctrl_set_microstep_interval(fixture->dev,
 						       STEPPER_CTRL_HIGH_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -1236,11 +1235,11 @@ ZTEST_F(accel_controller, test_stop_from_deceleration_negative_direction)
 		 STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
-	k_msleep(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_MS / 2);
+	k_msleep(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS);
 	zassert_ok(stepper_ctrl_stop(fixture->dev));
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event, STEPPER_CTRL_EVENT_STOPPED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_LOW_TO_HIGH_HALF_MS +
-				     STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_HIGH_TO_LOW_HALF_MS +
+				     STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position)
@@ -1249,7 +1248,7 @@ ZTEST_F(accel_controller, test_stop_from_deceleration_negative_direction)
 ZTEST_F(accel_controller, test_stop_movement_commands_fail_positive_direction)
 {
 	int ret = 0;
-	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW;
+	int target_position = STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0;
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_POSITIVE));
@@ -1272,7 +1271,7 @@ ZTEST_F(accel_controller, test_stop_movement_commands_fail_positive_direction)
 		      -EBUSY, ret);
 
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event, STEPPER_CTRL_EVENT_STOPPED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_POSITIVE(fixture, target_position);
@@ -1281,7 +1280,7 @@ ZTEST_F(accel_controller, test_stop_movement_commands_fail_positive_direction)
 ZTEST_F(accel_controller, test_stop_movement_commands_fail_negative_direction)
 {
 	int ret = 0;
-	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW);
+	int target_position = -(STEPPER_CTRL_ACCEL_STEPS_0_TO_LOW + STEPPER_CTRL_DECEL_STEPS_LOW_TO_0);
 	zassert_ok(
 		stepper_ctrl_set_microstep_interval(fixture->dev, STEPPER_CTRL_LOW_SPEED_INTERVAL));
 	zassert_ok(stepper_ctrl_run(fixture->dev, STEPPER_CTRL_DIRECTION_NEGATIVE));
@@ -1304,7 +1303,7 @@ ZTEST_F(accel_controller, test_stop_movement_commands_fail_negative_direction)
 		      -EBUSY, ret);
 
 	POLL_AND_CHECK_SIGNAL(stepper_ctrl_signal, stepper_ctrl_event, STEPPER_CTRL_EVENT_STOPPED,
-			      K_MSEC(STEPPER_CTRL_ACCEL_TIMEOUT_0_TO_LOW_MS +
+			      K_MSEC(STEPPER_CTRL_DECEL_TIMEOUT_LOW_TO_0_MS +
 				     CONFIG_STEPPER_CTRL_TEST_TIMEOUT_TOLERANCE_MS));
 
 	STEPPER_CTRL_POSITION_COMPARE_NEGATIVE(fixture, target_position);

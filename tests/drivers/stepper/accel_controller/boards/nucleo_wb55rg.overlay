@@ -23,6 +23,7 @@
 
 		stepper-ctrl = <&step_dir_motion_control>;
 		accel-time-microstep = <666666>;
+		decel-time-microstep = <333333>;
 		update-interval = <10000000>;
 		step-adjustment = <935>;
 	};

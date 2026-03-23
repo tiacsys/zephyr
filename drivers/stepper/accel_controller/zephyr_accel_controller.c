@@ -23,8 +23,6 @@ static struct k_work_q zephyr_accel_controller_wq;
 
 struct zephyr_accel_controller_config {
 	const struct device *stepper_ctrl;
-	uint64_t accel_time_microstep_ns;
-	uint64_t decel_time_microstep_ns;
 	uint32_t update_interval_ns;
 	float accel_decel_mult;
 };
@@ -34,6 +32,8 @@ struct zephyr_accel_controller_data {
 	struct k_work_delayable accel_work;
 	struct k_work_delayable decel_work_start;
 	struct k_work_delayable decel_work;
+	uint64_t accel_time_microstep_ns;
+	uint64_t decel_time_microstep_ns;
 	uint32_t start_segments;
 	uint32_t stop_segments;
 	uint32_t segment_index;
@@ -99,9 +99,9 @@ static inline uint32_t zephyr_accel_controller_decel_steps(const struct device *
 							   uint64_t start_steps_s)
 {
 	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
 
-	return (start_steps_s * start_steps_s * config->decel_time_microstep_ns / NSEC_PER_SEC /
-		2) *
+	return (start_steps_s * start_steps_s * data->decel_time_microstep_ns / NSEC_PER_SEC / 2) *
 	       config->accel_decel_mult;
 }
 
@@ -112,6 +112,7 @@ static inline int zephyr_accel_controller_adjust_speed(const struct device *dev,
 						       uint32_t *new_steps_s)
 {
 	const struct zephyr_accel_controller_config *config = dev->config;
+	struct zephyr_accel_controller_data *data = dev->data;
 
 	uint32_t decel_steps_base = zephyr_accel_controller_decel_steps(dev, steps_s_start);
 
@@ -131,24 +132,30 @@ static inline int zephyr_accel_controller_adjust_speed(const struct device *dev,
 	*accel_steps -= diff / 2;
 	*decel_steps -= diff / 2;
 
-	//TODO:Adjust
-	*new_steps_s =
-		sqrtl(steps_s_start +
-		      2.0 * (*accel_steps) /
-			      ((long double)config->accel_decel_mult *
-			       ((long double)config->accel_time_microstep_ns / NSEC_PER_SEC)));
+	// TODO:Adjust
+	*new_steps_s = sqrtl(steps_s_start +
+			     2.0 * (*accel_steps) /
+				     ((long double)config->accel_decel_mult *
+				      ((long double)data->accel_time_microstep_ns / NSEC_PER_SEC)));
 
 	return 0;
 }
 
-static inline uint32_t zephyr_accel_controller_start_segments(const struct device *dev)
+static inline uint32_t zephyr_accel_controller_start_segments(const struct device *dev,
+							      uint32_t start_steps_s,
+							      uint32_t stop_steps_s)
 {
 	const struct zephyr_accel_controller_config *config = dev->config;
 	struct zephyr_accel_controller_data *data = dev->data;
 
-	//TODO: Adjust for deceleratig start
-	return (uint64_t)abs((int32_t)data->steps_s - (int32_t)data->steps_s_start) *
-	       config->accel_time_microstep_ns / ((uint64_t)config->update_interval_ns);
+	// TODO: Adjust for deceleratig start
+	if (start_steps_s <= stop_steps_s) {
+		return (uint64_t)(stop_steps_s - start_steps_s) * data->accel_time_microstep_ns /
+		       ((uint64_t)config->update_interval_ns);
+	} else {
+		return (uint64_t)abs((int32_t)start_steps_s - (int32_t)stop_steps_s) *
+		       data->decel_time_microstep_ns / ((uint64_t)config->update_interval_ns);
+	}
 }
 
 static int zephyr_accel_controller_move_by(const struct device *dev, const int32_t micro_steps)
@@ -207,15 +214,35 @@ static int zephyr_accel_controller_move_by(const struct device *dev, const int32
 		goto end;
 	}
 
-	//TODO: Adjust for decel start
-	uint32_t accel_steps =
-		(abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
-		 abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
-		 config->accel_time_microstep_ns / NSEC_PER_SEC / 2) *
-			config->accel_decel_mult +
-		(base_steps_s * abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
-		 config->accel_time_microstep_ns / NSEC_PER_SEC) *
-			config->accel_decel_mult;
+	// TODO: Adjust for decel start
+	uint32_t accel_steps = 0;
+	if (data->shadow_steps_s >= steps_s_start) {
+		accel_steps = (abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+			       abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+			       data->accel_time_microstep_ns / NSEC_PER_SEC / 2) *
+				      config->accel_decel_mult +
+			      (base_steps_s *
+			       abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+			       data->accel_time_microstep_ns / NSEC_PER_SEC) *
+				      config->accel_decel_mult;
+	} else {
+		accel_steps = (abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+			       abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+			       data->decel_time_microstep_ns / NSEC_PER_SEC / 2) *
+				      config->accel_decel_mult +
+			      (base_steps_s *
+			       abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+			       data->decel_time_microstep_ns / NSEC_PER_SEC) *
+				      config->accel_decel_mult;
+	}
+	// uint32_t accel_steps =
+	// 	(abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+	// 	 abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+	// 	 data->accel_time_microstep_ns / NSEC_PER_SEC / 2) *
+	// 		config->accel_decel_mult +
+	// 	(base_steps_s * abs((int32_t)data->shadow_steps_s - (int32_t)steps_s_start) *
+	// 	 data->accel_time_microstep_ns / NSEC_PER_SEC) *
+	// 		config->accel_decel_mult;
 	uint32_t decel_steps = zephyr_accel_controller_decel_steps(dev, data->shadow_steps_s);
 
 	if (accel_steps + decel_steps > abs(micro_steps)) {
@@ -235,8 +262,9 @@ static int zephyr_accel_controller_move_by(const struct device *dev, const int32
 	data->mode = STEPPER_CTRL_RUN_MODE_POSITION;
 
 	data->steps_s_start = steps_s_start;
-	data->start_segments = zephyr_accel_controller_start_segments(dev);
-	data->stop_segments = (data->steps_s) * config->decel_time_microstep_ns /
+	data->start_segments =
+		zephyr_accel_controller_start_segments(dev, steps_s_start, data->steps_s);
+	data->stop_segments = (data->steps_s) * data->decel_time_microstep_ns /
 			      ((uint64_t)config->update_interval_ns);
 
 	data->steps_s_stop_start = data->steps_s;
@@ -292,6 +320,8 @@ static int zephyr_accel_controller_set_microstep_interval(const struct device *d
 	struct zephyr_accel_controller_data *data = dev->data;
 	const struct zephyr_accel_controller_config *config = dev->config;
 
+	return -ENOSYS;
+
 	/* This is, because delays during calculations would result in additional steps being taken.
 	 */
 	if (data->mode == STEPPER_CTRL_RUN_MODE_POSITION) {
@@ -304,6 +334,49 @@ static int zephyr_accel_controller_set_microstep_interval(const struct device *d
 
 	data->shadow_microstep_interval_ns = microstep_interval_ns;
 	data->shadow_steps_s = NSEC_PER_SEC / microstep_interval_ns;
+
+	k_sem_give(&data->semaphore);
+
+	if (data->mode == STEPPER_CTRL_RUN_MODE_VELOCITY) {
+		return stepper_ctrl_run(dev, data->direction);
+	}
+
+	if (data->mode == STEPPER_CTRL_RUN_MODE_HOLD) {
+		return stepper_ctrl_set_microstep_interval(config->stepper_ctrl,
+							   microstep_interval_ns);
+	}
+
+	return 0;
+}
+
+static int zephyr_accel_controller_configure_ramp(const struct device *dev,
+						  const struct stepper_ctrl_ramp *ramp)
+{
+	struct zephyr_accel_controller_data *data = dev->data;
+	const struct zephyr_accel_controller_config *config = dev->config;
+
+	/* This is, because delays during calculations would result in additional steps being taken.
+	 */
+	if (data->mode == STEPPER_CTRL_RUN_MODE_POSITION) {
+		LOG_ERR("configure_ramp while run_mode is POSITION or STOP is not "
+			"supported");
+		return -EBUSY;
+	}
+
+	if (ramp->acceleration_max == 0 || ramp->deceleration_max == 0 || ramp->speed_max == 0) {
+		LOG_ERR("At least one ramp parameter is 0");
+		return -EINVAL;
+	}
+
+	k_sem_take(&data->semaphore, K_FOREVER);
+
+	uint64_t microstep_interval_ns = NSEC_PER_SEC / ramp->speed_max;
+
+	data->shadow_microstep_interval_ns = microstep_interval_ns;
+	data->shadow_steps_s = NSEC_PER_SEC / microstep_interval_ns;
+
+	data->accel_time_microstep_ns = NSEC_PER_SEC / ramp->acceleration_max;
+	data->decel_time_microstep_ns = NSEC_PER_SEC / ramp->deceleration_max;
 
 	k_sem_give(&data->semaphore);
 
@@ -562,11 +635,12 @@ int zephyr_accel_controller_run(const struct device *dev,
 		data->steps_s_start = data->steps_s_current;
 	}
 
-	data->start_segments = zephyr_accel_controller_start_segments(dev);
+	data->start_segments =
+		zephyr_accel_controller_start_segments(dev, data->steps_s_start, data->steps_s);
 	data->direction = direction;
 
 	LOG_DBG("Started Acceleration, Segments: %u", data->start_segments);
-	//TODO: Check this segment
+	// TODO: Check this segment
 	if (data->steps_s_current < data->steps_s) {
 		data->segment_index = 1;
 		if (!running) {
@@ -635,7 +709,7 @@ int zephyr_accel_controller_stop(const struct device *dev)
 
 	int32_t decel_steps = zephyr_accel_controller_decel_steps(dev, data->steps_s_current);
 
-	data->stop_segments = ((uint64_t)data->steps_s_current) * config->decel_time_microstep_ns /
+	data->stop_segments = ((uint64_t)data->steps_s_current) * data->decel_time_microstep_ns /
 			      ((uint64_t)config->update_interval_ns);
 	data->segment_index = data->stop_segments;
 	data->steps_s_stop_start = data->steps_s_current;
@@ -690,6 +764,7 @@ static DEVICE_API(stepper_ctrl, zephyr_accel_controller_api) = {
 	.get_actual_position = zephyr_accel_controller_get_actual_position,
 	.set_event_cb = zephyr_accel_controller_set_event_callback,
 	.set_microstep_interval = zephyr_accel_controller_set_microstep_interval,
+	.configure_ramp = zephyr_accel_controller_configure_ramp,
 	.run = zephyr_accel_controller_run,
 	.stop = zephyr_accel_controller_stop,
 };
@@ -699,14 +774,14 @@ static DEVICE_API(stepper_ctrl, zephyr_accel_controller_api) = {
 		{                                                                                  \
 			.stepper_ctrl =                                                            \
 				DEVICE_DT_GET(DT_PHANDLE(DT_DRV_INST(inst), stepper_ctrl)),        \
-			.accel_time_microstep_ns = DT_INST_PROP(inst, accel_time_microstep),       \
-			.decel_time_microstep_ns = DT_INST_PROP(inst, decel_time_microstep),       \
 			.update_interval_ns = DT_INST_PROP(inst, update_interval),                 \
 			.accel_decel_mult = (float)DT_INST_PROP(inst, step_adjustment) / 1000.0f,  \
 	};                                                                                         \
 	static struct zephyr_accel_controller_data zephyr_accel_controller_data_##inst = {         \
 		.dev = DEVICE_DT_INST_GET(inst),                                                   \
 		.callback_initialized = false,                                                     \
+		.accel_time_microstep_ns = DT_INST_PROP(inst, accel_time_microstep),               \
+		.decel_time_microstep_ns = DT_INST_PROP(inst, decel_time_microstep),               \
 	};                                                                                         \
 	DEVICE_DT_INST_DEFINE(inst, zephyr_accel_controller_init, NULL,                            \
 			      &zephyr_accel_controller_data_##inst,                                \

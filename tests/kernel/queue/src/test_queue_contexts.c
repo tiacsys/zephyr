@@ -3,7 +3,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
+/**
+ * @file test_queue_context.c Implementation of Kernel Queue API tests
+ */
 #include "test_queue.h"
 
 #define STACK_SIZE (512 + CONFIG_TEST_EXTRA_STACK_SIZE)
@@ -460,16 +462,22 @@ static void high_prio_t2_wait_for_queue(void *p1, void *p2, void *p3)
 }
 
 /**
- * @brief Test multi-threads to get data from a queue.
- *
- * @details Define three threads, and set a higher priority for two of them,
- * and set a lower priority for the last one. Then Add a delay between
- * creating the two high priority threads.
- * Test point:
- * 1. Any number of threads may wait on an empty FIFO simultaneously.
- * 2. When a data item is added, it is given to the highest priority
- * thread that has waited longest.
- *
+  @brief Test multi-threads to get data from a queue.
+
+  @details Define three threads, and set a higher priority for two of them,
+  and set a lower priority for the last one. Then Add a delay between
+  creating the two high priority threads.
+
+  Test points:
+
+  1. Any number of threads may wait on an empty FIFO simultaneously.
+  2. When a data item is added, it is given to the highest priority
+  thread that has waited longest.
+
+@verbatim embed:rst
+- :external+req:ref:`zep-srs-20-6`
+- :external+req:ref:`zep-srs-20-7`
+@endverbatim
  */
 ZTEST(queue_api_1cpu, test_queue_multithread_competition)
 {
@@ -527,7 +535,7 @@ ZTEST(queue_api_1cpu, test_queue_multithread_competition)
 
 	/** Assert:
 	 * 1. Wait for thread exiting */
-	k_thread_priority_setad_join(&tdata, K_FOREVER);
+	k_thread_priority_set_adjoin(&tdata, K_FOREVER);
 	k_thread_join(&tdata1, K_FOREVER);
 	k_thread_join(&tdata2, K_FOREVER);
 

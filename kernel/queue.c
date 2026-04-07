@@ -4,12 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/** @file */
+
 /**
- * @file
- *
- * @brief dynamic-size QUEUE object.
+ * @defgroup queue_detailed_design Queue detailed design
+ * 
+ * The detailed design of the queue kernel object
+ *   
  */
 
+ /**
+  * @defgroup queue_overview Design Overview
+  * 
+  * Here we show the overall desing principles for the queue implementation
+  * @ingroup queue_detailed_design
+  */
+
+/**
+ * @defgroup queue_configuration Configuration properties
+ * 
+ * Here we describe what can be configured on the queue object
+ * 
+ * @ingroup queue_detailed_design
+ *
+ */
 
 #include <zephyr/kernel.h>
 #include <zephyr/kernel_structs.h>
@@ -22,6 +40,11 @@
 #include <kernel_internal.h>
 #include <zephyr/sys/check.h>
 
+/**
+ * This might be a good place to design the overall queue functionality
+ * 
+ * @addtogroup queue_overview
+ */
 struct alloc_node {
 	sys_sfnode_t node;
 	void *data;
@@ -55,10 +78,51 @@ void *z_queue_node_peek(sys_sfnode_t *node, bool needs_free)
 	return ret;
 }
 
-void z_impl_k_queue_init(struct k_queue *queue)
+/** 
+ * @defgroup queue_init Initialization of a queue object 
+ * @ingroup queue_apis
+ * 
+ * function: #k_queue_init
+ * 
+ * @verbatim embed:rst
+   - :external+req:ref:`zep-srs-20-2`
+   @endverbatim
+ *
+ * 
+ * @par Preconditions
+ * 
+ * This is the precondition...
+ * 
+ * @par Postconditions
+ * 
+ * This is a postcondition
+ * 
+ * @par Invariants
+ * 
+ * Tis is an invariant...
+ * 
+ * 
+ * Test for embedding dot notation into the detailed design
+ *  \dot
+ *  digraph example {
+ *      node [shape=record, fontname=Helvetica, fontsize=10];
+ *      b [ label="class B" URL="\ref B"];
+ *      c [ label="class C" URL="\ref C"];
+ *      b -> c [ arrowhead="open", style="dashed" ];
+ *  }
+ *  \enddot
+ * 
+ * The macro #K_QUEUE_DEFINE implements the definition of a queue object at compile time 
+ * 
+ * @ingroup queue_detailed_design
+ */
+void k_queue_init(struct k_queue *queue)
 {
 	sys_sflist_init(&queue->data_q);
 	queue->lock = (struct k_spinlock) {};
+	/** Ein Inline- Test 
+	 * @addtogroup queue_init
+	*/
 	z_waitq_init(&queue->wait_q);
 #if defined(CONFIG_POLL)
 	sys_dlist_init(&queue->poll_events);
@@ -73,7 +137,7 @@ void z_impl_k_queue_init(struct k_queue *queue)
 static inline void z_vrfy_k_queue_init(struct k_queue *queue)
 {
 	K_OOPS(K_SYSCALL_OBJ_NEVER_INIT(queue, K_OBJ_QUEUE));
-	z_impl_k_queue_init(queue);
+	k_queue_init(queue);
 }
 #include <zephyr/syscalls/k_queue_init_mrsh.c>
 #endif /* CONFIG_USERSPACE */
@@ -96,7 +160,7 @@ static inline bool handle_poll_events(struct k_queue *queue, uint32_t state)
 #endif /* CONFIG_POLL */
 }
 
-void z_impl_k_queue_cancel_wait(struct k_queue *queue)
+void k_queue_cancel_wait(struct k_queue *queue)
 {
 	SYS_PORT_TRACING_OBJ_FUNC(k_queue, cancel_wait, queue);
 
@@ -124,7 +188,7 @@ void z_impl_k_queue_cancel_wait(struct k_queue *queue)
 static inline void z_vrfy_k_queue_cancel_wait(struct k_queue *queue)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	z_impl_k_queue_cancel_wait(queue);
+	k_queue_cancel_wait(queue);
 }
 #include <zephyr/syscalls/k_queue_cancel_wait_mrsh.c>
 #endif /* CONFIG_USERSPACE */
@@ -210,7 +274,7 @@ void k_queue_prepend(struct k_queue *queue, void *data)
 	SYS_PORT_TRACING_OBJ_FUNC_EXIT(k_queue, prepend, queue);
 }
 
-int32_t z_impl_k_queue_alloc_append(struct k_queue *queue, void *data)
+int32_t k_queue_alloc_append(struct k_queue *queue, void *data)
 {
 	SYS_PORT_TRACING_OBJ_FUNC_ENTER(k_queue, alloc_append, queue);
 
@@ -226,12 +290,12 @@ static inline int32_t z_vrfy_k_queue_alloc_append(struct k_queue *queue,
 						  void *data)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	return z_impl_k_queue_alloc_append(queue, data);
+	return k_queue_alloc_append(queue, data);
 }
 #include <zephyr/syscalls/k_queue_alloc_append_mrsh.c>
 #endif /* CONFIG_USERSPACE */
 
-int32_t z_impl_k_queue_alloc_prepend(struct k_queue *queue, void *data)
+int32_t k_queue_alloc_prepend(struct k_queue *queue, void *data)
 {
 	SYS_PORT_TRACING_OBJ_FUNC_ENTER(k_queue, alloc_prepend, queue);
 
@@ -247,7 +311,7 @@ static inline int32_t z_vrfy_k_queue_alloc_prepend(struct k_queue *queue,
 						   void *data)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	return z_impl_k_queue_alloc_prepend(queue, data);
+	return k_queue_alloc_prepend(queue, data);
 }
 #include <zephyr/syscalls/k_queue_alloc_prepend_mrsh.c>
 #endif /* CONFIG_USERSPACE */
@@ -330,7 +394,7 @@ int k_queue_merge_slist(struct k_queue *queue, sys_slist_t *list)
 	return 0;
 }
 
-void *z_impl_k_queue_get(struct k_queue *queue, k_timeout_t timeout)
+void *k_queue_get(struct k_queue *queue, k_timeout_t timeout)
 {
 	k_spinlock_key_t key = k_spin_lock(&queue->lock);
 	void *data;
@@ -399,7 +463,7 @@ bool k_queue_unique_append(struct k_queue *queue, void *data)
 	return true;
 }
 
-void *z_impl_k_queue_peek_head(struct k_queue *queue)
+void *k_queue_peek_head(struct k_queue *queue)
 {
 	void *ret = z_queue_node_peek(sys_sflist_peek_head(&queue->data_q), false);
 
@@ -408,7 +472,7 @@ void *z_impl_k_queue_peek_head(struct k_queue *queue)
 	return ret;
 }
 
-void *z_impl_k_queue_peek_tail(struct k_queue *queue)
+void *k_queue_peek_tail(struct k_queue *queue)
 {
 	void *ret = z_queue_node_peek(sys_sflist_peek_tail(&queue->data_q), false);
 
@@ -422,28 +486,28 @@ static inline void *z_vrfy_k_queue_get(struct k_queue *queue,
 				       k_timeout_t timeout)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	return z_impl_k_queue_get(queue, timeout);
+	return k_queue_get(queue, timeout);
 }
 #include <zephyr/syscalls/k_queue_get_mrsh.c>
 
 static inline int z_vrfy_k_queue_is_empty(struct k_queue *queue)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	return z_impl_k_queue_is_empty(queue);
+	return k_queue_is_empty(queue);
 }
 #include <zephyr/syscalls/k_queue_is_empty_mrsh.c>
 
 static inline void *z_vrfy_k_queue_peek_head(struct k_queue *queue)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	return z_impl_k_queue_peek_head(queue);
+	return k_queue_peek_head(queue);
 }
 #include <zephyr/syscalls/k_queue_peek_head_mrsh.c>
 
 static inline void *z_vrfy_k_queue_peek_tail(struct k_queue *queue)
 {
 	K_OOPS(K_SYSCALL_OBJ(queue, K_OBJ_QUEUE));
-	return z_impl_k_queue_peek_tail(queue);
+	return k_queue_peek_tail(queue);
 }
 #include <zephyr/syscalls/k_queue_peek_tail_mrsh.c>
 
@@ -494,3 +558,11 @@ static int init_lifo_obj_core_list(void)
 SYS_INIT(init_lifo_obj_core_list, PRE_KERNEL_1,
 	 CONFIG_KERNEL_INIT_PRIORITY_OBJECTS);
 #endif /* CONFIG_OBJ_CORE_LIFO */
+
+/**
+ * @defgroup queue_limitations Design limitations and constraints
+ * 
+ * here we describe limitations and constraints of our design
+ * 
+ * @ingroup queue_detailed_design
+ */

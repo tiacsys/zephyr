@@ -91,6 +91,7 @@ void k_msgq_init(struct k_msgq *msgq, char *buffer, size_t msg_size,
 }
 
 int z_impl_k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size, uint32_t max_msgs)
+int k_msgq_alloc_init(struct k_msgq *msgq, size_t msg_size, uint32_t max_msgs)
 {
 	void *buffer;
 	int ret;

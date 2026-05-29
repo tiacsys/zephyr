@@ -3,9 +3,21 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+/**
+ * @file main.c FIFO API test module entry point -- suite and group definitions
+ */
 
 /**
- * @brief Tests for the FIFO kernel object
+ * @defgroup kernel_fifo_api_module Kernel FIFO API Test Module
+ * @ingroup kernel_fifo_tests
+ * @brief Test module at tests/kernel/fifo/fifo_api -- contains all fifo_api test suites.
+ */
+
+/**
+ * @defgroup fifo_api FIFO API ZTest suite
+ * @ingroup kernel_fifo_api_module
+ * @brief k_fifo API tests across ISR and thread contexts -- cross-context data
+ *        passing, k_fifo_is_empty() correctness, and failure-mode behaviour.
  *
  * Verify the Zephyr FIFO APIs across thread and ISR contexts, including data
  * passing, emptiness queries, cancellation, timeouts and queueing order.

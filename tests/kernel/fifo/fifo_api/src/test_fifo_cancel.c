@@ -3,6 +3,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+/**
+ * @file test_fifo_cancel.c k_fifo_cancel_wait() tests for the FIFO API
+ */
 
 #include "test_fifo.h"
 
@@ -16,12 +19,32 @@ struct k_fifo fifo_c;
 static K_THREAD_STACK_DEFINE(tstack_cancel, STACK_SIZE);
 static struct k_thread thread;
 
+/** @cond INTERNAL */
 static void t_cancel_wait_entry(void *p1, void *p2, void *p3)
 {
 	k_sleep(K_MSEC(50));
 	k_fifo_cancel_wait((struct k_fifo *)p1);
 }
+/** @endcond */
 
+/**
+ * @brief Run the cancel-wait scenario and verify k_fifo_get() returns NULL
+ * within the expected timeframe.
+ *
+ * @details
+ * Creates a helper thread (@c t_cancel_wait_entry) at preemptive priority 0
+ * that sleeps 50 ms then calls k_fifo_cancel_wait().  The current thread
+ * immediately calls k_fifo_get() with a 500 ms timeout on the empty @p pfifo
+ * and records the elapsed time.  Asserts via zassert_is_null() that the return
+ * value is NULL and via zassert_true() that the elapsed time is under 80 ms,
+ * confirming that the cancel arrived well before the 500 ms timeout.
+ *
+ * @param pfifo Non-null pointer to an initialised, empty fifo.
+ *
+ * @see k_fifo_get(), k_fifo_cancel_wait()
+ *
+ * @ingroup fifo_api_1cpu_procedures
+ */
 static void tfifo_thread_thread(struct k_fifo *pfifo)
 {
 	k_tid_t tid = k_thread_create(&thread, tstack_cancel, STACK_SIZE,
@@ -51,26 +74,44 @@ static void tfifo_thread_thread(struct k_fifo *pfifo)
 }
 
 /**
- * @addtogroup kernel_fifo_tests
- * @{
- */
-
-/**
- * @brief Test cancel waiting on a FIFO queue.
- * @details This routine causes first thread pending on fifo (if any),
- * to return from k_fifo_get() with NULL value (as if timeout expired).
- * @see k_fifo_init(),k_fifo_get(), k_fifo_cancel_wait()
+ * @brief k_fifo_cancel_wait() causes a blocked k_fifo_get() to return NULL
+ * well before its timeout expires.
+ *
+ * @details
+ * Runs the cancel-wait scenario via @c tfifo_thread_thread() on both a
+ * runtime-initialised fifo and a compile-time-defined fifo.  In each case a
+ * helper thread calls k_fifo_cancel_wait() after 50 ms while the current
+ * thread blocks on k_fifo_get() with a 500 ms timeout.  The call must return
+ * NULL in under 80 ms, confirming that cancellation takes effect promptly.
+ *
+ * @verbatim embed:rst
+ * - :external+req:ref:`zep-srs-24-2`
+ * @endverbatim
+ *
+ * @see k_fifo_init(), k_fifo_get(), k_fifo_cancel_wait()
+ * @draft
  */
 ZTEST(fifo_api_1cpu, test_fifo_cancel_wait)
 {
+	/** @par Arrange
+	 * -# Initialise @p fifo_c at runtime via k_fifo_init().
+	 * -# @p kfifo_c is already available as a compile-time-defined fifo.
+	 */
 	/**TESTPOINT: init via k_fifo_init*/
 	k_fifo_init(&fifo_c);
+
+	/** @par Act
+	 * -# Run @c tfifo_thread_thread() on the runtime-initialised fifo:
+	 *    a helper thread cancels the wait after 50 ms.
+	 * -# Run @c tfifo_thread_thread() on the compile-time-defined fifo.
+	 */
+
+	/** @par Assert
+	 * -# Both invocations complete without assertion failure: k_fifo_get()
+	 *    returns NULL and the elapsed time is under 80 ms in each case.
+	 */
 	tfifo_thread_thread(&fifo_c);
 
 	/**TESTPOINT: test K_FIFO_DEFINEed fifo*/
 	tfifo_thread_thread(&kfifo_c);
 }
-
-/**
- * @}
- */

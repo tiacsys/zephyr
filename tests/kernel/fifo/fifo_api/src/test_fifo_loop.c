@@ -3,6 +3,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+/**
+ * @file test_fifo_loop.c Repeated multi-context FIFO stress tests
+ */
 
 #include "test_fifo.h"
 
@@ -16,6 +19,19 @@ static K_THREAD_STACK_DEFINE(tstack_loop, STACK_SIZE);
 static struct k_thread tdata;
 static struct k_sem end_sema;
 
+/**
+ * @brief Enqueue LIST_LEN items to a fifo via k_fifo_put().
+ *
+ * @details
+ * Appends @p data[0..LIST_LEN-1] to the tail of @p pfifo one by one via
+ * k_fifo_put(), leaving the fifo with LIST_LEN items in insertion order.
+ *
+ * @param pfifo Non-null pointer to an initialised fifo.
+ *
+ * @see k_fifo_put()
+ *
+ * @ingroup fifo_api_1cpu_procedures
+ */
 static void tfifo_put(struct k_fifo *pfifo)
 {
 	/**TESTPOINT: fifo put*/
@@ -24,6 +40,22 @@ static void tfifo_put(struct k_fifo *pfifo)
 	}
 }
 
+/**
+ * @brief Dequeue LIST_LEN items from a fifo and verify their identity and order.
+ *
+ * @details
+ * Drains @p pfifo by calling k_fifo_get() with K_NO_WAIT for each of
+ * @p data[0..LIST_LEN-1] and asserting pointer identity via zassert_equal(),
+ * confirming FIFO ordering.
+ *
+ * @pre @p pfifo must have been populated by @c tfifo_put().
+ *
+ * @param pfifo Non-null pointer to a fifo containing @p data[0..LIST_LEN-1].
+ *
+ * @see k_fifo_get()
+ *
+ * @ingroup fifo_api_1cpu_procedures
+ */
 static void tfifo_get(struct k_fifo *pfifo)
 {
 	void *rx_data;
@@ -37,6 +69,21 @@ static void tfifo_get(struct k_fifo *pfifo)
 }
 
 /*entry of contexts*/
+/**
+ * @brief ISR-context phase: drain then refill the fifo.
+ *
+ * @details
+ * Executed via irq_offload() during one iteration of @c tfifo_read_write().
+ * In ISR context, dequeues LIST_LEN items via @c tfifo_get() then immediately
+ * re-enqueues LIST_LEN items via @c tfifo_put(), leaving the fifo ready for
+ * the consumer thread.
+ *
+ * @param p Pointer to the fifo under test, cast to @c const @c void*.
+ *
+ * @see k_fifo_put(), k_fifo_get()
+ *
+ * @ingroup fifo_api_1cpu_procedures
+ */
 static void tIsr_entry(const void *p)
 {
 	TC_PRINT("isr fifo get\n");
@@ -45,6 +92,28 @@ static void tIsr_entry(const void *p)
 	tfifo_put((struct k_fifo *)p);
 }
 
+/**
+ * @brief Consumer-thread phase: drain then refill the fifo in two signalled stages.
+ *
+ * @details
+ * Executed as the body of the consumer thread spawned by @c tfifo_read_write().
+ * Performs two phases:
+ * -# **Phase 1**: dequeues LIST_LEN items via @c tfifo_get(), then signals
+ *    @c end_sema so the main thread knows the drain is complete.
+ * -# **Phase 2**: re-enqueues LIST_LEN items via @c tfifo_put(), then signals
+ *    @c end_sema again so the main thread can proceed to its own drain.
+ *
+ * @pre @p p1 must point to a fifo that has been re-filled by the ISR phase
+ *      of @c tfifo_read_write().
+ *
+ * @param p1 Pointer to the fifo under test, cast to @c void*.
+ * @param p2 Unused.
+ * @param p3 Unused.
+ *
+ * @see k_fifo_put(), k_fifo_get()
+ *
+ * @ingroup fifo_api_1cpu_procedures
+ */
 static void tThread_entry(void *p1, void *p2, void *p3)
 {
 	TC_PRINT("thread fifo get\n");
@@ -55,6 +124,24 @@ static void tThread_entry(void *p1, void *p2, void *p3)
 	k_sem_give(&end_sema);
 }
 
+/**
+ * @brief Run one iteration of the multi-context fifo read-write cycle.
+ *
+ * @details
+ * Exercises fifo operations across three execution contexts in a fixed sequence:
+ * -# **Main thread**: enqueues LIST_LEN items via @c tfifo_put().
+ * -# **ISR** (via irq_offload()): dequeues and re-enqueues via @c tIsr_entry().
+ * -# **Consumer thread** (@c tThread_entry): dequeues (phase 1), signals,
+ *    re-enqueues (phase 2), signals.
+ * -# **Main thread**: waits for both consumer signals then dequeues and
+ *    verifies the final batch via @c tfifo_get().
+ *
+ * @param pfifo Non-null pointer to an initialised, empty fifo.
+ *
+ * @see k_fifo_put(), k_fifo_get()
+ *
+ * @ingroup fifo_api_1cpu_procedures
+ */
 /* fifo read write job */
 static void tfifo_read_write(struct k_fifo *pfifo)
 {
@@ -77,33 +164,43 @@ static void tfifo_read_write(struct k_fifo *pfifo)
 }
 
 /**
- * @addtogroup kernel_fifo_tests
- * @{
- */
-
-/**
- * @brief Verify zephyr fifo continuous read write in loop
+ * @brief FIFO operations remain correct across LOOPS repeated multi-context
+ * read-write cycles.
  *
  * @details
- * - Test Steps
- *   -# fifo put from main thread
- *   -# fifo read from isr
- *   -# fifo put from isr
- *   -# fifo get from spawn thread
- *   -# loop above steps for LOOPs times
- * - Expected Results
- *   -# fifo data pass correctly and stably across contexts
+ * Runs LOOPS (32) iterations of @c tfifo_read_write(), each of which exercises
+ * k_fifo_put() and k_fifo_get() across the main thread, an ISR, and a consumer
+ * thread.  The test confirms that fifo state stays consistent -- pointer identity
+ * holds throughout -- with no accumulated corruption or ordering error over the
+ * full loop.
+ *
+ * @verbatim embed:rst
+ * - :external+req:ref:`zep-srs-24-3`
+ * - :external+req:ref:`zep-srs-24-7`
+ * @endverbatim
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_get()
+ * @draft
  */
 ZTEST(fifo_api_1cpu, test_fifo_loop)
 {
+	/** @par Arrange
+	 * -# Initialise @p fifo via k_fifo_init().
+	 */
 	k_fifo_init(&fifo);
+
+	/** @par Act
+	 * -# Repeat @c tfifo_read_write() for LOOPS (32) iterations, each
+	 *    exercising the full three-context put/get cycle.
+	 */
+
+	/** @par Assert
+	 * -# Each call to @c tfifo_read_write() completes without assertion
+	 *    failure: @c tfifo_get() verifies pointer identity in every context
+	 *    across all 32 iterations.
+	 */
 	for (int i = 0; i < LOOPS; i++) {
 		TC_PRINT("* Pass data by fifo in loop %d\n", i);
 		tfifo_read_write(&fifo);
 	}
 }
-/**
- * @}
- */

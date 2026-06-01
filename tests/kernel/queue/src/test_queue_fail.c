@@ -26,11 +26,10 @@ K_SEM_DEFINE(sem, 0, 1);
  * when no item is available -- both when called with K_NO_WAIT (immediate
  * return) and with a finite timeout (TIMEOUT = 100 ms, after which it expires).
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-6`
- * @endverbatim
+ * @reqref{zep-srs-20-6}
  *
  * @see k_queue_init(), k_queue_get()
+ * @testid{TSPEC-QUEUE-1CPU-002}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_get_fail)
@@ -97,11 +96,10 @@ static void tThread_entry(void *p1, void *p2, void *p3)
  *    consumer thread (@c tThread_entry) asserts via zassert_equal() that
  *    the received pointer equals the node that was passed as the list head.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-11`
- * @endverbatim
+ * @reqref{zep-srs-20-11}
  *
  * @see k_queue_init(), k_queue_append_list()
+ * @testid{TSPEC-QUEUE-API-009}
  * @draft
  */
 ZTEST(queue_api, test_queue_append_list_error)
@@ -184,11 +182,10 @@ ZTEST(queue_api, test_queue_append_list_error)
  *    set to NULL (a corrupted/incomplete list) causes the call to return
  *    a non-zero error code.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-12`
- * @endverbatim
+ * @reqref{zep-srs-20-12}
  *
  * @see k_queue_init(), k_queue_merge_slist()
+ * @testid{TSPEC-QUEUE-API-015}
  * @draft
  */
 ZTEST(queue_api, test_queue_merge_list_error)
@@ -242,6 +239,7 @@ ZTEST(queue_api, test_queue_merge_list_error)
  * that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_init()
+ * @testid{TSPEC-QUEUE-API-012}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_init_null)
@@ -267,6 +265,7 @@ ZTEST_USER(queue_api, test_queue_init_null)
  * generate an oops that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_alloc_append()
+ * @testid{TSPEC-QUEUE-API-005}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_alloc_append_null)
@@ -299,6 +298,7 @@ ZTEST_USER(queue_api, test_queue_alloc_append_null)
  * generate an oops that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_alloc_prepend()
+ * @testid{TSPEC-QUEUE-API-007}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_alloc_prepend_null)
@@ -331,6 +331,7 @@ ZTEST_USER(queue_api, test_queue_alloc_prepend_null)
  * generate an oops that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_get()
+ * @testid{TSPEC-QUEUE-API-011}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_get_null)
@@ -356,6 +357,7 @@ ZTEST_USER(queue_api, test_queue_get_null)
  * an oops that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_is_empty()
+ * @testid{TSPEC-QUEUE-API-013}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_is_empty_null)
@@ -381,6 +383,7 @@ ZTEST_USER(queue_api, test_queue_is_empty_null)
  * an oops that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_peek_head()
+ * @testid{TSPEC-QUEUE-API-016}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_peek_head_null)
@@ -406,6 +409,7 @@ ZTEST_USER(queue_api, test_queue_peek_head_null)
  * an oops that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_peek_tail()
+ * @testid{TSPEC-QUEUE-API-017}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_peek_tail_null)
@@ -434,6 +438,7 @@ ZTEST_USER(queue_api, test_queue_peek_tail_null)
  *    that ztest intercepts as the valid expected fault.
  *
  * @see k_queue_init(), k_queue_cancel_wait()
+ * @testid{TSPEC-QUEUE-API-010}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_cancel_wait_error)

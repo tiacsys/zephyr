@@ -92,17 +92,16 @@ void child_thread_get(void *p1, void *p2, void *p3)
  * signals a semaphore on exit to confirm completion without assertion failure.
  * Skipped if CONFIG_USERSPACE is not enabled.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-3`
- * - :external+req:ref:`zep-srs-20-6`
- * - :external+req:ref:`zep-srs-20-8`
- * - :external+req:ref:`zep-srs-20-9`
- * - :external+req:ref:`zep-srs-20-14`
- * @endverbatim
+ * @reqref{zep-srs-20-3}
+ * @reqref{zep-srs-20-6}
+ * @reqref{zep-srs-20-8}
+ * @reqref{zep-srs-20-9}
+ * @reqref{zep-srs-20-14}
  *
  * @see k_queue_init(), k_queue_append(), k_queue_alloc_append(),
  *      k_queue_is_empty(), k_queue_peek_head(), k_queue_peek_tail(),
  *      k_queue_get(), k_queue_cancel_wait()
+ * @testid{TSPEC-QUEUE-1CPU-006}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_supv_to_user)
@@ -184,13 +183,12 @@ ZTEST(queue_api_1cpu, test_queue_supv_to_user)
  * data value matches the expected LIFO index (LIST_LEN*2-1 down to 0), confirming
  * that prepend inserts at the head and get removes from the head.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-4`
- * - :external+req:ref:`zep-srs-20-6`
- * - :external+req:ref:`zep-srs-20-14`
- * @endverbatim
+ * @reqref{zep-srs-20-4}
+ * @reqref{zep-srs-20-6}
+ * @reqref{zep-srs-20-14}
  *
  * @see k_queue_init(), k_queue_alloc_prepend(), k_queue_get()
+ * @testid{TSPEC-QUEUE-API-008}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_alloc_prepend_user)
@@ -241,13 +239,12 @@ ZTEST_USER(queue_api, test_queue_alloc_prepend_user)
  * data value matches the insertion index, confirming that append inserts at the
  * tail and get removes from the head (FIFO ordering).
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-3`
- * - :external+req:ref:`zep-srs-20-6`
- * - :external+req:ref:`zep-srs-20-14`
- * @endverbatim
+ * @reqref{zep-srs-20-3}
+ * @reqref{zep-srs-20-6}
+ * @reqref{zep-srs-20-14}
  *
  * @see k_queue_init(), k_queue_alloc_append(), k_queue_get()
+ * @testid{TSPEC-QUEUE-API-006}
  * @draft
  */
 ZTEST_USER(queue_api, test_queue_alloc_append_user)
@@ -301,11 +298,10 @@ ZTEST_USER(queue_api, test_queue_alloc_append_user)
  * earlier allocation had not been released, the pool would be exhausted and
  * the assertion would fail.  Skipped if CONFIG_USERSPACE is not enabled.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-14`
- * @endverbatim
+ * @reqref{zep-srs-20-14}
  *
  * @see k_heap_alloc(), k_heap_free()
+ * @testid{TSPEC-QUEUE-API-002}
  * @draft
  */
 ZTEST(queue_api, test_auto_free)

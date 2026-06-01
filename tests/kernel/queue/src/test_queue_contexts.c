@@ -260,6 +260,7 @@ static void tqueue_isr_thread(struct k_queue *pqueue)
  * initialisation method does not affect transfer correctness.
  *
  * @see k_queue_init(), tqueue_thread_thread()
+ * @testid{TSPEC-QUEUE-1CPU-007}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_thread2thread)
@@ -296,12 +297,11 @@ ZTEST(queue_api_1cpu, test_queue_thread2thread)
  * and the current thread dequeues and verifies them, confirming that cross-context
  * data passing works regardless of how the queue was initialised.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-6`
- * @endverbatim
+ * @reqref{zep-srs-20-6}
  *
  * @see k_queue_init(), k_queue_insert(), k_queue_peek_tail(), k_queue_append(),
  *      k_queue_prepend(), k_queue_append_list(), k_queue_merge_slist(), k_queue_get()
+ * @testid{TSPEC-QUEUE-API-018}
  * @draft
  */
 ZTEST(queue_api, test_queue_thread2isr)
@@ -339,12 +339,11 @@ ZTEST(queue_api, test_queue_thread2isr)
  * insertion APIs, then an ISR drains and verifies them, confirming that
  * thread-to-ISR data passing works regardless of initialisation method.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-6`
- * @endverbatim
+ * @reqref{zep-srs-20-6}
  *
  * @see k_queue_init(), k_queue_insert(), k_queue_peek_tail(), k_queue_append(),
  *      k_queue_prepend(), k_queue_append_list(), k_queue_merge_slist(), k_queue_get()
+ * @testid{TSPEC-QUEUE-API-014}
  * @draft
  */
 ZTEST(queue_api, test_queue_isr2thread)
@@ -446,11 +445,10 @@ static void tqueue_get_2threads(struct k_queue *pqueue)
  * k_queue_get() dispatches a unique item to each waiter and does not deliver
  * the same item to more than one thread.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-6`
- * @endverbatim
+ * @reqref{zep-srs-20-6}
  *
  * @see k_queue_init(), k_queue_append(), k_queue_get()
+ * @testid{TSPEC-QUEUE-1CPU-001}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_get_2threads)
@@ -551,12 +549,11 @@ static void tqueue_alloc(struct k_queue *pqueue)
  * queue empty, while a sufficiently sized pool allows successful insertion and
  * subsequent retrieval.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-14`
- * @endverbatim
+ * @reqref{zep-srs-20-14}
  *
  * @see k_queue_init(), k_queue_alloc_append(), k_queue_alloc_prepend(),
  *      k_thread_heap_assign(), k_queue_is_empty(), k_queue_get(), k_queue_remove()
+ * @testid{TSPEC-QUEUE-API-004}
  * @draft
  */
 ZTEST(queue_api, test_queue_alloc)
@@ -639,11 +636,10 @@ static void queue_poll_race_consume(void *p1, void *p2, void *p3)
  * test verifies that the combined consumed count equals two with no spurious
  * NULL return.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-6`
- * @endverbatim
+ * @reqref{zep-srs-20-6}
  *
  * @see k_queue_init(), k_queue_append(), k_queue_get()
+ * @testid{TSPEC-QUEUE-1CPU-005}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_poll_race)
@@ -718,6 +714,7 @@ ZTEST(queue_api_1cpu, test_queue_poll_race)
  * do not share state.
  *
  * @see k_queue_init(), tqueue_append(), tqueue_get()
+ * @testid{TSPEC-QUEUE-API-003}
  * @draft
  */
 ZTEST(queue_api, test_multiple_queues)
@@ -787,6 +784,7 @@ void user_access_queue_private_data(void *p1, void *p2, void *p3)
  * via ztest_set_fault_valid() inside @c user_access_queue_private_data.
  *
  * @see k_queue_init(), k_queue_insert(), k_queue_peek_tail(), k_queue_is_empty()
+ * @testid{TSPEC-QUEUE-API-001}
  * @draft
  */
 ZTEST(queue_api, test_access_kernel_obj_with_priv_data)
@@ -914,12 +912,11 @@ static void high_prio_t2_wait_for_queue(void *p1, void *p2, void *p3)
  * wait order.  Three items are then appended one-by-one and each consumer
  * thread verifies it received the expected value.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-6`
- * - :external+req:ref:`zep-srs-20-7`
- * @endverbatim
+ * @reqref{zep-srs-20-6}
+ * @reqref{zep-srs-20-7}
  *
  * @see k_queue_init(), k_queue_is_empty(), k_queue_append(), k_queue_get()
+ * @testid{TSPEC-QUEUE-1CPU-004}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_multithread_competition)
@@ -1016,11 +1013,10 @@ ZTEST(queue_api_1cpu, test_queue_multithread_competition)
  * rejects an item already present in the queue and returns false, and accepts
  * a different item and returns true again.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-13`
- * @endverbatim
+ * @reqref{zep-srs-20-13}
  *
  * @see k_queue_init(), k_queue_unique_append()
+ * @testid{TSPEC-QUEUE-API-019}
  * @draft
  */
 ZTEST(queue_api, test_queue_unique_append)

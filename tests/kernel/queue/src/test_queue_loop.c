@@ -242,15 +242,14 @@ static void tqueue_read_write(struct k_queue *pqueue)
  * -- pointer identity and removal success hold throughout -- with no
  * accumulated corruption or ordering error over the full loop.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-20-3`
- * - :external+req:ref:`zep-srs-20-4`
- * - :external+req:ref:`zep-srs-20-5`
- * - :external+req:ref:`zep-srs-20-6`
- * @endverbatim
+ * @reqref{zep-srs-20-3}
+ * @reqref{zep-srs-20-4}
+ * @reqref{zep-srs-20-5}
+ * @reqref{zep-srs-20-6}
  *
  * @see k_queue_init(), k_queue_append(), k_queue_prepend(),
  *      k_queue_get(), k_queue_remove()
+ * @testid{TSPEC-QUEUE-1CPU-003}
  * @draft
  */
 ZTEST(queue_api_1cpu, test_queue_loop)

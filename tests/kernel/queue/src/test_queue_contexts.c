@@ -7,17 +7,6 @@
  * @file test_queue_contexts.c Implementation of Kernel Queue API tests
  */
 
-/**
- * @defgroup queue_api_procedures Shared Test Procedures
- * @ingroup queue_api
- * @brief Reusable helper procedures invoked by queue_api test cases.
- */
-
-/**
- * @defgroup queue_api_1cpu_procedures Shared Test Procedures
- * @ingroup queue_api_1cpu
- * @brief Reusable helper procedures invoked by queue_api_1cpu test cases.
- */
 
 #include "test_queue.h"
 
@@ -69,8 +58,7 @@ static struct k_sem end_sema;
  * @see k_queue_insert(), k_queue_append(), k_queue_prepend(),
  *      k_queue_append_list(), k_queue_merge_slist()
  *
- * @ingroup queue_api_procedures
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_append(struct k_queue *pqueue)
 {
@@ -122,8 +110,7 @@ static void tqueue_append(struct k_queue *pqueue)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_procedures
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_get(struct k_queue *pqueue)
 {
@@ -189,7 +176,7 @@ static void tThread_entry(void *p1, void *p2, void *p3)
  *
  * @see k_queue_append(), k_queue_get(), tqueue_append(), tqueue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_thread_thread(struct k_queue *pqueue)
 {
@@ -214,7 +201,7 @@ static void tqueue_thread_thread(struct k_queue *pqueue)
  *
  * @see k_queue_append(), k_queue_get()
  *
- * @ingroup queue_api_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_thread_isr(struct k_queue *pqueue)
 {
@@ -237,7 +224,7 @@ static void tqueue_thread_isr(struct k_queue *pqueue)
  *
  * @see k_queue_append(), k_queue_get()
  *
- * @ingroup queue_api_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_isr_thread(struct k_queue *pqueue)
 {
@@ -387,7 +374,7 @@ ZTEST(queue_api, test_queue_isr2thread)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tThread_get(void *p1, void *p2, void *p3)
 {
@@ -410,7 +397,7 @@ static void tThread_get(void *p1, void *p2, void *p3)
  *
  * @see k_queue_append(), k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_get_2threads(struct k_queue *pqueue)
 {
@@ -501,7 +488,7 @@ ZTEST(queue_api_1cpu, test_queue_get_2threads)
  * @see k_queue_alloc_append(), k_queue_alloc_prepend(), k_queue_remove(),
  *      k_queue_is_empty(), k_queue_get(), k_thread_heap_assign()
  *
- * @ingroup queue_api_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_alloc(struct k_queue *pqueue)
 {
@@ -610,7 +597,7 @@ ZTEST(queue_api, test_queue_alloc)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void queue_poll_race_consume(void *p1, void *p2, void *p3)
 {
@@ -763,7 +750,7 @@ ZTEST(queue_api, test_multiple_queues)
  *
  * @see k_queue_is_empty()
  *
- * @ingroup queue_api_procedures
+ * @ingroup queue_procedures
  */
 void user_access_queue_private_data(void *p1, void *p2, void *p3)
 {
@@ -830,7 +817,7 @@ ZTEST(queue_api, test_access_kernel_obj_with_priv_data)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void low_prio_wait_for_queue(void *p1, void *p2, void *p3)
 {
@@ -858,7 +845,7 @@ static void low_prio_wait_for_queue(void *p1, void *p2, void *p3)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void high_prio_t1_wait_for_queue(void *p1, void *p2, void *p3)
 {
@@ -887,7 +874,7 @@ static void high_prio_t1_wait_for_queue(void *p1, void *p2, void *p3)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void high_prio_t2_wait_for_queue(void *p1, void *p2, void *p3)
 {

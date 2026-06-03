@@ -42,7 +42,7 @@ static ZTEST_BMEM struct qdata qdata[LIST_LEN * 2];
  *
  * @see k_queue_is_empty(), k_queue_peek_head(), k_queue_peek_tail(), k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 void child_thread_get(void *p1, void *p2, void *p3)
 {

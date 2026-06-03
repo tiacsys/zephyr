@@ -71,7 +71,7 @@ ZTEST(queue_api_1cpu, test_queue_get_fail)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_procedures
+ * @ingroup queue_procedures
  */
 static void tThread_entry(void *p1, void *p2, void *p3)
 {

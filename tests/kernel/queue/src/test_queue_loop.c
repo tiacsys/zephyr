@@ -39,7 +39,7 @@ static struct k_sem end_sema;
  *
  * @see k_queue_append(), k_queue_prepend()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_append(struct k_queue *pqueue)
 {
@@ -78,7 +78,7 @@ static void tqueue_append(struct k_queue *pqueue)
  *
  * @see k_queue_get()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_get(struct k_queue *pqueue)
 {
@@ -114,7 +114,7 @@ static void tqueue_get(struct k_queue *pqueue)
  *
  * @see k_queue_remove()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tqueue_find_and_remove(struct k_queue *pqueue)
 {
@@ -146,7 +146,7 @@ static void tqueue_find_and_remove(struct k_queue *pqueue)
  *
  * @see k_queue_append(), k_queue_get(), k_queue_remove()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tIsr_entry(const void *p)
 {
@@ -177,7 +177,7 @@ static void tIsr_entry(const void *p)
  *
  * @see k_queue_append(), k_queue_get(), k_queue_remove()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 static void tThread_entry(void *p1, void *p2, void *p3)
 {
@@ -210,7 +210,7 @@ static void tThread_entry(void *p1, void *p2, void *p3)
  *
  * @see k_queue_append(), k_queue_get(), k_queue_remove()
  *
- * @ingroup queue_api_1cpu_procedures
+ * @ingroup queue_procedures
  */
 /* queue read write job */
 static void tqueue_read_write(struct k_queue *pqueue)

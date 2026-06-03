@@ -7,18 +7,6 @@
  * @file test_fifo_contexts.c Context and is-empty tests for the FIFO API
  */
 
-/**
- * @defgroup fifo_api_procedures Shared Test Procedures
- * @ingroup fifo_api
- * @brief Reusable helper procedures invoked by fifo_api test cases.
- */
-
-/**
- * @defgroup fifo_api_1cpu_procedures Shared Test Procedures
- * @ingroup fifo_api_1cpu
- * @brief Reusable helper procedures invoked by fifo_api_1cpu test cases.
- */
-
 #include "test_fifo.h"
 
 #define STACK_SIZE (512 + CONFIG_TEST_EXTRA_STACK_SIZE)
@@ -54,7 +42,6 @@ static struct k_sem end_sema;
  * @see k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist()
  *
  * @ingroup fifo_api_procedures
- * @ingroup fifo_api_1cpu_procedures
  */
 static void tfifo_put(struct k_fifo *pfifo)
 {
@@ -97,7 +84,6 @@ static void tfifo_put(struct k_fifo *pfifo)
  * @see k_fifo_get()
  *
  * @ingroup fifo_api_procedures
- * @ingroup fifo_api_1cpu_procedures
  */
 static void tfifo_get(struct k_fifo *pfifo)
 {
@@ -184,7 +170,7 @@ static void tThread_entry(void *p1, void *p2, void *p3)
  *
  * @see k_fifo_put(), k_fifo_get()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 static void tfifo_thread_thread(struct k_fifo *pfifo)
 {

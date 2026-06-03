@@ -43,7 +43,7 @@ static void t_cancel_wait_entry(void *p1, void *p2, void *p3)
  *
  * @see k_fifo_get(), k_fifo_cancel_wait()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 static void tfifo_thread_thread(struct k_fifo *pfifo)
 {

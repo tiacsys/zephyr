@@ -14,12 +14,6 @@
  * @brief Test module at tests/kernel/fifo/fifo_usage -- thread and ISR usage scenarios.
  */
 
-/**
- * @defgroup fifo_usage_procedures Shared Test Procedures
- * @ingroup fifo_usage
- * @brief Reusable helper procedures invoked by fifo_usage test cases.
- */
-
 #include <zephyr/ztest.h>
 #include <zephyr/irq_offload.h>
 

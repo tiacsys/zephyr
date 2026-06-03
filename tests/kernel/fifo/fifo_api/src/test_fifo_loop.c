@@ -30,7 +30,7 @@ static struct k_sem end_sema;
  *
  * @see k_fifo_put()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 static void tfifo_put(struct k_fifo *pfifo)
 {
@@ -54,7 +54,7 @@ static void tfifo_put(struct k_fifo *pfifo)
  *
  * @see k_fifo_get()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 static void tfifo_get(struct k_fifo *pfifo)
 {
@@ -82,7 +82,7 @@ static void tfifo_get(struct k_fifo *pfifo)
  *
  * @see k_fifo_put(), k_fifo_get()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 static void tIsr_entry(const void *p)
 {
@@ -112,7 +112,7 @@ static void tIsr_entry(const void *p)
  *
  * @see k_fifo_put(), k_fifo_get()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 static void tThread_entry(void *p1, void *p2, void *p3)
 {
@@ -140,7 +140,7 @@ static void tThread_entry(void *p1, void *p2, void *p3)
  *
  * @see k_fifo_put(), k_fifo_get()
  *
- * @ingroup fifo_api_1cpu_procedures
+ * @ingroup fifo_api_procedures
  */
 /* fifo read write job */
 static void tfifo_read_write(struct k_fifo *pfifo)

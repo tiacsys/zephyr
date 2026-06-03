@@ -15,18 +15,6 @@
  * @brief Test module at tests/kernel/fifo/fifo_timeout -- k_fifo_get() timeout tests.
  */
 
-/**
- * @defgroup fifo_timeout_procedures Shared Test Procedures
- * @ingroup fifo_timeout
- * @brief Reusable helper procedures invoked by fifo_timeout test cases.
- */
-
-/**
- * @defgroup fifo_timeout_1cpu_procedures Shared Test Procedures
- * @ingroup fifo_timeout_1cpu
- * @brief Reusable helper procedures invoked by fifo_timeout_1cpu test cases.
- */
-
 #include <zephyr/ztest.h>
 #include <zephyr/irq_offload.h>
 #include <zephyr/sys/__assert.h>
@@ -103,7 +91,6 @@ static k_tid_t tid[TIMEOUT_ORDER_NUM_THREADS];
  * @see k_fifo_get()
  *
  * @ingroup fifo_timeout_procedures
- * @ingroup fifo_timeout_1cpu_procedures
  */
 static void *get_scratch_packet(void)
 {
@@ -159,7 +146,7 @@ static void test_thread_put_timeout(void *p1, void *p2, void *p3)
  *
  * @see k_fifo_get()
  *
- * @ingroup fifo_timeout_1cpu_procedures
+ * @ingroup fifo_timeout_procedures
  */
 /* a thread pends on a fifo then times out */
 static void test_thread_pend_and_timeout(void *p1, void *p2, void *p3)
@@ -196,7 +183,7 @@ static void test_thread_pend_and_timeout(void *p1, void *p2, void *p3)
  *
  * @see k_fifo_get()
  *
- * @ingroup fifo_timeout_1cpu_procedures
+ * @ingroup fifo_timeout_procedures
  */
 /* Spins several threads that pend and timeout on fifos */
 static int test_multiple_threads_pending(struct timeout_order_data *test_data,
@@ -278,7 +265,7 @@ static int test_multiple_threads_pending(struct timeout_order_data *test_data,
  *
  * @see k_fifo_get()
  *
- * @ingroup fifo_timeout_1cpu_procedures
+ * @ingroup fifo_timeout_procedures
  */
 /* a thread pends on a fifo with a timeout and gets the data in time */
 static void test_thread_pend_and_get_data(void *p1, void *p2, void *p3)
@@ -312,7 +299,7 @@ static void test_thread_pend_and_get_data(void *p1, void *p2, void *p3)
  *
  * @see k_fifo_get(), k_fifo_put()
  *
- * @ingroup fifo_timeout_1cpu_procedures
+ * @ingroup fifo_timeout_procedures
  */
 /* Spins child threads that get fifo data in time, except the last one */
 static int test_multiple_threads_get_data(struct timeout_order_data *test_data,

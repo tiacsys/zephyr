@@ -89,6 +89,7 @@ static void tfifo_thread_thread(struct k_fifo *pfifo)
  * @endverbatim
  *
  * @see k_fifo_init(), k_fifo_get(), k_fifo_cancel_wait()
+ * @testid{TSPEC-FIFO-1CPU-002}
  * @draft
  */
 ZTEST(fifo_api_1cpu, test_fifo_cancel_wait)

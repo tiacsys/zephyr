@@ -218,6 +218,7 @@ static void thread_entry_fn_isr(void *p1, void *p2, void *p3)
  * @endverbatim
  *
  * @see k_fifo_put(), k_fifo_get()
+ * @testid{TSPEC-FIFO-USE-001}
  * @draft
  */
 ZTEST(fifo_usage, test_single_fifo_play)
@@ -290,6 +291,7 @@ ZTEST(fifo_usage, test_single_fifo_play)
  * @endverbatim
  *
  * @see k_fifo_put(), k_fifo_get()
+ * @testid{TSPEC-FIFO-USE-002}
  * @draft
  */
 ZTEST(fifo_usage, test_dual_fifo_play)
@@ -352,6 +354,7 @@ ZTEST(fifo_usage, test_dual_fifo_play)
  * @endverbatim
  *
  * @see k_fifo_put(), k_fifo_get(), k_fifo_is_empty()
+ * @testid{TSPEC-FIFO-USE-003}
  * @draft
  */
 ZTEST(fifo_usage, test_isr_fifo_play)

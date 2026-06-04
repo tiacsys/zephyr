@@ -397,6 +397,7 @@ static void test_thread_timeout_reply_values_wfe(void *p1, void *p2, void *p3)
  * @endverbatim
  *
  * @see k_fifo_get()
+ * @testid{TSPEC-FIFO-TMO1C-001}
  * @draft
  */
 ZTEST(fifo_timeout_1cpu, test_timeout_empty_fifo)
@@ -454,6 +455,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_empty_fifo)
  * @endverbatim
  *
  * @see k_fifo_get(), k_fifo_put()
+ * @testid{TSPEC-FIFO-TMO-001}
  * @draft
  */
 ZTEST(fifo_timeout, test_timeout_non_empty_fifo)
@@ -517,6 +519,7 @@ ZTEST(fifo_timeout, test_timeout_non_empty_fifo)
  * @endverbatim
  *
  * @see k_fifo_get(), k_fifo_put()
+ * @testid{TSPEC-FIFO-TMO1C-002}
  * @draft
  */
 ZTEST(fifo_timeout_1cpu, test_timeout_fifo_thread)
@@ -656,6 +659,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_fifo_thread)
  * @endverbatim
  *
  * @see k_fifo_get()
+ * @testid{TSPEC-FIFO-TMO1C-003}
  * @draft
  */
 ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_fifo)
@@ -699,6 +703,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_fifo)
  * @endverbatim
  *
  * @see k_fifo_get()
+ * @testid{TSPEC-FIFO-TMO1C-004}
  * @draft
  */
 ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_dual_fifos)
@@ -749,6 +754,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_dual_fifos)
  * @endverbatim
  *
  * @see k_fifo_get(), k_fifo_put()
+ * @testid{TSPEC-FIFO-TMO1C-005}
  * @draft
  */
 ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_fail_on_fifo)

@@ -278,6 +278,7 @@ static void tfifo_is_empty(void *p)
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist(),
  *      k_fifo_get()
+ * @testid{TSPEC-FIFO-1CPU-001}
  * @draft
  */
 ZTEST(fifo_api_1cpu, test_fifo_thread2thread)
@@ -326,6 +327,7 @@ ZTEST(fifo_api_1cpu, test_fifo_thread2thread)
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist(),
  *      k_fifo_get()
+ * @testid{TSPEC-FIFO-API-001}
  * @draft
  */
 ZTEST(fifo_api, test_fifo_thread2isr)
@@ -374,6 +376,7 @@ ZTEST(fifo_api, test_fifo_thread2isr)
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist(),
  *      k_fifo_get()
+ * @testid{TSPEC-FIFO-API-002}
  * @draft
  */
 ZTEST(fifo_api, test_fifo_isr2thread)
@@ -416,6 +419,7 @@ ZTEST(fifo_api, test_fifo_isr2thread)
  * @endverbatim
  *
  * @see k_fifo_init(), k_fifo_is_empty(), k_fifo_put(), k_fifo_get()
+ * @testid{TSPEC-FIFO-API-003}
  * @draft
  */
 ZTEST(fifo_api, test_fifo_is_empty_thread)
@@ -457,6 +461,7 @@ ZTEST(fifo_api, test_fifo_is_empty_thread)
  * @endverbatim
  *
  * @see k_fifo_init(), k_fifo_is_empty(), k_fifo_put(), k_fifo_get()
+ * @testid{TSPEC-FIFO-API-004}
  * @draft
  */
 ZTEST(fifo_api, test_fifo_is_empty_isr)

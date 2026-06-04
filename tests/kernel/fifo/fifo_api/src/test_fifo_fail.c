@@ -25,6 +25,7 @@
  * @endverbatim
  *
  * @see k_fifo_init(), k_fifo_get()
+ * @testid{TSPEC-FIFO-API-005}
  * @draft
  */
 ZTEST(fifo_api, test_fifo_get_fail)

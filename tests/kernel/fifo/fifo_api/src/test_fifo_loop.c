@@ -180,6 +180,7 @@ static void tfifo_read_write(struct k_fifo *pfifo)
  * @endverbatim
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_get()
+ * @testid{TSPEC-FIFO-1CPU-003}
  * @draft
  */
 ZTEST(fifo_api_1cpu, test_fifo_loop)

@@ -460,7 +460,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_empty_fifo)
  *
  * @see k_fifo_get()
  * @see k_fifo_put()
- * @verifies ZEP-SRS-24-7
+ * @verifies ZEP-SRS-24-
  */
 ZTEST(fifo_timeout, test_timeout_non_empty_fifo)
 {

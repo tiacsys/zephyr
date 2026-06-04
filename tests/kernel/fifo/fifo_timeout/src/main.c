@@ -392,9 +392,7 @@ static void test_thread_timeout_reply_values_wfe(void *p1, void *p2, void *p3)
  *    elapsed time is at least 10 ms, confirming the timeout was observed.
  * -# With K_NO_WAIT: the call returns NULL immediately without blocking.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_get()
  * @testid{TSPEC-FIFO-TMO1C-001}
@@ -449,10 +447,8 @@ ZTEST(fifo_timeout_1cpu, test_timeout_empty_fifo)
  * Both sub-scenarios confirm that k_fifo_get() returns a non-null pointer
  * when data is present regardless of the timeout value.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_get(), k_fifo_put()
  * @testid{TSPEC-FIFO-TMO-001}
@@ -513,10 +509,8 @@ ZTEST(fifo_timeout, test_timeout_non_empty_fifo)
  *    K_FOREVER on a pre-loaded fifo via @c test_thread_timeout_reply_values_wfe,
  *    which also reports true.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_get(), k_fifo_put()
  * @testid{TSPEC-FIFO-TMO1C-002}
@@ -654,9 +648,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_fifo_thread)
  * @c test_multiple_threads_pending() that completions are collected from
  * @c timeout_order_fifo in the expected order (one-tick tolerance allowed).
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_get()
  * @testid{TSPEC-FIFO-TMO1C-003}
@@ -698,9 +690,7 @@ ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_fifo)
  * Verifies via @c test_multiple_threads_pending() that completions arrive in
  * the expected order regardless of which fifo each thread pended on.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_get()
  * @testid{TSPEC-FIFO-TMO1C-004}
@@ -748,10 +738,8 @@ ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_dual_fifos)
  * that each thread completes in queue order, confirming that timeout recomputation
  * is correct when earlier waiters are satisfied.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_get(), k_fifo_put()
  * @testid{TSPEC-FIFO-TMO1C-005}

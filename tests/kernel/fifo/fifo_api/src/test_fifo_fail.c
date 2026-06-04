@@ -20,9 +20,7 @@
  * no item is available -- both when called with K_NO_WAIT (immediate return)
  * and with a finite timeout (TIMEOUT = 100 ms, after which it expires).
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_init(), k_fifo_get()
  * @testid{TSPEC-FIFO-API-005}

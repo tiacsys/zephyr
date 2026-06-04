@@ -268,13 +268,11 @@ static void tfifo_is_empty(void *p)
  * verifies item identity and order, confirming that the initialisation method
  * does not affect transfer correctness.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-1`
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-5`
- * - :external+req:ref:`zep-srs-24-6`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-1}
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-5}
+ * @reqref{zep-srs-24-6}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist(),
  *      k_fifo_get()
@@ -318,12 +316,10 @@ ZTEST(fifo_api_1cpu, test_fifo_thread2thread)
  * asserts the fifo is non-empty, and the current thread dequeues and verifies
  * them, confirming cross-context data passing regardless of initialisation.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-5`
- * - :external+req:ref:`zep-srs-24-6`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-5}
+ * @reqref{zep-srs-24-6}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist(),
  *      k_fifo_get()
@@ -367,12 +363,10 @@ ZTEST(fifo_api, test_fifo_thread2isr)
  * insertion APIs, then an ISR drains and verifies them and asserts the fifo
  * is empty on exit.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-5`
- * - :external+req:ref:`zep-srs-24-6`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-5}
+ * @reqref{zep-srs-24-6}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_put_list(), k_fifo_put_slist(),
  *      k_fifo_get()
@@ -414,9 +408,7 @@ ZTEST(fifo_api, test_fifo_isr2thread)
  * k_fifo_init(), false after @c tfifo_put() enqueues items, and true
  * again after @c tfifo_get() drains them -- all checked from thread context.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-8`
- * @endverbatim
+ * @reqref{zep-srs-24-8}
  *
  * @see k_fifo_init(), k_fifo_is_empty(), k_fifo_put(), k_fifo_get()
  * @testid{TSPEC-FIFO-API-003}
@@ -456,9 +448,7 @@ ZTEST(fifo_api, test_fifo_is_empty_thread)
  * dequeue, and empty-check operations execute in ISR context, confirming that
  * k_fifo_is_empty() is accurate when called from an interrupt handler.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-8`
- * @endverbatim
+ * @reqref{zep-srs-24-8}
  *
  * @see k_fifo_init(), k_fifo_is_empty(), k_fifo_put(), k_fifo_get()
  * @testid{TSPEC-FIFO-API-004}

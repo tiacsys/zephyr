@@ -174,10 +174,8 @@ static void tfifo_read_write(struct k_fifo *pfifo)
  * holds throughout -- with no accumulated corruption or ordering error over the
  * full loop.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_init(), k_fifo_put(), k_fifo_get()
  * @testid{TSPEC-FIFO-1CPU-003}

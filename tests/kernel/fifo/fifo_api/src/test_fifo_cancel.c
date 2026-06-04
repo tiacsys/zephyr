@@ -84,9 +84,7 @@ static void tfifo_thread_thread(struct k_fifo *pfifo)
  * thread blocks on k_fifo_get() with a 500 ms timeout.  The call must return
  * NULL in under 80 ms, confirming that cancellation takes effect promptly.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-2`
- * @endverbatim
+ * @reqref{zep-srs-24-2}
  *
  * @see k_fifo_init(), k_fifo_get(), k_fifo_cancel_wait()
  * @testid{TSPEC-FIFO-1CPU-002}

@@ -212,10 +212,8 @@ static void thread_entry_fn_isr(void *p1, void *p2, void *p3)
  * After waiting for the consumer to signal @c end_sema, the test thread drains
  * @p fifo1 again, asserting that each received pointer matches @p data2[i].
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_put(), k_fifo_get()
  * @testid{TSPEC-FIFO-USE-001}
@@ -285,10 +283,8 @@ ZTEST(fifo_usage, test_single_fifo_play)
  * each item received from @p fifo1 equals @p data1[i], confirming two-fifo
  * alternating data passing.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
  *
  * @see k_fifo_put(), k_fifo_get()
  * @testid{TSPEC-FIFO-USE-002}
@@ -347,11 +343,9 @@ ZTEST(fifo_usage, test_dual_fifo_play)
  * the child signals @c end_sema, the test thread ISR-drains @p fifo1, asserting
  * pointer identity and empty state from ISR context.
  *
- * @verbatim embed:rst
- * - :external+req:ref:`zep-srs-24-3`
- * - :external+req:ref:`zep-srs-24-7`
- * - :external+req:ref:`zep-srs-24-8`
- * @endverbatim
+ * @reqref{zep-srs-24-3}
+ * @reqref{zep-srs-24-7}
+ * @reqref{zep-srs-24-8}
  *
  * @see k_fifo_put(), k_fifo_get(), k_fifo_is_empty()
  * @testid{TSPEC-FIFO-USE-003}

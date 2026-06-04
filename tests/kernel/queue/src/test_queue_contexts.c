@@ -7,7 +7,6 @@
  * @file test_queue_contexts.c Implementation of Kernel Queue API tests
  */
 
-
 #include "test_queue.h"
 
 #define STACK_SIZE (512 + CONFIG_TEST_EXTRA_STACK_SIZE)
@@ -981,7 +980,7 @@ ZTEST(queue_api_1cpu, test_queue_multithread_competition)
 	 * All three threads are joined to confirm that each thread received
 	 * exactly one item and completed without assertion failure.
 	 */
-	k_thread_priority_set_adjoin(&tdata, K_FOREVER);
+	k_thread_join(&tdata, K_FOREVER);
 	k_thread_join(&tdata1, K_FOREVER);
 	k_thread_join(&tdata2, K_FOREVER);
 

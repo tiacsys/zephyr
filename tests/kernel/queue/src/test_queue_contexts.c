@@ -245,9 +245,9 @@ static void tqueue_isr_thread(struct k_queue *pqueue)
  * queue and verifies item identity and order, confirming that the
  * initialisation method does not affect transfer correctness.
  *
- * @see k_queue_init(), tqueue_thread_thread()
  * @testid{TSPEC-QUEUE-1CPU-007}
  * @draft
+ * @see k_queue_init(), tqueue_thread_thread()
  */
 ZTEST(queue_api_1cpu, test_queue_thread2thread)
 {
@@ -283,12 +283,12 @@ ZTEST(queue_api_1cpu, test_queue_thread2thread)
  * and the current thread dequeues and verifies them, confirming that cross-context
  * data passing works regardless of how the queue was initialised.
  *
+ * @testid{TSPEC-QUEUE-API-018}
  * @reqref{zep-srs-20-6}
+ * @draft
  *
  * @see k_queue_init(), k_queue_insert(), k_queue_peek_tail(), k_queue_append(),
  *      k_queue_prepend(), k_queue_append_list(), k_queue_merge_slist(), k_queue_get()
- * @testid{TSPEC-QUEUE-API-018}
- * @draft
  */
 ZTEST(queue_api, test_queue_thread2isr)
 {

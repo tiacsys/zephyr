@@ -1,0 +1,48 @@
+# Copyright (c) 2026 The Zephyr Project Contributors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Rules for scripts/check_include_layering.py.
+#
+# This file is a list of rules. Each rule has:
+#
+#   name:        short, stable identifier (used as the baseline key together
+#                with the offending header -- keep it stable across renames)
+#   description: free text, printed in reports
+#   scope:       glob pattern(s) selecting which translation units (.c/.cpp
+#                sources from compile_commands.json) the rule applies to.
+#                Matched relative to the zephyr repository root, e.g.
+#                "kernel/**" matches any source under <zephyr>/kernel/.
+#   forbidden:   glob pattern(s) for headers that must never be transitively
+#                #include-able (directly or indirectly) from a TU in scope.
+#                Matched relative to the west workspace root, e.g.
+#                "modules/hal/**" matches any header under
+#                <workspace>/modules/hal/. Patterns may also be given as bare
+#                path fragments (matched at a '/' boundary anywhere in the
+#                absolute path) for headers that don't have a single stable
+#                root-relative location.
+#
+# Glob dialect: "**" matches any number of path segments (incl. zero), "*"
+# matches within one path segment, "?" matches a single character.
+#
+# A violation is: some TU matching `scope` has a header matching one of
+# `forbidden` reachable via zero or more #include edges (i.e. transitively).
+#
+# Rationale for the rule below: the kernel core is meant to be portable
+# across architectures, SoCs and HALs. If kernel/*.c can transitively reach
+# a specific vendor's HAL headers (e.g. STM32Cube), or a specific SoC's or
+# driver's headers, it has silently grown a hidden, untestable dependency
+# on that hardware -- discovered today via the chain
+#   kernel.h -> kernel_includes.h -> arch/cpu.h -> arch/arm/arch.h ->
+#   arm_mpu.h -> arm_mpu_v7m.h -> cmsis_core.h -> soc.h -> stm32g4xx.h -> HAL
+
+- name: kernel-no-hal
+  description: >
+    zephyr/kernel/**.c must not transitively reach vendor HAL, SoC, or
+    driver headers. The kernel core is expected to stay portable; reaching
+    into these layers means it has picked up a hidden hardware dependency.
+  scope:
+    - "kernel/**"
+  forbidden:
+    - "modules/hal/**"
+    - "zephyr/soc/**"
+    - "zephyr/drivers/**"

@@ -25,6 +25,11 @@
 #include <cortex_m/debug.h>
 #include <zephyr/arch/common/xip.h>
 #include <zephyr/arch/common/init.h>
+/* This arch-layer init code programs SCB/VTOR/CONTROL via the CMSIS core
+ * definitions directly; it used to obtain them transitively through the
+ * arch headers, which no longer include <cmsis_core.h>.
+ */
+#include <cmsis_core.h>
 
 /*
  * GCC can detect if memcpy is passed a NULL argument, however one of

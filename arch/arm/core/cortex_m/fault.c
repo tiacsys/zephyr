@@ -21,6 +21,11 @@
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/barrier.h>
 #include <cortex_m/debug.h>
+/* This arch-layer fault handler accesses the SCB fault-status registers and
+ * CMSIS intrinsics directly; it used to obtain them transitively through
+ * <cortex_m/exception.h>, which no longer includes <cmsis_core.h>.
+ */
+#include <cmsis_core.h>
 
 LOG_MODULE_DECLARE(os, CONFIG_KERNEL_LOG_LEVEL);
 

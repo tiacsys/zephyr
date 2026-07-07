@@ -36,7 +36,15 @@
 #define MPU_RLAR_AttrIndx_Msk (0x7UL << MPU_RLAR_AttrIndx_Pos)
 #define MPU_RLAR_EN_Msk       (0x1UL)
 #else
-#include <cmsis_core.h>
+/*
+ * Only the ARMv8-M MPU RBAR/RLAR register-field constants are needed here, not
+ * the CMSIS MPU peripheral struct or intrinsics. Pull them from a local,
+ * Zephyr-owned header instead of <cmsis_core.h> so that the kernel's
+ * architecture-portable include graph does not reach into the vendor CMSIS/HAL
+ * headers. Arch/SoC MPU driver code that needs the actual MPU peripheral still
+ * includes <cmsis_core.h> directly.
+ */
+#include <zephyr/arch/arm/mpu/arm_mpu_v8_reg.h>
 #endif
 
 /* Privileged No Access, Unprivileged No Access */

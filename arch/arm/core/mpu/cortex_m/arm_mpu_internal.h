@@ -4,6 +4,13 @@
  */
 
 #include <zephyr/sys/math_extras.h>
+/*
+ * This arch-layer helper programs the Cortex-M MPU peripheral directly, so it
+ * needs the CMSIS core definitions (MPU peripheral struct, MPU_* field masks).
+ * Include them here explicitly: arm_mpu_v7m.h no longer pulls <cmsis_core.h>
+ * into the (arch-portable) kernel include graph.
+ */
+#include <cmsis_core.h>
 
 /**
  *  Get the number of supported MPU regions.

@@ -29,6 +29,10 @@ extern "C" {
 
 #ifndef _ASMLANGUAGE
 #include <zephyr/arch/arm/arm-m-switch.h>
+/* Zephyr-owned SCB register definitions (Z_ARM_SCB): arch_swap() below is
+ * compiled into kernel translation units, which must not reach <cmsis_core.h>.
+ */
+#include <cortex_m/scs.h>
 
 extern void z_arm_fault_init(void);
 extern void z_arm_cpu_idle_init(void);
@@ -91,7 +95,7 @@ static ALWAYS_INLINE int arch_swap(unsigned int key)
 	_current->arch.swap_return_value = -EAGAIN;
 
 	/* set pending bit to make sure we will take a PendSV exception */
-	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+	Z_ARM_SCB->icsr |= Z_ARM_SCB_ICSR_PENDSVSET_Msk;
 
 	/* clear mask or enable all irqs to take a pendsv */
 	irq_unlock(0);

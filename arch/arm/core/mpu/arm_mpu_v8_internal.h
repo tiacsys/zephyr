@@ -10,6 +10,13 @@
 #define ZEPHYR_ARCH_ARM_CORE_AARCH32_MPU_ARM_MPU_V8_INTERNAL_H_
 
 #include <cortex_m/cmse.h>
+/*
+ * This arch-layer helper programs the ARMv8-M MPU peripheral directly, so it
+ * needs the CMSIS core definitions (MPU peripheral struct, MPU_* field masks).
+ * Include them here explicitly: arm_mpu_v8.h no longer pulls <cmsis_core.h>
+ * into the (arch-portable) kernel include graph.
+ */
+#include <cmsis_core.h>
 #define LOG_LEVEL CONFIG_MPU_LOG_LEVEL
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/math_extras.h>

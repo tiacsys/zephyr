@@ -20,7 +20,13 @@
 
 #else
 
-#include <cmsis_core.h>
+/*
+ * This helper is always-inlined into arch_kernel_init() and thus compiled
+ * into kernel translation units: use the Zephyr-owned Cortex-M register
+ * definitions instead of <cmsis_core.h> to keep the kernel's
+ * architecture-portable include graph free of vendor CMSIS/HAL headers.
+ */
+#include <cortex_m/scs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,10 +47,10 @@ static ALWAYS_INLINE void z_arm_interrupt_stack_setup(void)
 	uint32_t msp = (uint32_t)(K_KERNEL_STACK_BUFFER(z_interrupt_stacks[0])) +
 		       K_KERNEL_STACK_SIZEOF(z_interrupt_stacks[0]);
 
-	__set_MSP(msp);
+	z_arm_set_msp(msp);
 #if defined(CONFIG_BUILTIN_STACK_GUARD)
 #if defined(CONFIG_CPU_CORTEX_M_HAS_SPLIM)
-	__set_MSPLIM((uint32_t)z_interrupt_stacks[0]);
+	z_arm_set_msplim((uint32_t)z_interrupt_stacks[0]);
 #else
 #error "Built-in MSP limit checks not supported by HW"
 #endif
@@ -57,7 +63,7 @@ static ALWAYS_INLINE void z_arm_interrupt_stack_setup(void)
 	 * default and it is not configurable.
 	 */
 #if defined(CONFIG_CPU_CORTEX_M3) || defined(CONFIG_CPU_CORTEX_M4)
-	SCB->CCR |= SCB_CCR_STKALIGN_Msk;
+	Z_ARM_SCB->ccr |= Z_ARM_SCB_CCR_STKALIGN_Msk;
 #endif
 #endif /* CONFIG_STACK_ALIGN_DOUBLE_WORD */
 }

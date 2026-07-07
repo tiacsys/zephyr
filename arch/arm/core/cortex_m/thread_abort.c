@@ -21,6 +21,11 @@
 #include <zephyr/linker/sections.h>
 #include <kswap.h>
 #include <zephyr/sys/__assert.h>
+/* This arch-layer helper pends PendSV/SVC via the CMSIS SCB definitions
+ * directly; it used to obtain them transitively through the arch headers,
+ * which no longer include <cmsis_core.h>.
+ */
+#include <cmsis_core.h>
 
 void z_impl_k_thread_abort(k_tid_t thread)
 {

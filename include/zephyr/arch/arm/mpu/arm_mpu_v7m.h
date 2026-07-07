@@ -10,7 +10,15 @@
 
 #ifndef _ASMLANGUAGE
 
-#include <cmsis_core.h>
+/*
+ * Only the ARMv7-M MPU RASR register-field constants are needed here, not the
+ * CMSIS MPU peripheral struct or intrinsics. Pull them from a local,
+ * Zephyr-owned header instead of <cmsis_core.h> so that the kernel's
+ * architecture-portable include graph does not reach into the vendor CMSIS/HAL
+ * headers. Arch/SoC MPU driver code that needs the actual MPU peripheral still
+ * includes <cmsis_core.h> directly.
+ */
+#include <zephyr/arch/arm/mpu/arm_mpu_v7m_reg.h>
 
 /* Convenience macros to represent the ARMv7-M-specific
  * configuration for memory access permission and

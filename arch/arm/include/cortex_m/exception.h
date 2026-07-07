@@ -22,7 +22,14 @@
 
 #else
 
-#include <cmsis_core.h>
+/*
+ * The always-inline helpers below (arch_is_in_isr() in the kernel's hot path,
+ * z_arm_exc_setup()/z_arm_clear_faults() inlined into arch_kernel_init(), ...)
+ * are compiled into kernel translation units: use the Zephyr-owned Cortex-M
+ * register definitions instead of <cmsis_core.h> to keep the kernel's
+ * architecture-portable include graph free of vendor CMSIS/HAL headers.
+ */
+#include <cortex_m/scs.h>
 #include <zephyr/arch/arm/exception.h>
 #include <zephyr/irq_offload.h>
 
@@ -92,7 +99,7 @@ extern volatile irq_offload_routine_t offload_routine;
  */
 static ALWAYS_INLINE bool arch_is_in_isr(void)
 {
-	return (__get_IPSR()) ? (true) : (false);
+	return (z_arm_get_ipsr()) ? (true) : (false);
 }
 
 /**
@@ -117,7 +124,7 @@ static ALWAYS_INLINE bool arch_is_in_isr(void)
  */
 static ALWAYS_INLINE bool arch_is_in_nested_exception(const struct arch_esf *esf)
 {
-	return (esf->basic.xpsr & IPSR_ISR_Msk) ? (true) : (false);
+	return (esf->basic.xpsr & Z_ARM_IPSR_ISR_Msk) ? (true) : (false);
 }
 
 #if defined(CONFIG_USERSPACE)
@@ -146,36 +153,36 @@ static ALWAYS_INLINE void z_arm_exc_setup(void)
 	/* PendSV is set to lowest priority, regardless of it being used.
 	 * This is done as the IRQ is always enabled.
 	 */
-	NVIC_SetPriority(PendSV_IRQn, _EXC_PENDSV_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_PENDSV, _EXC_PENDSV_PRIO);
 
 #ifdef CONFIG_CPU_CORTEX_M_HAS_BASEPRI
 	/* Note: SVCall IRQ priority level is left to default (0)
 	 * for Cortex-M variants without BASEPRI (e.g. ARMv6-M).
 	 */
-	NVIC_SetPriority(SVCall_IRQn, _EXC_SVC_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_SVCALL, _EXC_SVC_PRIO);
 #endif
 
 #ifdef CONFIG_CPU_CORTEX_M_HAS_PROGRAMMABLE_FAULT_PRIOS
-	NVIC_SetPriority(MemoryManagement_IRQn, _EXC_FAULT_PRIO);
-	NVIC_SetPriority(BusFault_IRQn, _EXC_FAULT_PRIO);
-	NVIC_SetPriority(UsageFault_IRQn, _EXC_FAULT_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_MEMMANAGE, _EXC_FAULT_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_BUSFAULT, _EXC_FAULT_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_USAGEFAULT, _EXC_FAULT_PRIO);
 #if defined(CONFIG_CORTEX_M_DEBUG_MONITOR_HOOK)
-	NVIC_SetPriority(DebugMonitor_IRQn, IRQ_PRIO_LOWEST);
+	z_arm_exc_set_priority(Z_ARM_IRQN_DEBUGMONITOR, IRQ_PRIO_LOWEST);
 #elif defined(CONFIG_CPU_CORTEX_M_HAS_DWT)
-	NVIC_SetPriority(DebugMonitor_IRQn, _EXC_FAULT_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_DEBUGMONITOR, _EXC_FAULT_PRIO);
 #endif
 #if defined(CONFIG_ARM_SECURE_FIRMWARE)
-	NVIC_SetPriority(SecureFault_IRQn, _EXC_FAULT_PRIO);
+	z_arm_exc_set_priority(Z_ARM_IRQN_SECUREFAULT, _EXC_FAULT_PRIO);
 #endif /* CONFIG_ARM_SECURE_FIRMWARE */
 
 	/* Enable Usage, Mem, & Bus Faults */
-	SCB->SHCSR |=
-		SCB_SHCSR_USGFAULTENA_Msk | SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk;
+	Z_ARM_SCB->shcsr |= Z_ARM_SCB_SHCSR_USGFAULTENA_Msk | Z_ARM_SCB_SHCSR_MEMFAULTENA_Msk |
+			    Z_ARM_SCB_SHCSR_BUSFAULTENA_Msk;
 #if defined(CONFIG_ARM_SECURE_FIRMWARE)
 	/* Enable Secure Fault */
-	SCB->SHCSR |= SCB_SHCSR_SECUREFAULTENA_Msk;
+	Z_ARM_SCB->shcsr |= Z_ARM_SCB_SHCSR_SECUREFAULTENA_Msk;
 	/* Clear BFAR before setting BusFaults to target Non-Secure state. */
-	SCB->BFAR = 0;
+	Z_ARM_SCB->bfar = 0;
 #endif /* CONFIG_ARM_SECURE_FIRMWARE */
 #endif /* CONFIG_CPU_CORTEX_M_HAS_PROGRAMMABLE_FAULT_PRIOS */
 
@@ -184,9 +191,10 @@ static ALWAYS_INLINE void z_arm_exc_setup(void)
 	 * NMI and Bus Faults targeting the Secure state will
 	 * escalate to a SecureFault or SecureHardFault.
 	 */
-	SCB->AIRCR =
-		(SCB->AIRCR & (~(SCB_AIRCR_VECTKEY_Msk))) | SCB_AIRCR_BFHFNMINS_Msk |
-		((AIRCR_VECT_KEY_PERMIT_WRITE << SCB_AIRCR_VECTKEY_Pos) & SCB_AIRCR_VECTKEY_Msk);
+	Z_ARM_SCB->aircr = (Z_ARM_SCB->aircr & (~(Z_ARM_SCB_AIRCR_VECTKEY_Msk))) |
+			   Z_ARM_SCB_AIRCR_BFHFNMINS_Msk |
+			   ((AIRCR_VECT_KEY_PERMIT_WRITE << Z_ARM_SCB_AIRCR_VECTKEY_Pos) &
+			    Z_ARM_SCB_AIRCR_VECTKEY_Msk);
 	/* Note: Fault conditions that would generate a SecureFault
 	 * in a PE with the Main Extension instead generate a
 	 * SecureHardFault in a PE without the Main Extension.
@@ -215,10 +223,11 @@ static ALWAYS_INLINE void z_arm_clear_faults(void)
 #if defined(CONFIG_ARMV6_M_ARMV8_M_BASELINE)
 #elif defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
 	/* Reset all faults */
-	SCB->CFSR = SCB_CFSR_USGFAULTSR_Msk | SCB_CFSR_MEMFAULTSR_Msk | SCB_CFSR_BUSFAULTSR_Msk;
+	Z_ARM_SCB->cfsr = Z_ARM_SCB_CFSR_USGFAULTSR_Msk | Z_ARM_SCB_CFSR_MEMFAULTSR_Msk |
+			  Z_ARM_SCB_CFSR_BUSFAULTSR_Msk;
 
 	/* Clear all Hard Faults - HFSR is write-one-to-clear */
-	SCB->HFSR = 0xffffffff;
+	Z_ARM_SCB->hfsr = 0xffffffff;
 #else
 #error Unknown ARM architecture
 #endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
@@ -251,7 +260,7 @@ static ALWAYS_INLINE void z_arm_set_fault_sp(const struct arch_esf *esf, uint32_
 #endif /* CONFIG_FPU && CONFIG_FPU_SHARING */
 
 #if !(defined(CONFIG_ARMV8_M_MAINLINE) || defined(CONFIG_ARMV8_M_BASELINE))
-	if ((esf->basic.xpsr & SCB_CCR_STKALIGN_Msk) == SCB_CCR_STKALIGN_Msk) {
+	if ((esf->basic.xpsr & Z_ARM_SCB_CCR_STKALIGN_Msk) == Z_ARM_SCB_CCR_STKALIGN_Msk) {
 		/* Adjust stack alignment after PSR bit[9] detected */
 		z_arm_coredump_fault_sp |= 0x4;
 	}

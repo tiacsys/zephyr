@@ -21,7 +21,6 @@
 #include <zephyr/toolchain.h>
 #include <zephyr/types.h>
 #include <zephyr/arch/exception.h>
-#include <cmsis_core.h>
 
 #if defined(CONFIG_CPU_AARCH32_CORTEX_R) || defined(CONFIG_CPU_AARCH32_CORTEX_A)
 #include <zephyr/arch/arm/cortex_a_r/cpu.h>
@@ -30,6 +29,80 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Native GCC inline-assembly replacements for the small set of CMSIS-Core
+ * intrinsics this header used to rely on. Providing them locally lets the ARM
+ * arch layer drop its <cmsis_core.h> dependency, keeping the kernel's
+ * architecture-portable include graph free of vendor CMSIS/HAL headers.
+ *
+ * Each helper reproduces, byte-for-byte, the instruction, operand constraints,
+ * "volatile" qualifier and clobber list of the corresponding CMSIS-Core
+ * intrinsic (CMSIS-Core cmsis_gcc.h and m-profile/cmsis_gcc_m.h), so the code
+ * generated at each call site is identical to the previous CMSIS-based one.
+ * In particular the PRIMASK/BASEPRI *readers* deliberately have NO "memory"
+ * clobber, matching CMSIS __get_PRIMASK()/__get_BASEPRI(). The names are
+ * deliberately NOT the CMSIS ones (no __get_PRIMASK() etc.) to avoid macro/
+ * symbol redefinition clashes in translation units that also include CMSIS.
+ */
+
+/* Equivalent of CMSIS __get_PRIMASK(): reads PRIMASK, no memory clobber. */
+static ALWAYS_INLINE uint32_t z_arm_get_primask(void)
+{
+	uint32_t result;
+
+	__asm__ volatile("MRS %0, primask" : "=r"(result));
+	return result;
+}
+
+/* Equivalent of CMSIS __set_PRIMASK(): writes PRIMASK, memory clobber. */
+static ALWAYS_INLINE void z_arm_set_primask(uint32_t primask)
+{
+	__asm__ volatile("MSR primask, %0" : : "r"(primask) : "memory");
+}
+
+/* Equivalent of CMSIS __enable_irq(): clears PRIMASK, memory clobber. */
+static ALWAYS_INLINE void z_arm_enable_irq(void)
+{
+	__asm__ volatile("cpsie i" : : : "memory");
+}
+
+/* Equivalent of CMSIS __disable_irq(): sets PRIMASK, memory clobber. */
+static ALWAYS_INLINE void z_arm_disable_irq(void)
+{
+	__asm__ volatile("cpsid i" : : : "memory");
+}
+
+/* Equivalent of CMSIS __ISB(): Instruction Synchronization Barrier. */
+static ALWAYS_INLINE void z_arm_isb(void)
+{
+	__asm__ volatile("isb 0xF" : : : "memory");
+}
+
+#if defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
+/* BASEPRI only exists on ARMv7-M / ARMv8-M Mainline. */
+
+/* Equivalent of CMSIS __get_BASEPRI(): reads BASEPRI, no memory clobber. */
+static ALWAYS_INLINE uint32_t z_arm_get_basepri(void)
+{
+	uint32_t result;
+
+	__asm__ volatile("MRS %0, basepri" : "=r"(result));
+	return result;
+}
+
+/* Equivalent of CMSIS __set_BASEPRI(): writes BASEPRI, memory clobber. */
+static ALWAYS_INLINE void z_arm_set_basepri(uint32_t basepri)
+{
+	__asm__ volatile("MSR basepri, %0" : : "r"(basepri) : "memory");
+}
+
+/* Equivalent of CMSIS __set_BASEPRI_MAX(): writes BASEPRI_MAX, memory clobber. */
+static ALWAYS_INLINE void z_arm_set_basepri_max(uint32_t basepri)
+{
+	__asm__ volatile("MSR basepri_max, %0" : : "r"(basepri) : "memory");
+}
+#endif /* CONFIG_ARMV7_M_ARMV8_M_MAINLINE */
 
 /* On ARMv7-M and ARMv8-M Mainline CPUs, this function prevents regular
  * exceptions (i.e. with interrupt priority lower than or equal to
@@ -47,15 +120,15 @@ static ALWAYS_INLINE unsigned int arch_irq_lock(void)
 
 #if defined(CONFIG_ARMV6_M_ARMV8_M_BASELINE)
 #if CONFIG_MP_MAX_NUM_CPUS == 1 || defined(CONFIG_ARMV8_M_BASELINE)
-	key = __get_PRIMASK();
-	__disable_irq();
+	key = z_arm_get_primask();
+	z_arm_disable_irq();
 #else
 #error "Cortex-M0 and Cortex-M0+ require SoC specific support for cross core synchronisation."
 #endif
 #elif defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
-	key = __get_BASEPRI();
-	__set_BASEPRI_MAX(_EXC_IRQ_DEFAULT_PRIO);
-	__ISB();
+	key = z_arm_get_basepri();
+	z_arm_set_basepri_max(_EXC_IRQ_DEFAULT_PRIO);
+	z_arm_isb();
 #elif defined(CONFIG_ARMV7_R) || defined(CONFIG_AARCH32_ARMV8_R) \
 	|| defined(CONFIG_ARMV7_A) || defined(CONFIG_AARCH32_ARMV8_A)
 	__asm__ volatile(
@@ -83,17 +156,17 @@ static ALWAYS_INLINE void arch_irq_unlock(unsigned int key)
 	if (key != 0U) {
 		return;
 	}
-	__enable_irq();
-	__ISB();
+	z_arm_enable_irq();
+	z_arm_isb();
 #elif defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
-	__set_BASEPRI(key);
-	__ISB();
+	z_arm_set_basepri(key);
+	z_arm_isb();
 #elif defined(CONFIG_ARMV7_R) || defined(CONFIG_AARCH32_ARMV8_R) \
 	|| defined(CONFIG_ARMV7_A) || defined(CONFIG_AARCH32_ARMV8_A)
 	if (key != 0U) {
 		return;
 	}
-	__enable_irq();
+	z_arm_enable_irq();
 #else
 #error Unknown ARM architecture
 #endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
@@ -109,9 +182,9 @@ static ALWAYS_INLINE bool arch_irq_unlocked(unsigned int key)
 static ALWAYS_INLINE bool arch_cpu_irqs_are_enabled(void)
 {
 #if defined(CONFIG_ARMV6_M_ARMV8_M_BASELINE)
-	return __get_PRIMASK() == 0U;
+	return z_arm_get_primask() == 0U;
 #elif defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
-	return __get_BASEPRI() == 0U;
+	return z_arm_get_basepri() == 0U;
 #elif defined(CONFIG_ARMV7_R) || defined(CONFIG_AARCH32_ARMV8_R) \
 	|| defined(CONFIG_ARMV7_A) || defined(CONFIG_AARCH32_ARMV8_A)
 	unsigned int cpsr;
@@ -129,21 +202,21 @@ static ALWAYS_INLINE unsigned int arch_zli_lock(void)
 {
 	unsigned int key;
 
-	key = __get_PRIMASK();
+	key = z_arm_get_primask();
 
 	/*
 	 * The cpsid instruction is self synchronizing within the instruction stream, no need for
-	 * an explicit __ISB().
+	 * an explicit ISB.
 	 */
-	__disable_irq();
+	z_arm_disable_irq();
 
 	return key;
 }
 
 static ALWAYS_INLINE void arch_zli_unlock(unsigned int key)
 {
-	__set_PRIMASK(key);
-	__ISB();
+	z_arm_set_primask(key);
+	z_arm_isb();
 }
 
 #endif /* CONFIG_ZERO_LATENCY_IRQS */

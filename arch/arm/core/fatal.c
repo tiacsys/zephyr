@@ -16,6 +16,13 @@
 #include <zephyr/arch/exception.h>
 #include <kernel_arch_data.h>
 #include <zephyr/logging/log.h>
+#if defined(CONFIG_CPU_CORTEX_M)
+/* This arch-layer fatal-error code reads IPSR via the CMSIS intrinsics
+ * directly; it used to obtain them transitively through the arch headers,
+ * which no longer include <cmsis_core.h>.
+ */
+#include <cmsis_core.h>
+#endif
 LOG_MODULE_DECLARE(os, CONFIG_KERNEL_LOG_LEVEL);
 
 extern void z_arm_unwind_stack(const struct arch_esf *esf);

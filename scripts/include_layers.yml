@@ -3,15 +3,23 @@
 #
 # Rules for scripts/check_include_layering.py.
 #
-# This file is a list of rules. Each rule has:
+# This file is a list of rules. Every rule has:
 #
 #   name:        short, stable identifier (used as the baseline key together
 #                with the offending header -- keep it stable across renames)
+#   type:        rule kind, one of "forbidden-layer" (default if omitted) or
+#                "max-reach". The two kinds take different extra keys (below).
 #   description: free text, printed in reports
 #   scope:       glob pattern(s) selecting which translation units (.c/.cpp
 #                sources from compile_commands.json) the rule applies to.
 #                Matched relative to the zephyr repository root, e.g.
 #                "kernel/**" matches any source under <zephyr>/kernel/.
+#
+# Glob dialect: "**" matches any number of path segments (incl. zero), "*"
+# matches within one path segment, "?" matches a single character.
+#
+# -- type: forbidden-layer (the default) -------------------------------------
+#
 #   forbidden:   glob pattern(s) for headers that must never be transitively
 #                #include-able (directly or indirectly) from a TU in scope.
 #                Matched relative to the west workspace root, e.g.
@@ -21,11 +29,29 @@
 #                absolute path) for headers that don't have a single stable
 #                root-relative location.
 #
-# Glob dialect: "**" matches any number of path segments (incl. zero), "*"
-# matches within one path segment, "?" matches a single character.
+# A forbidden-layer violation is: some TU matching `scope` has a header
+# matching one of `forbidden` reachable via zero or more #include edges (i.e.
+# transitively). These violations are deduplicated per (rule, header) and
+# participate in the baseline workflow.
 #
-# A violation is: some TU matching `scope` has a header matching one of
-# `forbidden` reachable via zero or more #include edges (i.e. transitively).
+# -- type: max-reach ---------------------------------------------------------
+#
+#   budget:      non-negative integer ceiling on the number of distinct
+#                headers a single TU in scope may transitively reach.
+#
+# Counting definition (exact): for a TU in scope, `count` is the number of
+# distinct header files in the TU's transitive #include closure, i.e. every
+# node reachable from the TU by following one or more #include edges,
+# EXCLUDING the TU itself. Reachability is computed by BFS over the include
+# graph parsed from `gcc -H` output. ALL headers are counted -- project,
+# public API, toolchain/libc system, and generated (build-dir) headers alike;
+# nothing is filtered. This equals `gcc -M`'s prerequisite file count minus
+# the source file itself. The number is deterministic for a given build.
+#
+# A max-reach violation is: count > budget. One violation is reported per
+# over-budget TU (the unit of failure is the TU, so there is no per-header
+# deduplication). max-reach rules are a hard threshold: they are NEVER written
+# to or suppressed by the baseline, and a breach always fails the run.
 #
 # Rationale for the rule below: the kernel core is meant to be portable
 # across architectures, SoCs and HALs. If kernel/*.c can transitively reach
@@ -46,3 +72,20 @@
     - "modules/hal/**"
     - "zephyr/soc/**"
     - "zephyr/drivers/**"
+
+- name: kernel-reach-budget
+  type: max-reach
+  description: >
+    Per-TU transitive header-count ceiling for kernel sources. Locks in
+    header-reach reductions: any regression that pushes a kernel TU's
+    reachable-header count above the budget fails the check. Count is the
+    number of distinct headers in the TU's #include closure (excluding the
+    TU itself), counting all headers including toolchain and generated ones
+    -- i.e. `gcc -M` file count minus the source. See the counting
+    definition documented at the top of this file.
+  scope:
+    - "kernel/**"
+  # Measured max on the reference build (nucleo_g474re, hello_world, gcc):
+  # 204 headers (kernel/init.c). Budget set to a round number just above it
+  # so the current tree passes with a little headroom.
+  budget: 210

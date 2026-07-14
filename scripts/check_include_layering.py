@@ -31,6 +31,17 @@ This script makes such cross-layer reachability measurable and enforceable:
      *new* violations fail CI, while existing ones are tracked and their
      eventual fix is reported as good news.
 
+The rules file supports two kinds of rule, selected per-rule by a `type:`
+key (rules without a `type:` default to the first, forbidden-layer kind):
+
+  * forbidden-layer (default): a TU in scope must not transitively reach any
+    header matching one of the rule's `forbidden` patterns. These feed the
+    baseline workflow (deduped per (rule, header)).
+  * max-reach: a per-TU ceiling on the number of distinct headers a scoped
+    TU may transitively reach (see include_layers.yml for the exact counting
+    definition). One violation is reported per over-budget TU. Budget rules
+    are a hard threshold: they are never baselined and always fail the run.
+
 Usage:
     python3 check_include_layering.py [OPTIONS] BUILD_DIR
 
@@ -52,7 +63,8 @@ Examples:
 
 Exit status:
     0  no (new) violations
-    1  new violations found (or, with --no-baseline, any violations)
+    1  new violations found (or, with --no-baseline, any violations); also
+       any max-reach budget violation, which is never baselined
     2  usage / environment error (bad build dir, rules file, etc.)
 '''
 
@@ -129,8 +141,9 @@ def parse_args(argv=None):
         "--update-baseline",
         action="store_true",
         help=(
-            "Write the current violation set to --baseline instead of "
-            "comparing against it. Always exits 0 on success."
+            "Write the current forbidden-layer violation set to --baseline "
+            "instead of comparing against it. max-reach budget rules are "
+            "never baselined and still fail; otherwise exits 0 on success."
         ),
     )
     baseline.add_argument(
@@ -211,14 +224,25 @@ def find_workspace_root(explicit, build_dir, zephyr_root):
 # ---------------------------------------------------------------------------
 
 
-class Rule:
-    __slots__ = ("name", "description", "scope", "forbidden")
+# Rule kinds. A rule's `type:` key selects one; a missing `type:` defaults to
+# FORBIDDEN_LAYER, keeping pre-existing rules files working unchanged.
+FORBIDDEN_LAYER = "forbidden-layer"
+MAX_REACH = "max-reach"
+RULE_TYPES = (FORBIDDEN_LAYER, MAX_REACH)
 
-    def __init__(self, name, description, scope, forbidden):
+
+class Rule:
+    __slots__ = ("name", "type", "description", "scope", "forbidden", "budget")
+
+    def __init__(self, name, type, description, scope, forbidden, budget):
         self.name = name
+        self.type = type
         self.description = description
         self.scope = scope
+        # forbidden-layer rules only:
         self.forbidden = forbidden
+        # max-reach rules only:
+        self.budget = budget
 
 
 def load_rules(path):
@@ -232,18 +256,51 @@ def load_rules(path):
 
     rules = []
     for i, item in enumerate(data):
-        if "scope" not in item or "forbidden" not in item:
-            sys.exit(f"error: {path}: rule #{i} is missing 'scope' or 'forbidden'")
+        name = item.get("name", f"rule-{i}")
+        rtype = item.get("type", FORBIDDEN_LAYER)
+        if rtype not in RULE_TYPES:
+            sys.exit(
+                f"error: {path}: rule '{name}' has unknown type '{rtype}' "
+                f"(expected one of: {', '.join(RULE_TYPES)})"
+            )
+        if "scope" not in item:
+            sys.exit(f"error: {path}: rule '{name}' is missing 'scope'")
         scope = item["scope"]
-        forbidden = item["forbidden"]
         scope = [scope] if isinstance(scope, str) else list(scope)
-        forbidden = [forbidden] if isinstance(forbidden, str) else list(forbidden)
+
+        forbidden = []
+        budget = None
+        if rtype == FORBIDDEN_LAYER:
+            if "forbidden" not in item:
+                sys.exit(
+                    f"error: {path}: forbidden-layer rule '{name}' is missing "
+                    "'forbidden'"
+                )
+            forbidden = item["forbidden"]
+            forbidden = (
+                [forbidden] if isinstance(forbidden, str) else list(forbidden)
+            )
+        else:  # MAX_REACH
+            if "budget" not in item:
+                sys.exit(
+                    f"error: {path}: max-reach rule '{name}' is missing 'budget'"
+                )
+            budget = item["budget"]
+            # bool is an int subclass; reject it explicitly to catch typos.
+            if isinstance(budget, bool) or not isinstance(budget, int) or budget < 0:
+                sys.exit(
+                    f"error: {path}: max-reach rule '{name}' 'budget' must be a "
+                    "non-negative integer"
+                )
+
         rules.append(
             Rule(
-                name=item.get("name", f"rule-{i}"),
+                name=name,
+                type=rtype,
                 description=item.get("description", ""),
                 scope=scope,
                 forbidden=forbidden,
+                budget=budget,
             )
         )
     if not rules:
@@ -438,6 +495,21 @@ def shortest_chains_from(root, adjacency):
     return chains
 
 
+def heaviest_direct_includes(tu, adjacency, top=3):
+    """Return the `top` direct #includes of `tu` with the largest transitive
+    header reach, as a list of (reach_count, header) sorted descending. Purely
+    informational context for max-reach reports; cheap because a TU has few
+    direct includes. Subtrees overlap, so the counts do not sum to the TU
+    total -- each is 'how many headers become reachable through this include'.
+    """
+    scored = [
+        (len(shortest_chains_from(child, adjacency)), child)
+        for child in adjacency.get(tu, ())
+    ]
+    scored.sort(reverse=True)
+    return scored[:top]
+
+
 # ---------------------------------------------------------------------------
 # Violation detection
 # ---------------------------------------------------------------------------
@@ -451,16 +523,27 @@ def relpath_for_report(abs_path, workspace_root):
 
 
 def find_violations(rules, compiled_tus, edges, zephyr_root, workspace_root):
-    """Returns a list of violation dicts:
+    """Evaluate all rules and return (layer_violations, budget_violations).
+
+    layer_violations (from forbidden-layer rules) are dicts:
         {rule, tu, header, chain}
-    `tu` and `header` and `chain` entries are workspace-root-relative paths
-    where possible. One violation is reported per (rule, forbidden header)
-    pair -- the example TU/chain chosen is the shortest one found across all
+    `tu`, `header` and `chain` entries are workspace-root-relative paths where
+    possible. One violation is reported per (rule, forbidden header) pair --
+    the example TU/chain chosen is the shortest one found across all
     scope-matching TUs, since a header being reachable at all from the scope
     is the fact we're flagging, and a single concrete chain is enough to act
-    on it. (Compiling one violation per (rule, TU, header) would multiply
-    into thousands of near-duplicate entries for a broadly shared header
-    such as a HAL master include.)
+    on it. (Compiling one violation per (rule, TU, header) would multiply into
+    thousands of near-duplicate entries for a broadly shared header such as a
+    HAL master include.)
+
+    budget_violations (from max-reach rules) are dicts:
+        {rule, type: "max-reach", tu, count, budget, heaviest_includes}
+    with one entry per over-budget TU -- here the unit of failure is the TU
+    itself, so there is no (rule, header) deduplication. `count` is the number
+    of distinct headers transitively reachable from the TU (excluding the TU
+    itself; toolchain and generated headers included), i.e. the size of the
+    TU's include closure. `heaviest_includes` is optional context: the top few
+    direct #includes by transitive reach.
     """
     adjacency = defaultdict(set)
     for src, dst in edges:
@@ -472,8 +555,9 @@ def find_violations(rules, compiled_tus, edges, zephyr_root, workspace_root):
             if pat not in pattern_cache:
                 pattern_cache[pat] = compile_pattern(pat)
 
-    # best[(rule.name, header)] = (chain_length, tu, chain)
+    # best[(rule.name, header)] = (chain_length, tu, chain)  (forbidden-layer)
     best = {}
+    budget_violations = []
 
     for rule in rules:
         scope_tus = [
@@ -484,6 +568,36 @@ def find_violations(rules, compiled_tus, edges, zephyr_root, workspace_root):
                 for pat in rule.scope
             )
         ]
+
+        if rule.type == MAX_REACH:
+            for tu in scope_tus:
+                chains = shortest_chains_from(tu, adjacency)
+                # Reachable distinct headers, excluding the TU (the BFS root).
+                count = len(chains) - 1
+                if count > rule.budget:
+                    budget_violations.append(
+                        {
+                            "rule": rule.name,
+                            "type": MAX_REACH,
+                            "tu": relpath_for_report(tu, workspace_root),
+                            "count": count,
+                            "budget": rule.budget,
+                            "heaviest_includes": [
+                                {
+                                    "header": relpath_for_report(
+                                        header, workspace_root
+                                    ),
+                                    "reaches": reach,
+                                }
+                                for reach, header in heaviest_direct_includes(
+                                    tu, adjacency
+                                )
+                            ],
+                        }
+                    )
+            continue
+
+        # forbidden-layer (default)
         for tu in scope_tus:
             chains = shortest_chains_from(tu, adjacency)
             for node, chain in chains.items():
@@ -498,9 +612,9 @@ def find_violations(rules, compiled_tus, edges, zephyr_root, workspace_root):
                     if key not in best or length < best[key][0]:
                         best[key] = (length, tu, chain)
 
-    violations = []
+    layer_violations = []
     for (rule_name, header), (_length, tu, chain) in best.items():
-        violations.append(
+        layer_violations.append(
             {
                 "rule": rule_name,
                 "tu": relpath_for_report(tu, workspace_root),
@@ -508,8 +622,9 @@ def find_violations(rules, compiled_tus, edges, zephyr_root, workspace_root):
                 "chain": [relpath_for_report(p, workspace_root) for p in chain],
             }
         )
-    violations.sort(key=lambda v: (v["rule"], v["header"]))
-    return violations
+    layer_violations.sort(key=lambda v: (v["rule"], v["header"]))
+    budget_violations.sort(key=lambda v: (v["rule"], v["tu"]))
+    return layer_violations, budget_violations
 
 
 # ---------------------------------------------------------------------------
@@ -552,20 +667,36 @@ def format_chain(chain):
     return " -> ".join(chain)
 
 
-def print_human_report(rules, current, new, fixed, unchanged, baseline_mode, out):
+def print_human_report(
+    rules, current, budget_violations, new, fixed, unchanged, baseline_mode, out
+):
     by_rule = defaultdict(list)
     for v in current:
         by_rule[v["rule"]].append(v)
+    budget_by_rule = defaultdict(list)
+    for v in budget_violations:
+        budget_by_rule[v["rule"]].append(v)
 
     print("Include layering check", file=out)
     print("=======================", file=out)
     for rule in rules:
-        vs = by_rule.get(rule.name, [])
-        print(f"\nRule: {rule.name}  ({len(vs)} violation(s))", file=out)
-        if rule.description:
-            print(f"  {rule.description.strip()}", file=out)
-        print(f"  scope:     {rule.scope}", file=out)
-        print(f"  forbidden: {rule.forbidden}", file=out)
+        if rule.type == MAX_REACH:
+            vs = budget_by_rule.get(rule.name, [])
+            print(
+                f"\nRule: {rule.name}  [max-reach]  ({len(vs)} violation(s))",
+                file=out,
+            )
+            if rule.description:
+                print(f"  {rule.description.strip()}", file=out)
+            print(f"  scope:  {rule.scope}", file=out)
+            print(f"  budget: {rule.budget} reachable header(s) per TU", file=out)
+        else:
+            vs = by_rule.get(rule.name, [])
+            print(f"\nRule: {rule.name}  ({len(vs)} violation(s))", file=out)
+            if rule.description:
+                print(f"  {rule.description.strip()}", file=out)
+            print(f"  scope:     {rule.scope}", file=out)
+            print(f"  forbidden: {rule.forbidden}", file=out)
 
     new_set = {violation_key(v) for v in new}
     if new:
@@ -579,6 +710,24 @@ def print_human_report(rules, current, new, fixed, unchanged, baseline_mode, out
             print(f"  reaches forbidden header: {v['header']}", file=out)
             print(f"  example chain:", file=out)
             print(f"    {format_chain(v['chain'])}", file=out)
+
+    # Budget (max-reach) violations are never baselined -- always reported.
+    if budget_violations:
+        print(f"\n{'='*70}", file=out)
+        print(f"HEADER-REACH BUDGET EXCEEDED ({len(budget_violations)})", file=out)
+        print("=" * 70, file=out)
+        for v in budget_violations:
+            over = v["count"] - v["budget"]
+            print(f"\n[{v['rule']}] {v['tu']}", file=out)
+            print(
+                f"  reachable headers: {v['count']} "
+                f"(budget {v['budget']}, over by {over})",
+                file=out,
+            )
+            if v.get("heaviest_includes"):
+                print("  heaviest direct includes (by transitive reach):", file=out)
+                for h in v["heaviest_includes"]:
+                    print(f"    {h['reaches']:5d}  {h['header']}", file=out)
 
     if baseline_mode:
         if fixed:
@@ -594,14 +743,23 @@ def print_human_report(rules, current, new, fixed, unchanged, baseline_mode, out
 
     print(f"\n{'='*70}", file=out)
     total = len(current)
+    budget_note = (
+        f" {len(budget_violations)} over budget (never baselined)."
+        if budget_violations
+        else ""
+    )
     if baseline_mode:
         print(
-            f"Summary: {total} total violation(s), {len(new)} new, "
-            f"{len(fixed)} fixed, {len(unchanged)} baselined.",
+            f"Summary: {total} forbidden-layer violation(s), {len(new)} new, "
+            f"{len(fixed)} fixed, {len(unchanged)} baselined.{budget_note}",
             file=out,
         )
     else:
-        print(f"Summary: {total} total violation(s) (no baseline).", file=out)
+        print(
+            f"Summary: {total} forbidden-layer violation(s) (no baseline)."
+            f"{budget_note}",
+            file=out,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -661,16 +819,30 @@ def main(argv=None):
         )
 
     compiled_tus = [os.path.normpath(e["file"]) for e in scoped_entries]
-    current = find_violations(rules, compiled_tus, edges, zephyr_root, workspace_root)
+    # `current` holds forbidden-layer violations (the baselined kind);
+    # `budget_violations` holds max-reach violations, which are never
+    # baselined and always fail the run.
+    current, budget_violations = find_violations(
+        rules, compiled_tus, edges, zephyr_root, workspace_root
+    )
 
     if args.update_baseline:
+        # Only forbidden-layer violations are baselined; a max-reach budget is
+        # already an explicit threshold, so budget rules are never written to
+        # (or suppressed by) the baseline -- and a budget breach still fails.
         write_baseline(args.baseline, current)
         if not args.quiet:
             print(
                 f"Wrote {len(current)} violation(s) to baseline: {args.baseline}",
                 file=sys.stderr,
             )
-        return 0
+            if budget_violations:
+                print(
+                    f"note: {len(budget_violations)} max-reach budget "
+                    "violation(s) are not baselined and still fail the run.",
+                    file=sys.stderr,
+                )
+        return 1 if budget_violations else 0
 
     if args.no_baseline:
         new, fixed, unchanged = current, [], []
@@ -698,9 +870,14 @@ def main(argv=None):
             "rules": [
                 {
                     "name": r.name,
+                    "type": r.type,
                     "description": r.description,
                     "scope": r.scope,
-                    "forbidden": r.forbidden,
+                    **(
+                        {"budget": r.budget}
+                        if r.type == MAX_REACH
+                        else {"forbidden": r.forbidden}
+                    ),
                 }
                 for r in rules
             ],
@@ -709,14 +886,24 @@ def main(argv=None):
             "new": new,
             "fixed": fixed,
             "unchanged": unchanged if baseline_mode else [],
+            # Distinct shape: max-reach entries carry type/count/budget.
+            "budget_violations": budget_violations,
         }
         print(json.dumps(report, indent=2))
     else:
         print_human_report(
-            rules, current, new, fixed, unchanged, baseline_mode, sys.stdout
+            rules,
+            current,
+            budget_violations,
+            new,
+            fixed,
+            unchanged,
+            baseline_mode,
+            sys.stdout,
         )
 
-    return 1 if new else 0
+    # A max-reach budget breach always fails, even alongside a clean baseline.
+    return 1 if (new or budget_violations) else 0
 
 
 if __name__ == "__main__":

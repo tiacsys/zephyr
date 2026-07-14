@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2024 Michael Hope
+ * Copyright (c) 2026 TiaC Systems
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -35,7 +36,7 @@ static int gpio_ch32v00x_configure(const struct device *dev, gpio_pin_t pin, gpi
 	const struct gpio_ch32v00x_config *config = dev->config;
 	GPIO_TypeDef *regs = config->regs;
 	uint32_t cnf_mode;
-	uint32_t bshr = 0;
+	uint32_t bsbr = 0;
 
 	if (flags == GPIO_DISCONNECTED) {
 		cnf_mode = GPIO_CFGLR_IN_FLOAT;
@@ -58,9 +59,9 @@ static int gpio_ch32v00x_configure(const struct device *dev, gpio_pin_t pin, gpi
 			return -EINVAL;
 		}
 		if ((flags & GPIO_OUTPUT_INIT_HIGH) != 0) {
-			bshr = GPIO_BSHR_BS0 << pin;
+			bsbr = GPIO_BSHR_BS0 << pin;
 		} else if ((flags & GPIO_OUTPUT_INIT_LOW) != 0) {
-			bshr = GPIO_BSHR_BR0 << pin;
+			bsbr = GPIO_BSHR_BR0 << pin;
 		}
 	} else if ((flags & GPIO_INPUT) != 0) {
 		switch (flags & (GPIO_PULL_UP | GPIO_PULL_DOWN)) {
@@ -70,12 +71,12 @@ static int gpio_ch32v00x_configure(const struct device *dev, gpio_pin_t pin, gpi
 		case GPIO_PULL_UP:
 			cnf_mode = GPIO_CFGLR_IN_PUPD;
 			/* Set the ODR to enable the pull up */
-			bshr = GPIO_BSHR_BS0 << pin;
+			bsbr = GPIO_BSHR_BS0 << pin;
 			break;
 		case GPIO_PULL_DOWN:
 			cnf_mode = GPIO_CFGLR_IN_PUPD;
 			/* Reset the ODR to enable the pull down */
-			bshr = GPIO_BSHR_BR0 << pin;
+			bsbr = GPIO_BSHR_BR0 << pin;
 			break;
 		default:
 			return -EINVAL;
@@ -84,14 +85,32 @@ static int gpio_ch32v00x_configure(const struct device *dev, gpio_pin_t pin, gpi
 		return -EINVAL;
 	}
 
+#if !defined(CONFIG_SOC_CH32X035)
 	if (pin < 8) {
 		regs->CFGLR = (regs->CFGLR & ~(GPIO_CH32V00X_CFGLR_MASK << (4 * pin))) |
 			      (cnf_mode << (4 * pin));
 	} else {
-		regs->CFGHR = (regs->CFGHR & ~(GPIO_CH32V00X_CFGLR_MASK << ((pin - 8) * 4))) |
-			      (cnf_mode << ((pin - 8) * 4));
+		regs->CFGHR = (regs->CFGHR & ~(GPIO_CH32V00X_CFGLR_MASK << (4 * (pin - 8)))) |
+			      (cnf_mode << (4 * (pin - 8)));
 	}
-	regs->BSHR = bshr;
+	regs->BSHR = bsbr;
+#else
+	if (pin < 8) {
+		regs->CFGLR = (regs->CFGLR & ~(GPIO_CH32V00X_CFGLR_MASK << (4 * pin))) |
+			      (cnf_mode << (4 * pin));
+	} else if (pin < 16) {
+		regs->CFGHR = (regs->CFGHR & ~(GPIO_CH32V00X_CFGLR_MASK << (4 * (pin - 8)))) |
+			      (cnf_mode << (4 * (pin - 8)));
+	} else {
+		regs->CFGXR = (regs->CFGXR & ~(GPIO_CH32V00X_CFGLR_MASK << (4 * (pin - 16)))) |
+			      (cnf_mode << (4 * (pin - 16)));
+	}
+	if (pin < 16) {
+		regs->BSHR = bsbr;
+	} else {
+		regs->BSXR = bsbr;
+	}
+#endif
 
 	return 0;
 }

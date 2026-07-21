@@ -51,6 +51,8 @@ properties:
     properties:
       cmake:
         type: string
+      cmake-modules:
+        type: string
       kconfig:
         type: string
       cmake-ext:
@@ -311,6 +313,14 @@ def process_settings(module, meta):
                 root_path = PurePath(module) / setting
                 out_text += f'"{root.upper()}_ROOT":'
                 out_text += f'"{root_path.as_posix()}"\n'
+
+    # A module may extend the CMake module search path (build: cmake-modules:).
+    # Emitted through the same settings channel so cmake appends it to the
+    # CMAKE_MODULES_PATH list; paths are relative to the module root.
+    cmake_modules = section.get('cmake-modules', None)
+    if cmake_modules is not None:
+        cm_path = PurePath(module) / cmake_modules
+        out_text += f'"CMAKE_MODULES_PATH":"{cm_path.as_posix()}"\n'
 
     return out_text
 

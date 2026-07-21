@@ -20,6 +20,8 @@ properties:
     properties:
       cmake:
         type: string
+      cmake-modules:
+        type: string
       kconfig:
         type: string
       cmake-ext:

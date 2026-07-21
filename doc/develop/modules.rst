@@ -523,6 +523,31 @@ module:
      cmake: .
      kconfig: Kconfig
 
+Extend CMake module search path
+-------------------------------
+
+A module may extend the CMake module search path list in ``CMAKE_MODULES_PATH``
+with:
+
+.. code-block:: yaml
+
+   build:
+     cmake-modules: <cmake-modules-directory>
+
+The ``cmake-modules: <cmake-modules-directory>`` part specifies that
+:file:`<cmake-modules-directory>` contains the :file:`default.cmake` and
+auto-includes it if present. That enabling early build-system hooks and
+cooperative override of later module includes. The directory is resolved
+relative to the module root.
+
+Here is an example :file:`module.yml` file referring to :file:`default.cmake`
+file in the :file:`cmake/modules` directory of the module:
+
+.. code-block:: yaml
+
+   build:
+     cmake-modules: cmake/modules
+
 .. _sysbuild_module_integration:
 
 Sysbuild integration

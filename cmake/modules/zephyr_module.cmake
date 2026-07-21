@@ -85,6 +85,18 @@ if(WEST OR ZEPHYR_MODULES)
     endforeach()
   endif()
 
+  # A Zephyr module may extend the CMake module search path
+  # (module.yml `build: cmake-modules: <dir>`) and optionally ship an early
+  # `default.cmake` hook. PREPEND so a module can override a later module
+  # include by providing a same-named .cmake that first include()s the
+  # original and then adjusts it. This runs before boards/dts/kconfig/soc.
+  foreach(cmake_modules_dir ${CMAKE_MODULES_PATH})
+    list(PREPEND CMAKE_MODULE_PATH ${cmake_modules_dir})
+    if(EXISTS ${cmake_modules_dir}/default.cmake)
+      include(${cmake_modules_dir}/default.cmake)
+    endif()
+  endforeach()
+
   if(EXISTS ${cmake_modules_file})
     file(STRINGS ${cmake_modules_file} zephyr_modules_txt ENCODING UTF-8)
   endif()

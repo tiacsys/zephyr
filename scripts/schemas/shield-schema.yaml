@@ -29,6 +29,11 @@ $defs:
         items:
           type: string
           description: A hardware feature the shield supports (see dts/bindings/binding-types.txt)
+      template:
+        type: boolean
+        description: >
+          Marks a rig-template shield: its <name>.overlay is replaced by a
+          <name>.shield template that the rig expander unfolds into an overlay.
     required:
       - name
       - full_name

@@ -514,11 +514,11 @@ class Binding:
         self._check_properties()
 
         for key, val in raw.items():
-            if (key.endswith("-cells")
-                and not isinstance(val, list)
-                or not all(isinstance(elem, str) for elem in val)):
-                _err(f"malformed '{key}:' in {self.path}, "
-                     "expected a list of strings")
+            if key.endswith("-cells"):
+                if (not isinstance(val, list)
+                        or not all(isinstance(elem, str) for elem in val)):
+                    _err(f"malformed '{key}:' in {self.path}, "
+                         "expected a list of strings")
 
     def _check_properties(self) -> None:
         # _check() helper for checking the contents of 'properties:'.

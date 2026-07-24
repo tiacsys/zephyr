@@ -182,7 +182,13 @@ class Binding:
       cells.
 
     raw:
-      The binding as an object parsed from YAML.
+      The binding as an object parsed from YAML. Top-level keys containing
+      a comma (vendor-namespaced extension keys, e.g. 'vnd,foo') are opaque
+      to edtlib but preserved here, for external tooling that consumes
+      binding files beyond what edtlib itself models. Exception: the
+      '-cells' suffix keeps its edtlib meaning even in namespaced keys —
+      'vnd,foo-cells' declares specifier cells for a vendor-namespaced
+      specifier space (see specifier2cells), it is not an opaque key.
 
     bus:
       If nodes with this binding's 'compatible' describe a bus, a string
@@ -487,6 +493,20 @@ class Binding:
         for key in raw:
             if key in legacy_errors:
                 _err(f"legacy '{key}:' in {self.path}, {legacy_errors[key]}")
+
+            if "," in key and not key.endswith("-cells"):
+                # Vendor-namespaced extension key (same convention as
+                # devicetree property names, e.g. 'vnd,foo'): opaque to
+                # edtlib, preserved in 'raw' for external tooling that
+                # consumes binding files beyond what edtlib itself models.
+                # Typo protection is unaffected: every key edtlib assigns
+                # meaning to is comma-free, so misspelling one still errors
+                # below. The '-cells' suffix is NOT exempted: it keeps its
+                # edtlib meaning (a specifier-cells declaration, see
+                # specifier2cells) even under a vendor namespace, which is
+                # what lets a vendor declare its own specifier space
+                # ('vnd,foo-map' resolving via '#vnd,foo-cells').
+                continue
 
             if key not in ok_top and not key.endswith("-cells"):
                 _err(f"unknown key '{key}' in {self.path}, "

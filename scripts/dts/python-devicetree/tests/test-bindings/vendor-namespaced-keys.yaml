@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
+description: >
+  Binding with vendor-namespaced extension keys — top-level keys containing
+  a comma are opaque to edtlib and preserved in Binding.raw (see
+  test_vendor_namespaced_binding_keys).
+
+compatible: "vnd,vendor-namespaced-keys"
+
+vnd,extension-scalar: "some-value"
+vnd,extension-map:
+  first: {kind: analog}
+  second: {kind: gpio, optional: true}
+
+# NOT an opaque extension key: the -cells suffix keeps its edtlib meaning
+# (specifier-cells declaration) even under a vendor namespace.
+"vnd,ext-cells": [pin, flags]
+
+properties:
+  foo:
+    type: int
+
+child-binding:
+  description: child binding carrying its own extension key
+  vnd,child-extension: true
+  properties:
+    bar:
+      type: int

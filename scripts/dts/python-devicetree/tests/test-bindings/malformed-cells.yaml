@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
+description: >
+  Binding with a malformed *-cells value (not a list of strings) — must be
+  rejected (see test_vendor_namespaced_binding_keys; regression cover for
+  the *-cells validation after its operator-precedence fix).
+
+compatible: "vnd,malformed-cells"
+
+"#foo-cells": 3

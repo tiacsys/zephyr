@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
+description: >
+  Binding with a comma-free unknown top-level key — must still be rejected
+  (the vendor-namespaced escape applies only to keys containing a comma;
+  see test_vendor_namespaced_binding_keys).
+
+compatible: "vnd,unknown-toplevel-key"
+
+not-a-real-key: true
+
+properties:
+  foo:
+    type: int

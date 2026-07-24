@@ -396,6 +396,31 @@ def test_include():
                  ['int', 'int', 'int', 'int'],
                  [0, 1, 2, 3])
 
+def test_vendor_namespaced_binding_keys():
+    '''Top-level binding keys containing a comma (vendor-namespaced
+    extension keys, e.g. 'vnd,foo') are opaque to edtlib: accepted by the
+    unknown-key check and preserved in Binding.raw, at every binding level.
+    Comma-free unknown keys are still rejected.'''
+
+    with from_here():
+        binding = edtlib.Binding("test-bindings/vendor-namespaced-keys.yaml", {})
+    assert binding.raw["vnd,extension-scalar"] == "some-value"
+    assert binding.raw["vnd,extension-map"]["second"]["optional"] is True
+    assert binding.child_binding.raw["vnd,child-extension"] is True
+    # The extension keys change nothing edtlib itself models.
+    assert binding.compatible == "vnd,vendor-namespaced-keys"
+    assert "foo" in binding.prop2specs
+    # Exception pinned: the -cells suffix keeps its edtlib meaning even in a
+    # vendor-namespaced key — it declares a (vendor-namespaced) specifier
+    # space, it is not opaque.
+    assert binding.specifier2cells["vnd,ext"] == ["pin", "flags"]
+
+    with pytest.raises(edtlib.EDTError) as e:
+        with from_here():
+            edtlib.Binding("test-bindings/unknown-toplevel-key.yaml", {})
+    assert "unknown key 'not-a-real-key'" in str(e.value)
+
+
 def test_malformed_cells_value():
     '''A *-cells value that is not a list of strings is rejected.
     Regression cover for the validation's operator-precedence fix:

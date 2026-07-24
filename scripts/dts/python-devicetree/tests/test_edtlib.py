@@ -396,6 +396,19 @@ def test_include():
                  ['int', 'int', 'int', 'int'],
                  [0, 1, 2, 3])
 
+def test_malformed_cells_value():
+    '''A *-cells value that is not a list of strings is rejected.
+    Regression cover for the validation's operator-precedence fix:
+    '(A and B) or C' evaluated C — an iteration over the value — for EVERY
+    top-level key, crashing on the first non-iterable value instead of
+    validating anything.'''
+
+    with pytest.raises(edtlib.EDTError) as e:
+        with from_here():
+            edtlib.Binding("test-bindings/malformed-cells.yaml", {})
+    assert "malformed '#foo-cells:'" in str(e.value)
+
+
 def test_include_filters():
     '''Test property-allowlist and property-blocklist in an include.'''
 

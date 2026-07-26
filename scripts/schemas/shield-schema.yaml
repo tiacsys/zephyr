@@ -34,6 +34,26 @@ $defs:
         description: >
           Marks a rig-template shield: its <name>.overlay is replaced by a
           <name>.shield template that the rig expander unfolds into an overlay.
+      revisions:
+        type: object
+        properties:
+          default:
+            type: string
+            description: the revision a bare (unqualified) shield reference selects
+          list:
+            type: array
+            items:
+              type: string
+            description: every revision this shield declares
+        required:
+          - list
+        additionalProperties: false
+        description: >
+          Declares a rig-template shield's revision axis: a rig instance may
+          select one with shield: <name>@<rev>, resolved against a native DT
+          overlay (base <name>.shield plus <name>_<rev>.shield, cpp-included
+          into the same translation unit) rather than a separate shield
+          folder per hardware generation.
     required:
       - name
       - full_name

@@ -332,6 +332,11 @@ int sample_display_draw(void)
 		rect_h = capabilities.y_resolution * 40 / 100;
 		h_step = capabilities.y_resolution * 20 / 100;
 		scale = 1;
+		if ((rect_w == 0) || (rect_h == 0) || (h_step == 0)) {
+			rect_w = capabilities.x_resolution * 25 / 100;
+			rect_h = capabilities.y_resolution * 25 / 100;
+			h_step = capabilities.y_resolution * 50 / 100;
+		}
 	} else {
 		h_step = rect_h;
 		scale = (capabilities.x_resolution / 8) / rect_h;

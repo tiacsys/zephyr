@@ -2,4 +2,4 @@ common:
   tags:
     - kernel
 tests:
-  kernel.fifo: {}
+  kernel.fifo.fifo_api: {}

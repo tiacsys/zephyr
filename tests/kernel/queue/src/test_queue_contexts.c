@@ -256,6 +256,8 @@ static void tqueue_isr_thread(struct k_queue *pqueue)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-1CPU-007}
+ * @draft
  * @see k_queue_append()
  * @see k_queue_prepend()
  * @see k_queue_get()
@@ -303,6 +305,8 @@ ZTEST(queue_api_1cpu, test_queue_thread2thread)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-001}
+ * @draft
  * @see K_QUEUE_DEFINE
  * @verifies ZEP-SRS-20-1
  */
@@ -334,6 +338,8 @@ ZTEST(queue_api, test_queue_define)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-002}
+ * @draft
  * @see k_queue_init()
  * @verifies ZEP-SRS-20-2
  */
@@ -368,6 +374,8 @@ ZTEST(queue_api, test_queue_init)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-003}
+ * @draft
  * @see k_queue_prepend()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-4
@@ -405,6 +413,8 @@ ZTEST(queue_api, test_queue_prepend_order)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-004}
+ * @draft
  * @see k_queue_insert()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-10
@@ -443,6 +453,8 @@ ZTEST(queue_api, test_queue_insert_after)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-005}
+ * @draft
  * @see k_queue_append_list()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-11
@@ -488,6 +500,8 @@ ZTEST(queue_api, test_queue_append_list_order)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-006}
+ * @draft
  * @see k_queue_merge_slist()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-12
@@ -546,6 +560,8 @@ static void tqueue_merge_slist_wake_entry(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-007}
+ * @draft
  * @see k_queue_merge_slist()
  * @see k_queue_get()
  */
@@ -595,6 +611,8 @@ ZTEST(queue_api_1cpu, test_queue_merge_slist_wake)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-018}
+ * @draft
  * @see k_queue_append()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-3
@@ -643,6 +661,8 @@ ZTEST(queue_api, test_queue_thread2isr)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-014}
+ * @draft
  * @see k_queue_append()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-3
@@ -757,6 +777,8 @@ static void tqueue_get_2threads(struct k_queue *pqueue)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-1CPU-001}
+ * @draft
  * @see k_queue_get()
  * @see k_queue_append()
  * @verifies ZEP-SRS-20-6
@@ -871,6 +893,8 @@ static void tqueue_alloc(struct k_queue *pqueue)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-004}
+ * @draft
  * @see k_queue_alloc_append()
  * @see k_queue_alloc_prepend()
  * @see k_thread_heap_assign()
@@ -922,6 +946,8 @@ ZTEST(queue_api, test_queue_alloc)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-008}
+ * @draft
  * @see k_queue_alloc_append()
  * @see k_queue_alloc_prepend()
  * @see k_queue_remove()
@@ -990,6 +1016,8 @@ static void queue_poll_race_consume(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-1CPU-005}
+ * @draft
  * @see k_queue_append()
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-6
@@ -1075,6 +1103,8 @@ ZTEST(queue_api_1cpu, test_queue_poll_race)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-003}
+ * @draft
  * @see k_queue_init()
  * @verifies ZEP-SRS-20-3
  * @verifies ZEP-SRS-20-6
@@ -1153,6 +1183,8 @@ void user_access_queue_private_data(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-001}
+ * @draft
  * @see k_queue_is_empty()
  * @verifies ZEP-SRS-20-8
  * @verifies ZEP-SRS-20-10
@@ -1291,6 +1323,8 @@ static void high_prio_t2_wait_for_queue(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-1CPU-004}
+ * @draft
  * @see k_queue_get()
  * @see k_queue_append()
  * @verifies ZEP-SRS-20-6
@@ -1405,6 +1439,8 @@ ZTEST(queue_api_1cpu, test_queue_multithread_competition)
  *
  * @ingroup tests_kernel_queue
 
+ * @testid{TSPEC-QUEUE-API-019}
+ * @draft
  * @see k_queue_unique_append()
  * @verifies ZEP-SRS-20-13
  */

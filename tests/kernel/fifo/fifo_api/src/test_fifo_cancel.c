@@ -96,6 +96,8 @@ static void tfifo_thread_thread(struct k_fifo *pfifo)
  * Expected result:
  * - k_fifo_get() returns NULL promptly due to the cancel, not the timeout.
  *
+ * @testid{TSPEC-FIFO-1CPU-002}
+ * @draft
  * @see k_fifo_cancel_wait()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-2

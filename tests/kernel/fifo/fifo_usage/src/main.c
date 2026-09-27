@@ -217,6 +217,8 @@ static void thread_entry_fn_isr(void *p1, void *p2, void *p3)
  * Expected result:
  * - The main thread reads back exactly the items the child enqueued, in order.
  *
+ * @testid{TSPEC-FIFO-USE-001}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-3
@@ -291,6 +293,8 @@ ZTEST(fifo_usage, test_single_fifo_play)
  * Expected result:
  * - The threads alternate correctly and every item is received in order.
  *
+ * @testid{TSPEC-FIFO-USE-002}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-3
@@ -355,6 +359,8 @@ ZTEST(fifo_usage, test_dual_fifo_play)
  * Expected result:
  * - All ISR-context put/get operations succeed and items pass in order.
  *
+ * @testid{TSPEC-FIFO-USE-003}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-3

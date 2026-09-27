@@ -251,6 +251,8 @@ static void tqueue_read_write(struct k_queue *pqueue)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-1CPU-003}
+ * @draft
  * @see k_queue_append()
  * @see k_queue_get()
  * @see k_queue_remove()

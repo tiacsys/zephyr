@@ -282,6 +282,8 @@ static void tfifo_is_empty(void *p)
  * Expected result:
  * - The consumer dequeues every item in the order it was enqueued.
  *
+ * @testid{TSPEC-FIFO-1CPU-001}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_put_list()
  * @see k_fifo_put_slist()
@@ -330,6 +332,8 @@ ZTEST(fifo_api_1cpu, test_fifo_thread2thread)
  * Expected result:
  * - The statically defined FIFO accepts and delivers items as-is.
  *
+ * @testid{TSPEC-FIFO-001}
+ * @draft
  * @see K_FIFO_DEFINE
  * @verifies ZEP-SRS-24-1
  */
@@ -360,6 +364,8 @@ ZTEST(fifo_api, test_fifo_define)
  * - The pre-existing item is delivered first, then every list item in its
  *   original order.
  *
+ * @testid{TSPEC-FIFO-002}
+ * @draft
  * @see k_fifo_put_list()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-5
@@ -403,6 +409,8 @@ ZTEST(fifo_api, test_fifo_put_list_order)
  * - The pre-existing item is delivered first, then every node in order, and
  *   the source list is emptied.
  *
+ * @testid{TSPEC-FIFO-003}
+ * @draft
  * @see k_fifo_put_slist()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-6
@@ -448,6 +456,8 @@ ZTEST(fifo_api, test_fifo_put_slist_order)
  * Expected result:
  * - The thread dequeues every ISR-enqueued item in order.
  *
+ * @testid{TSPEC-FIFO-API-001}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-3
@@ -495,6 +505,8 @@ ZTEST(fifo_api, test_fifo_thread2isr)
  * Expected result:
  * - The ISR dequeues every thread-enqueued item in order.
  *
+ * @testid{TSPEC-FIFO-API-002}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-3
@@ -542,6 +554,8 @@ ZTEST(fifo_api, test_fifo_isr2thread)
  * Expected result:
  * - k_fifo_is_empty() reflects the presence or absence of queued data.
  *
+ * @testid{TSPEC-FIFO-API-003}
+ * @draft
  * @see k_fifo_is_empty()
  * @verifies ZEP-SRS-24-8
  */
@@ -585,6 +599,8 @@ ZTEST(fifo_api, test_fifo_is_empty_thread)
  * Expected result:
  * - k_fifo_is_empty() reports the correct state when called from an ISR.
  *
+ * @testid{TSPEC-FIFO-API-004}
+ * @draft
  * @see k_fifo_is_empty()
  * @verifies ZEP-SRS-24-8
  */
@@ -617,6 +633,8 @@ ZTEST(fifo_api, test_fifo_is_empty_isr)
  * removing them (a subsequent get still returns both items in order). Peeking an
  * empty FIFO returns NULL.
  *
+ * @testid{TSPEC-FIFO-004}
+ * @draft
  * @see k_fifo_peek_head(), k_fifo_peek_tail()
  * @verifies ZEP-SRS-24-9
  * @verifies ZEP-SRS-24-10
@@ -651,6 +669,8 @@ K_HEAP_DEFINE(fifo_alloc_pool, 256);
  * calling thread's resource pool. Verify the call succeeds and that the same
  * data pointer is returned by a subsequent get.
  *
+ * @testid{TSPEC-FIFO-005}
+ * @draft
  * @see k_fifo_alloc_put()
  * @verifies ZEP-SRS-24-4
  */

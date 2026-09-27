@@ -36,6 +36,8 @@ K_SEM_DEFINE(sem, 0, 1);
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-1CPU-002}
+ * @draft
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-6
  */
@@ -105,6 +107,8 @@ static void tThread_entry(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-009}
+ * @draft
  * @see k_queue_append_list()
  * @verifies ZEP-SRS-20-11
  */
@@ -190,6 +194,8 @@ ZTEST(queue_api, test_queue_append_list_error)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-015}
+ * @draft
  * @see k_queue_merge_slist()
  * @verifies ZEP-SRS-20-12
  */
@@ -243,6 +249,8 @@ ZTEST(queue_api, test_queue_merge_list_error)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-012}
+ * @draft
  * @see k_queue_init()
  * @verifies ZEP-SRS-20-2
  */
@@ -268,6 +276,8 @@ ZTEST_USER(queue_api, test_queue_init_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-005}
+ * @draft
  * @see k_queue_alloc_append()
  * @verifies ZEP-SRS-20-14
  */
@@ -300,6 +310,8 @@ ZTEST_USER(queue_api, test_queue_alloc_append_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-007}
+ * @draft
  * @see k_queue_alloc_prepend()
  * @verifies ZEP-SRS-20-14
  */
@@ -332,6 +344,8 @@ ZTEST_USER(queue_api, test_queue_alloc_prepend_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-011}
+ * @draft
  * @see k_queue_get()
  * @verifies ZEP-SRS-20-6
  */
@@ -357,6 +371,8 @@ ZTEST_USER(queue_api, test_queue_get_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-013}
+ * @draft
  * @see k_queue_is_empty()
  * @verifies ZEP-SRS-20-7
  */
@@ -382,6 +398,8 @@ ZTEST_USER(queue_api, test_queue_is_empty_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-016}
+ * @draft
  * @see k_queue_peek_head()
  * @verifies ZEP-SRS-20-9
  */
@@ -407,6 +425,8 @@ ZTEST_USER(queue_api, test_queue_peek_head_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-017}
+ * @draft
  * @see k_queue_peek_tail()
  * @verifies ZEP-SRS-20-8
  */
@@ -432,6 +452,8 @@ ZTEST_USER(queue_api, test_queue_peek_tail_null)
  *
  * @ingroup tests_kernel_queue
  *
+ * @testid{TSPEC-QUEUE-API-010}
+ * @draft
  * @see k_queue_cancel_wait()
  * @verifies ZEP-SRS-20-15
  */

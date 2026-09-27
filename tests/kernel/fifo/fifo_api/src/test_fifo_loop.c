@@ -185,6 +185,8 @@ static void tfifo_read_write(struct k_fifo *pfifo)
  * Expected result:
  * - Data passes correctly and in order across all contexts on every iteration.
  *
+ * @testid{TSPEC-FIFO-1CPU-003}
+ * @draft
  * @see k_fifo_put()
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-3

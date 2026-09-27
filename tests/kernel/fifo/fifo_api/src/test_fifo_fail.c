@@ -32,6 +32,8 @@
  * Expected result:
  * - Both k_fifo_get() calls return NULL.
  *
+ * @testid{TSPEC-FIFO-API-005}
+ * @draft
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-7
  */

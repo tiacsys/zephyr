@@ -397,6 +397,8 @@ static void test_thread_timeout_reply_values_wfe(void *p1, void *p2, void *p3)
  * Expected result:
  * - The timed get returns NULL after the timeout; K_NO_WAIT returns NULL at once.
  *
+ * @testid{TSPEC-FIFO-TMO1C-001}
+ * @draft
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-7
  */
@@ -452,6 +454,8 @@ ZTEST(fifo_timeout_1cpu, test_timeout_empty_fifo)
  * Expected result:
  * - Both gets return the queued item without blocking.
  *
+ * @testid{TSPEC-FIFO-TMO-001}
+ * @draft
  * @see k_fifo_get()
  * @see k_fifo_put()
  * @verifies ZEP-SRS-24-7
@@ -515,6 +519,8 @@ ZTEST(fifo_timeout, test_timeout_non_empty_fifo)
  * - The getter receives data supplied in time; the reply flags reflect FIFO
  *   availability for each timeout variant.
  *
+ * @testid{TSPEC-FIFO-TMO1C-002}
+ * @draft
  * @see k_fifo_get()
  * @see k_fifo_put()
  * @verifies ZEP-SRS-24-7
@@ -657,6 +663,8 @@ ZTEST(fifo_timeout_1cpu, test_timeout_fifo_thread)
  * Expected result:
  * - Threads time out strictly in increasing-timeout order (within one tick).
  *
+ * @testid{TSPEC-FIFO-TMO1C-003}
+ * @draft
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-7
  */
@@ -701,6 +709,8 @@ ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_fifo)
  * Expected result:
  * - Threads time out in increasing-timeout order across both FIFOs.
  *
+ * @testid{TSPEC-FIFO-TMO1C-004}
+ * @draft
  * @see k_fifo_get()
  * @verifies ZEP-SRS-24-7
  */
@@ -752,6 +762,8 @@ ZTEST(fifo_timeout_1cpu, test_timeout_threads_pend_on_dual_fifos)
  * Expected result:
  * - Satisfied threads report in queue order; the last thread times out cleanly.
  *
+ * @testid{TSPEC-FIFO-TMO1C-005}
+ * @draft
  * @see k_fifo_get()
  * @see k_fifo_put()
  * @verifies ZEP-SRS-24-7

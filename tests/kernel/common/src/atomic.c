@@ -29,7 +29,7 @@ atomic_t total_atomic;
 
 /**
  * @defgroup kernel_atomic_ops_tests Atomic Operations
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

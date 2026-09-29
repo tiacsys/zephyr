@@ -46,7 +46,7 @@ void busy_thread_entry(void *p1, void *p2, void *p3)
  * thread, memory block and memory slab object cores.
  *
  * @defgroup kernel_obj_core_stats_tests Object Core Statistics
- * @ingroup all_tests
+ * @ingroup kernel_obj_core_tests
  * @{
  */
 

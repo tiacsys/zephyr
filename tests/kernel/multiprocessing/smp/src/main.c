@@ -77,9 +77,17 @@ static int curr_cpu(void)
 }
 
 /**
+ * @brief Tests for multiprocessing
+ * @defgroup tests_kernel_multiprocessing Multiprocessing tests
+ * @ingroup all_tests
+ * @{
+ * @}
+ */
+
+/**
  * @brief SMP
  * @defgroup kernel_smp_tests SMP Tests
- * @ingroup all_tests
+ * @ingroup tests_kernel_multiprocessing
  * @{
  * @}
  */

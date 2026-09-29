@@ -184,7 +184,7 @@ static int ram_console_out(int character)
 
 /**
  * @defgroup kernel_printk_tests Printk
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

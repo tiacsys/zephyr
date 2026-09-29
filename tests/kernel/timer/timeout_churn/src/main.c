@@ -8,7 +8,7 @@
 /**
  * @brief Kernel timeout churn tests
  * @defgroup kernel_timeout_churn_tests Kernel timeout churn
- * @ingroup all_tests
+ * @ingroup kernel_timer_tests
  * @{
  *
  * Regression tests for system clock correctness under timeout-queue churn

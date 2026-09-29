@@ -12,7 +12,7 @@
  *
  * @defgroup test_pow2_ceil Z_POW2_CEIL() tests
  *
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  *
  * @{
  * @}

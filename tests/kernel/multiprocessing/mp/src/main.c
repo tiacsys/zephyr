@@ -27,7 +27,7 @@ volatile int cpu_running[CONFIG_MP_MAX_NUM_CPUS];
  *
  * @defgroup kernel_mp_tests MP Tests
  *
- * @ingroup all_tests
+ * @ingroup tests_kernel_multiprocessing
  *
  * @{
  * @}

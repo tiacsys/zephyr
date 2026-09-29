@@ -64,6 +64,8 @@ static void thread_read(void *arg1, void *arg2, void *arg3)
  * Expected result:
  * - The blocked read returns -EPIPE and the pipe stays closed.
  *
+ * @testid{TSPEC-PIPE-010}
+ * @draft
  * @see k_pipe_close()
  * @see k_pipe_read()
  *
@@ -103,6 +105,8 @@ ZTEST(k_pipe_concurrency, test_pipe_close_on_read)
  * Expected result:
  * - The blocked write returns -EPIPE and the pipe stays closed.
  *
+ * @testid{TSPEC-PIPE-011}
+ * @draft
  * @see k_pipe_close()
  * @see k_pipe_write()
  *
@@ -146,6 +150,8 @@ ZTEST(k_pipe_concurrency, test_pipe_close_on_write)
  * Expected result:
  * - The blocked read returns -ECANCELED; the pipe remains open.
  *
+ * @testid{TSPEC-PIPE-012}
+ * @draft
  * @see k_pipe_reset()
  * @see k_pipe_read()
  *
@@ -187,6 +193,8 @@ ZTEST(k_pipe_concurrency, test_pipe_reset_on_read)
  * Expected result:
  * - The blocked write returns -ECANCELED; the pipe remains open.
  *
+ * @testid{TSPEC-PIPE-013}
+ * @draft
  * @see k_pipe_reset()
  * @see k_pipe_write()
  *
@@ -232,6 +240,8 @@ ZTEST(k_pipe_concurrency, test_pipe_reset_on_write)
  * Expected result:
  * - The reader completes after the data is provided across multiple writes.
  *
+ * @testid{TSPEC-PIPE-014}
+ * @draft
  * @see k_pipe_read()
  * @see k_pipe_write()
  *
@@ -272,6 +282,8 @@ ZTEST(k_pipe_concurrency, test_pipe_partial_read)
  * Expected result:
  * - The writer completes once space becomes available.
  *
+ * @testid{TSPEC-PIPE-015}
+ * @draft
  * @see k_pipe_write()
  * @see k_pipe_read()
  *
@@ -335,6 +347,8 @@ static void zero_thread_read_write(void *arg1, void *arg2, void *arg3)
  * Expected result:
  * - Data is transferred directly between threads and matches end to end.
  *
+ * @testid{TSPEC-PIPE-016}
+ * @draft
  * @see k_pipe_init()
  * @see k_pipe_read()
  * @see k_pipe_write()

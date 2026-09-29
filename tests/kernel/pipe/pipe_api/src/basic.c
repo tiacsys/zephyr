@@ -41,6 +41,8 @@ static struct k_pipe pipe;
  * Expected result:
  * - The pipe reports PIPE_FLAG_OPEN.
  *
+ * @testid{TSPEC-PIPE-001}
+ * @draft
  * @see k_pipe_init()
  *
  * @verifies ZEP-SRS-32-1
@@ -68,6 +70,8 @@ ZTEST(k_pipe_basic, test_pipe_init)
  * Expected result:
  * - The byte read equals the byte written.
  *
+ * @testid{TSPEC-PIPE-002}
+ * @draft
  * @see k_pipe_write()
  * @see k_pipe_read()
  *
@@ -102,6 +106,8 @@ ZTEST(k_pipe_basic, test_pipe_write_read_one)
  * Expected result:
  * - Bytes are returned in FIFO order.
  *
+ * @testid{TSPEC-PIPE-003}
+ * @draft
  * @see k_pipe_write()
  * @see k_pipe_read()
  *
@@ -137,6 +143,8 @@ ZTEST(k_pipe_basic, test_pipe_write_read_multiple)
  * Expected result:
  * - The first write stores all bytes; the second returns -EAGAIN.
  *
+ * @testid{TSPEC-PIPE-004}
+ * @draft
  * @see k_pipe_write()
  *
  * @verifies ZEP-SRS-32-3
@@ -166,6 +174,8 @@ ZTEST(k_pipe_basic, test_pipe_write_full)
  * Expected result:
  * - k_pipe_read() returns -EAGAIN.
  *
+ * @testid{TSPEC-PIPE-005}
+ * @draft
  * @see k_pipe_read()
  *
  * @verifies ZEP-SRS-32-4
@@ -194,6 +204,8 @@ ZTEST(k_pipe_basic, test_pipe_read_empty)
  * Expected result:
  * - The read buffer is byte-for-byte identical to what was written.
  *
+ * @testid{TSPEC-PIPE-006}
+ * @draft
  * @see k_pipe_write()
  * @see k_pipe_read()
  *
@@ -232,6 +244,8 @@ ZTEST(k_pipe_basic, test_pipe_read_write_full)
  * Expected result:
  * - All bytes are returned in order despite the buffer wrap.
  *
+ * @testid{TSPEC-PIPE-007}
+ * @draft
  * @see k_pipe_write()
  * @see k_pipe_read()
  *
@@ -277,6 +291,8 @@ ZTEST(k_pipe_basic, test_pipe_read_write_wrap_around)
  * Expected result:
  * - The pipe remains functional after the reset.
  *
+ * @testid{TSPEC-PIPE-008}
+ * @draft
  * @see k_pipe_reset()
  *
  * @verifies ZEP-SRS-32-7
@@ -316,6 +332,8 @@ ZTEST(k_pipe_basic, test_pipe_reset)
  * - Writes fail with -EPIPE; buffered data is drained; empty closed reads
  *   return -EPIPE.
  *
+ * @testid{TSPEC-PIPE-009}
+ * @draft
  * @see k_pipe_close()
  * @see k_pipe_read()
  * @see k_pipe_write()

@@ -98,6 +98,8 @@ static void tlifo_read_write(struct k_lifo *plifo)
  * Expected result:
  * - Data passes correctly and in LIFO order across all contexts every iteration.
  *
+ * @testid{TSPEC-LIFO-006}
+ * @draft
  * @see k_lifo_put()
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-2

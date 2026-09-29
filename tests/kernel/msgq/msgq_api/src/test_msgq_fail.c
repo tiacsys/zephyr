@@ -58,6 +58,8 @@ static void get_fail(struct k_msgq *q)
  * Expected result:
  * - k_msgq_put() returns -ENOMSG (no wait) and -EAGAIN (timeout) when full.
  *
+ * @testid{TSPEC-MSGQ-022}
+ * @draft
  * @see k_msgq_put()
  * @verifies ZEP-SRS-31-7
  */
@@ -83,6 +85,8 @@ ZTEST(msgq_api_1cpu, test_msgq_put_fail)
  * Expected result:
  * - The error codes match the supervisor case from user mode.
  *
+ * @testid{TSPEC-MSGQ-023}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_alloc_init()
  * @verifies ZEP-SRS-31-7
@@ -112,6 +116,8 @@ ZTEST_USER(msgq_api, test_msgq_user_put_fail)
  * Expected result:
  * - k_msgq_get() returns -ENOMSG (no wait) and -EAGAIN (timeout) when empty.
  *
+ * @testid{TSPEC-MSGQ-024}
+ * @draft
  * @see k_msgq_get()
  * @verifies ZEP-SRS-31-11
  */
@@ -137,6 +143,8 @@ ZTEST(msgq_api_1cpu, test_msgq_get_fail)
  * Expected result:
  * - The error codes match the supervisor case from user mode.
  *
+ * @testid{TSPEC-MSGQ-025}
+ * @draft
  * @see k_msgq_get()
  * @see k_msgq_alloc_init()
  * @verifies ZEP-SRS-31-11

@@ -106,6 +106,8 @@ static void tlifo_isr_thread(struct k_lifo *plifo)
  * Expected result:
  * - The consumer dequeues items in reverse insertion order.
  *
+ * @testid{TSPEC-LIFO-001}
+ * @draft
  * @see k_lifo_put()
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-1
@@ -138,6 +140,8 @@ ZTEST(lifo_contexts_1cpu, test_lifo_thread2thread)
  * Expected result:
  * - The thread dequeues every ISR-enqueued item newest-first.
  *
+ * @testid{TSPEC-LIFO-002}
+ * @draft
  * @see k_lifo_put()
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-2
@@ -169,6 +173,8 @@ ZTEST(lifo_contexts, test_lifo_thread2isr)
  * Expected result:
  * - The ISR dequeues every thread-enqueued item newest-first.
  *
+ * @testid{TSPEC-LIFO-003}
+ * @draft
  * @see k_lifo_put()
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-2
@@ -194,6 +200,8 @@ K_HEAP_DEFINE(lifo_alloc_pool, 256);
  * calling thread's resource pool. Verify the call succeeds and that the same
  * data pointer is returned by a subsequent get.
  *
+ * @testid{TSPEC-LIFO-004}
+ * @draft
  * @see k_lifo_alloc_put()
  * @verifies ZEP-SRS-23-3
  */

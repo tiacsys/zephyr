@@ -156,6 +156,9 @@ static void thread_entry_fn_isr(void *p1, void *p2, void *p3)
 
 /**
  * @brief Verify data passing between threads using single stack
+ *
+ * @testid{TSPEC-STACK-001}
+ * @draft
  * @see k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-5
  * @verifies ZEP-SRS-30-6
@@ -195,6 +198,9 @@ ZTEST_USER(stack_usage, test_single_stack_play)
 
 /**
  * @brief Verify data passing between threads using dual stack
+ *
+ * @testid{TSPEC-STACK-002}
+ * @draft
  * @see k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-5
  * @verifies ZEP-SRS-30-6
@@ -226,6 +232,9 @@ ZTEST_USER(stack_usage_1cpu, test_dual_stack_play)
 
 /**
  * @brief Verify data passing between thread and ISR
+ *
+ * @testid{TSPEC-STACK-003}
+ * @draft
  * @see k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-5
  * @verifies ZEP-SRS-30-6
@@ -276,6 +285,8 @@ void thread_entry_wait(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_stack_tests
  *
+ * @testid{TSPEC-STACK-004}
+ * @draft
  * @see k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-9
  */

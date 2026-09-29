@@ -110,6 +110,8 @@ static void test_send(void *p1, void *p2, void *p3)
  * Expected result:
  * - The K_NO_WAIT get fails; the timed get receives the sender's message.
  *
+ * @testid{TSPEC-MBOX-020}
+ * @draft
  * @see k_mbox_get()
  * @see k_mbox_put()
  * @verifies ZEP-SRS-25-5
@@ -151,6 +153,8 @@ static void test_send_un(void *p1, void *p2, void *p3)
  * Expected result:
  * - The receiver obtains the message from the specified sender.
  *
+ * @testid{TSPEC-MBOX-021}
+ * @draft
  * @see k_mbox_get()
  * @see k_mbox_put()
  * @verifies ZEP-SRS-25-9
@@ -220,6 +224,8 @@ static void thread_high_prio(void *p1, void *p2, void *p3)
  * - Both receivers obtain a message; the high-priority thread receives first and
  *   each payload matches what was sent.
  *
+ * @testid{TSPEC-MBOX-022}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-4

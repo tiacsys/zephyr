@@ -462,6 +462,8 @@ static void tmbox(struct k_mbox *pmbox)
  * Expected result:
  * - The mailbox is initialized and ready for put/get operations.
  *
+ * @testid{TSPEC-MBOX-001}
+ * @draft
  * @see k_mbox_init()
  * @verifies ZEP-SRS-25-1
  */
@@ -485,6 +487,8 @@ ZTEST(mbox_api, test_mbox_kinit)
  * Expected result:
  * - The message is delivered, confirming the static mailbox is operational.
  *
+ * @testid{TSPEC-MBOX-002}
+ * @draft
  * @see K_MBOX_DEFINE()
  * @see k_mbox_put()
  * @see k_mbox_get()
@@ -513,6 +517,8 @@ static ZTEST_BMEM char __aligned(4) buffer[8];
  * Expected result:
  * - The message queue put succeeds and the mailbox transfers the same buffer.
  *
+ * @testid{TSPEC-MBOX-003}
+ * @draft
  * @see k_msgq_put()
  * @see k_mbox_async_put()
  * @see k_mbox_get()
@@ -548,6 +554,8 @@ ZTEST(mbox_api, test_mbox_enhanced_capabilities)
  * Expected result:
  * - Each mailbox independently delivers its message.
  *
+ * @testid{TSPEC-MBOX-004}
+ * @draft
  * @see k_mbox_init()
  * @see k_mbox_put()
  * @see k_mbox_get()
@@ -584,6 +592,8 @@ ZTEST(mbox_api, test_define_multi_mbox)
  * Expected result:
  * - The empty message is delivered with size 0 and the expected info value.
  *
+ * @testid{TSPEC-MBOX-005}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-5
@@ -609,6 +619,8 @@ ZTEST(mbox_api, test_mbox_put_get_null)
  * Expected result:
  * - The receiver obtains the exact buffer the sender transmitted.
  *
+ * @testid{TSPEC-MBOX-006}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-3
@@ -637,6 +649,8 @@ ZTEST(mbox_api, test_mbox_put_get_buffer)
  * Expected result:
  * - The asynchronously sent buffer is received intact.
  *
+ * @testid{TSPEC-MBOX-007}
+ * @draft
  * @see k_mbox_async_put()
  * @see k_mbox_data_get()
  * @see k_mbox_get()
@@ -669,6 +683,8 @@ ZTEST(mbox_api, test_mbox_async_put_get_buffer)
  * - Both sizes are negotiated down to TRUNCATED_SIZE and only that many bytes
  *   are transferred.
  *
+ * @testid{TSPEC-MBOX-008}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-7
@@ -695,6 +711,8 @@ ZTEST(mbox_api, test_mbox_async_put_get_block)
  * Expected result:
  * - The directed message is delivered and its contents match.
  *
+ * @testid{TSPEC-MBOX-009}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-4
@@ -720,6 +738,8 @@ ZTEST(mbox_api, test_mbox_target_source_thread_buffer)
  * Expected result:
  * - k_mbox_get() returns -ENOMSG.
  *
+ * @testid{TSPEC-MBOX-010}
+ * @draft
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-13
  * @verifies ZEP-SRS-25-17
@@ -743,6 +763,8 @@ ZTEST(mbox_api, test_mbox_incorrect_receiver_tid)
  * Expected result:
  * - k_mbox_put() returns -ENOMSG.
  *
+ * @testid{TSPEC-MBOX-011}
+ * @draft
  * @see k_mbox_put()
  * @verifies ZEP-SRS-25-13
  * @verifies ZEP-SRS-25-17
@@ -766,6 +788,8 @@ ZTEST(mbox_api, test_mbox_incorrect_transmit_tid)
  * Expected result:
  * - k_mbox_get() returns -EAGAIN after the timeout.
  *
+ * @testid{TSPEC-MBOX-012}
+ * @draft
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-12
  */
@@ -802,6 +826,8 @@ static void put_timeout_receiver(void *p1, void *p2, void *p3)
  * Expected result:
  * - The put without a receiver returns -EAGAIN; with a receiver it returns 0.
  *
+ * @testid{TSPEC-MBOX-013}
+ * @draft
  * @see k_mbox_put()
  */
 ZTEST(mbox_api, test_mbox_put_timeout)
@@ -844,6 +870,8 @@ ZTEST(mbox_api, test_mbox_put_timeout)
  * Expected result:
  * - The get returns -ENOMSG; the mismatched message is not delivered.
  *
+ * @testid{TSPEC-MBOX-014}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-6
@@ -870,6 +898,8 @@ ZTEST(mbox_api, test_mbox_msg_tid_mismatch)
  * Expected result:
  * - The get succeeds (returns 0) and the message is consumed without copying.
  *
+ * @testid{TSPEC-MBOX-015}
+ * @draft
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-3
  */
@@ -895,6 +925,8 @@ ZTEST(mbox_api, test_mbox_dispose_size_0_msg)
  * Expected result:
  * - The waiting get completes successfully once the async put runs.
  *
+ * @testid{TSPEC-MBOX-016}
+ * @draft
  * @see k_mbox_async_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-7
@@ -922,6 +954,8 @@ ZTEST(mbox_api, test_mbox_async_put_to_waiting_get)
  * Expected result:
  * - The filtered get times out (-EAGAIN); the message is retrievable via K_ANY.
  *
+ * @testid{TSPEC-MBOX-017}
+ * @draft
  * @see k_mbox_async_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-13
@@ -948,6 +982,8 @@ ZTEST(mbox_api, test_mbox_get_waiting_put_incorrect_tid)
  * Expected result:
  * - All queued messages are retrieved successfully.
  *
+ * @testid{TSPEC-MBOX-018}
+ * @draft
  * @see k_mbox_async_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-7
@@ -974,6 +1010,8 @@ ZTEST(mbox_api, test_mbox_async_multiple_put)
  * Expected result:
  * - Every waiting receiver obtains a message matching its source filter.
  *
+ * @testid{TSPEC-MBOX-019}
+ * @draft
  * @see k_mbox_put()
  * @see k_mbox_get()
  * @verifies ZEP-SRS-25-9

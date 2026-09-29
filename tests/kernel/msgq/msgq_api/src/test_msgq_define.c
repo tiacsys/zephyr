@@ -26,6 +26,8 @@ K_MSGQ_DEFINE_STATIC_TYPE(kmsgq_static_type, struct typed_msgq_msg, MSGQ_LEN);
  * - Verify that the used count equals 0.
  * - Verify that the message size is correct.
  *
+ * @testid{TSPEC-MSGQ-018}
+ * @draft
  * @see K_MSGQ_DEFINE()
  */
 ZTEST(msgq_api, test_define_public)
@@ -43,6 +45,8 @@ ZTEST(msgq_api, test_define_public)
  * - Verify that the used count equals 0.
  * - Verify that the message size is correct.
  *
+ * @testid{TSPEC-MSGQ-019}
+ * @draft
  * @see K_MSGQ_DEFINE_STATIC()
  */
 ZTEST(msgq_api, test_define_static)
@@ -60,6 +64,8 @@ ZTEST(msgq_api, test_define_static)
  * - Verify that the used count equals 0.
  * - Verify that the message size is correct.
  *
+ * @testid{TSPEC-MSGQ-020}
+ * @draft
  * @see K_MSGQ_DEFINE_TYPE()
  */
 ZTEST(msgq_api, test_define_type)
@@ -77,6 +83,8 @@ ZTEST(msgq_api, test_define_type)
  * - Verify that the used count equals 0.
  * - Verify that the message size is correct.
  *
+ * @testid{TSPEC-MSGQ-021}
+ * @draft
  * @see K_MSGQ_DEFINE_STATIC_TYPE()
  */
 ZTEST(msgq_api, test_define_static_type)

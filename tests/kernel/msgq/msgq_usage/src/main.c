@@ -284,6 +284,8 @@ static void start_client(void)
  * - Services register, the client receives correct responses, and all threads
  *   complete cleanly.
  *
+ * @testid{TSPEC-MSGQ-028}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_get()
  * @see k_msgq_purge()

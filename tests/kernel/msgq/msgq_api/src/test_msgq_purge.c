@@ -69,6 +69,8 @@ static void purge_when_put(struct k_msgq *q)
  * - Purge empties the queue, the pending writer gets -ENOMSG, and the queue is
  *   usable afterwards.
  *
+ * @testid{TSPEC-MSGQ-026}
+ * @draft
  * @see k_msgq_purge()
  * @see k_msgq_put()
  * @verifies ZEP-SRS-31-14
@@ -97,6 +99,8 @@ ZTEST(msgq_api_1cpu, test_msgq_purge_when_put)
  * Expected result:
  * - Behavior matches the supervisor case from user mode.
  *
+ * @testid{TSPEC-MSGQ-027}
+ * @draft
  * @see k_msgq_purge()
  * @see k_msgq_alloc_init()
  * @verifies ZEP-SRS-31-14

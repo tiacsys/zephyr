@@ -78,6 +78,8 @@ static void oops_entry(void *p1, void *p2, void *p3)
  * - The captured output contains the "Current thread:" dump line.
  * - The fatal handler observes K_ERR_KERNEL_OOPS (expected_reason cleared).
  *
+ * @testid{TSPEC-FATAL-015}
+ * @draft
  * @see k_oops()
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests

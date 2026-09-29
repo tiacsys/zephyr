@@ -92,6 +92,9 @@ static void high_prio_t2_wait_for_mutex(void *p1, void *p2, void *p3)
  * thread that has waited longest.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-032}
+ * @draft
  * @see sys_mutex_lock()
  * @see sys_mutex_unlock()
  * @verifies ZEP-SRS-6-6

@@ -10,6 +10,9 @@
 #ifdef CONFIG_TIMEOUT_64BIT
 /**
  * Verify that absolute timeout sums are handled correctly
+ *
+ * @testid{TSPEC-TIMEOUT-001}
+ * @draft
  */
 ZTEST(timeout, test_timeout_sum_absolute)
 {
@@ -117,6 +120,9 @@ ZTEST(timeout, test_timeout_sum_absolute)
 
 /**
  * Verify that relative timeout sums are handled correctly
+ *
+ * @testid{TSPEC-TIMEOUT-002}
+ * @draft
  */
 ZTEST(timeout, test_timeout_sum_relative)
 {

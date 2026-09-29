@@ -187,6 +187,8 @@ static void status_stop(struct k_timer *timer)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-004}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -221,6 +223,8 @@ ZTEST_USER(timer_api, test_timer_duration_period)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-005}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_status_get()
@@ -254,6 +258,8 @@ ZTEST(timer_api, test_timer_init_runtime)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-006}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -293,6 +299,8 @@ ZTEST_USER(timer_api, test_timer_restart)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-007}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -334,6 +342,8 @@ ZTEST_USER(timer_api, test_timer_period_0)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-008}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -377,6 +387,8 @@ ZTEST_USER(timer_api, test_timer_period_k_forever)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-009}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -426,6 +438,8 @@ static void tick_sync(void)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-010}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_status_sync()
@@ -499,6 +513,8 @@ ZTEST_USER(timer_api, test_timer_periodicity)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-011}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_status_get()
@@ -533,6 +549,8 @@ ZTEST_USER(timer_api, test_timer_status_get)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-012}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_status_get()
@@ -571,6 +589,8 @@ ZTEST_USER(timer_api, test_timer_status_get_anytime)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-013}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_status_sync()
@@ -614,6 +634,8 @@ ZTEST_USER(timer_api, test_timer_status_sync)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-014}
+ * @draft
  * @see k_timer_start()
  * @see K_TIMER_DEFINE()
  * @see k_timer_stop()
@@ -702,6 +724,8 @@ static void user_data_timer_handler(struct k_timer *timer)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-015}
+ * @draft
  * @see K_TIMER_DEFINE()
  * @see k_timer_user_data_set()
  * @see k_timer_start()
@@ -759,6 +783,8 @@ ZTEST_USER(timer_api, test_timer_user_data)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-016}
+ * @draft
  * @see k_timer_init()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -849,6 +875,9 @@ ZTEST_USER(timer_api, test_timer_remaining)
  * remaining time until expiry.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-017}
+ * @draft
  * @see K_TIMEOUT_ABS_TICKS
  * @see k_timer_remaining_ticks()
  * @verifies ZEP-SRS-28-14
@@ -997,6 +1026,9 @@ ZTEST_USER(timer_api, test_timeout_abs)
  * wakes the thread at the requested tick-aligned point in time.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-018}
+ * @draft
  * @see k_sleep()
  * @see K_TIMEOUT_ABS_TICKS
  * @verifies ZEP-SRS-28-8
@@ -1078,6 +1110,8 @@ static void isr_ctx_expire(struct k_timer *timer)
  * expired, verify the callback ran and that it observed itself running in
  * interrupt context.
  *
+ * @testid{TSPEC-TIMER-019}
+ * @draft
  * @see k_timer_start()
  * @see k_is_in_isr()
  * @verifies ZEP-SRS-4-15
@@ -1112,6 +1146,8 @@ static struct k_timer cleanup_timer;
  * k_timer_cleanup() and verify it succeeds (returns 0), indicating the timer's
  * resources may be released.
  *
+ * @testid{TSPEC-TIMER-020}
+ * @draft
  * @see k_timer_cleanup()
  * @verifies ZEP-SRS-4-16
  */
@@ -1155,6 +1191,8 @@ static void cleanup_waiter(void *p1, void *p2, void *p3)
  * timer, call k_timer_cleanup() and verify it returns -EAGAIN, indicating the
  * cleanup could not be performed. Then stop the timer to release the waiter.
  *
+ * @testid{TSPEC-TIMER-021}
+ * @draft
  * @see k_timer_cleanup()
  * @see k_timer_status_sync()
  * @verifies ZEP-SRS-4-17

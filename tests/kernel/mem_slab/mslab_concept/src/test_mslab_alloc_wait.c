@@ -45,6 +45,8 @@ void tmslab_alloc_wait_ok(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memory_slab_tests
  *
+ * @testid{TSPEC-SLAB-012}
+ * @draft
  * @see k_mem_slab_alloc()
  * @see k_mem_slab_free()
  * @verifies ZEP-SRS-9-14

@@ -50,6 +50,8 @@ static void thread_entry_abort(void *p1, void *p2, void *p3)
  * - The thread ran and stopped inside the abort, never reaching the code
  *   after it.
  *
+ * @testid{TSPEC-THREADS-045}
+ * @draft
  * @see k_thread_abort()
  * @verifies ZEP-SRS-1-6
  */
@@ -83,6 +85,8 @@ ZTEST_USER(threads_lifecycle, test_thread_abort_self)
  * - The thread aborted before starting never runs, and the one aborted after
  *   starting is terminated.
  *
+ * @testid{TSPEC-THREADS-046}
+ * @draft
  * @see k_thread_abort()
  * @verifies ZEP-SRS-1-6
  */
@@ -126,6 +130,8 @@ ZTEST_USER(threads_lifecycle, test_thread_abort_others)
  * Expected result:
  * - The repeated aborts complete without error and the system keeps running.
  *
+ * @testid{TSPEC-THREADS-047}
+ * @draft
  * @see k_thread_abort()
  * @verifies ZEP-SRS-1-6
  */
@@ -176,6 +182,8 @@ static void delayed_thread_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - The thread never runs, so its flag stays clear.
  *
+ * @testid{TSPEC-THREADS-048}
+ * @draft
  * @see k_thread_abort()
  * @verifies ZEP-SRS-1-6
  */
@@ -265,6 +273,8 @@ extern struct k_sem offload_sem;
  * Expected result:
  * - The ISR completes and the interrupted thread is terminated.
  *
+ * @testid{TSPEC-THREADS-049}
+ * @draft
  * @see k_thread_abort()
  * @see irq_offload()
  * @verifies ZEP-SRS-1-6
@@ -333,6 +343,8 @@ static void entry_aborted_thread(void *p1, void *p2, void *p3)
  * Expected result:
  * - The ISR completes and the target thread is terminated.
  *
+ * @testid{TSPEC-THREADS-050}
+ * @draft
  * @see k_thread_abort()
  * @see irq_offload()
  * @verifies ZEP-SRS-1-6

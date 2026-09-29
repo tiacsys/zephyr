@@ -56,7 +56,12 @@ void assert_post_action(const char *file, unsigned int line)
 	ztest_test_pass();
 }
 
-/** @brief Held spinlock address is reported on context switch assert */
+/**
+ * @brief Held spinlock address is reported on context switch assert
+ *
+ * @testid{TSPEC-SPINLOCK-010}
+ * @draft
+ */
 ZTEST(spinlock_held_lock, test_context_switch_prints_held_lock)
 {
 	zassert_is_null(z_spin_get_held_lock(), NULL);
@@ -72,7 +77,12 @@ ZTEST(spinlock_held_lock, test_context_switch_prints_held_lock)
 	ztest_test_fail();
 }
 
-/** @brief With nested locks the outermost address is reported */
+/**
+ * @brief With nested locks the outermost address is reported
+ *
+ * @testid{TSPEC-SPINLOCK-011}
+ * @draft
+ */
 ZTEST(spinlock_held_lock, test_context_switch_nested_prints_outer)
 {
 	zassert_is_null(z_spin_get_held_lock(), NULL);
@@ -95,6 +105,9 @@ ZTEST(spinlock_held_lock, test_context_switch_nested_prints_outer)
  *
  * lock(A), lock(B), unlock(A): slot cleared but count stays 1.
  * The pointer check alone misses this; the count check fires.
+ *
+ * @testid{TSPEC-SPINLOCK-012}
+ * @draft
  */
 ZTEST(spinlock_held_lock, test_context_switch_count_detects_unreleased_lock)
 {
@@ -117,6 +130,9 @@ ZTEST(spinlock_held_lock, test_context_switch_count_detects_unreleased_lock)
  * @brief Context switch while irq_lock() is held fires the IRQ state assert
  *
  * Skipped on ARM64 where the IRQ state check is disabled (see #35307).
+ *
+ * @testid{TSPEC-SPINLOCK-013}
+ * @draft
  */
 ZTEST(spinlock_held_lock, test_context_switch_with_irq_lock_held)
 {
@@ -134,7 +150,12 @@ ZTEST(spinlock_held_lock, test_context_switch_with_irq_lock_held)
 #endif
 }
 
-/** @brief z_pend_curr lock-swap pattern must not trigger a false positive */
+/**
+ * @brief z_pend_curr lock-swap pattern must not trigger a false positive
+ *
+ * @testid{TSPEC-SPINLOCK-014}
+ * @draft
+ */
 ZTEST(spinlock_held_lock, test_no_false_positive_pend_pattern)
 {
 	struct k_sem sem;

@@ -46,6 +46,8 @@ static void sleepy_thread(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-027}
+ * @draft
  * @see k_wakeup()
  * @verifies ZEP-SRS-28-11
  */
@@ -90,6 +92,8 @@ static void preempt_test_thread(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-028}
+ * @draft
  * @see k_is_preempt_thread()
  * @verifies ZEP-SRS-2-20
  */
@@ -161,6 +165,8 @@ static void thread_suspend_init_null(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-029}
+ * @draft
  * @see k_thread_suspend()
  * @verifies ZEP-SRS-1-3
  */
@@ -202,6 +208,8 @@ static void thread_resume_init_null(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-030}
+ * @draft
  * @see k_thread_resume()
  * @verifies ZEP-SRS-1-4
  */
@@ -243,6 +251,8 @@ static void thread_priority_get_init_null(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-031}
+ * @draft
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-16
  */
@@ -284,6 +294,8 @@ static void thread_priority_set_init_null(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-032}
+ * @draft
  * @see k_thread_priority_set()
  * @verifies ZEP-SRS-1-2
  */
@@ -327,6 +339,8 @@ static void thread_priority_set_overmax(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-033}
+ * @draft
  * @see k_thread_priority_set()
  * @verifies ZEP-SRS-1-2
  */
@@ -372,6 +386,8 @@ static void thread_priority_set_upgrade(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-034}
+ * @draft
  * @see k_thread_priority_set()
  * @verifies ZEP-SRS-1-2
  */
@@ -413,6 +429,8 @@ static void thread_wakeup_init_null(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-035}
+ * @draft
  * @see k_wakeup()
  * @verifies ZEP-SRS-28-11
  */

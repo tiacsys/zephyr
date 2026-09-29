@@ -102,6 +102,9 @@ static void t_med_chain(void *p1, void *p2, void *p3)
  * T_low all the way to T_high's priority, not just T_med.
  *
  * This validates the held_mutexes chain walk in k_mutex_lock().
+ *
+ * @testid{TSPEC-MUTEX-002}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_chain_boost_3threads)
 {
@@ -168,6 +171,9 @@ static void t_waiter(void *p1, void *p2, void *p3)
  * After unlocking mutex_b, priority is fully restored.
  *
  * This validates held_mutexes_highest_waiter_prio() in k_mutex_unlock().
+ *
+ * @testid{TSPEC-MUTEX-003}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_multi_mutex_partial_unlock_priority)
 {
@@ -225,6 +231,9 @@ ZTEST(mutex_api_1cpu, test_multi_mutex_partial_unlock_priority)
  * ownership, mutex_pended_on must be cleared before k_mutex_lock() returns.
  * A stale pointer here would cause false deadlock detection if the thread
  * later tries to lock another mutex.
+ *
+ * @testid{TSPEC-MUTEX-004}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_mutex_pended_on_cleared_on_grant)
 {
@@ -277,6 +286,9 @@ static void t_timeout_waiter(void *p1, void *p2, void *p3)
  * cleared before k_mutex_lock() returns -EAGAIN. A stale pointer here
  * could cause false deadlock detection in subsequent lock attempts by
  * other threads walking the chain.
+ *
+ * @testid{TSPEC-MUTEX-005}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_mutex_pended_on_cleared_on_timeout)
 {
@@ -316,6 +328,9 @@ ZTEST(mutex_api_1cpu, test_mutex_pended_on_cleared_on_timeout)
  * The held_mutexes list must accurately reflect which mutexes a thread
  * currently owns. Verifies that the mutex is added on first lock, transferred
  * to the new owner's list on unlock handoff, and removed after final unlock.
+ *
+ * @testid{TSPEC-MUTEX-006}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_held_mutexes_list_and_handoff)
 {
@@ -369,6 +384,9 @@ ZTEST(mutex_api_1cpu, test_held_mutexes_list_and_handoff)
  * A recursive lock increments lock_count but must not add the mutex to
  * held_mutexes again. The mutex must appear exactly once in the list
  * regardless of recursion depth, and be removed on the final unlock.
+ *
+ * @testid{TSPEC-MUTEX-007}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_recursive_held_mutexes_single_entry)
 {
@@ -429,6 +447,9 @@ ZTEST(mutex_api_1cpu, test_recursive_held_mutexes_single_entry)
  * T_mid waits on mutex_b. After T_high times out, T_owner's priority must
  * drop to T_mid's priority (not to original), because mutex_b still has a
  * waiter. This validates held_mutexes_highest_waiter_prio() in the timeout path.
+ *
+ * @testid{TSPEC-MUTEX-008}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_timeout_multi_mutex_priority_down)
 {
@@ -508,6 +529,9 @@ static void t_hold_mutex_b_timeout(void *p1, void *p2, void *p3)
  * to 1 (not 3), because m2 still has W2. After unlocking m2, T must
  * drop to 7 (not 3), proving orig_prio captured the true pre-inheritance
  * priority rather than the boosted snapshot.
+ *
+ * @testid{TSPEC-MUTEX-009}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_orig_prio_floor_when_boosted_at_second_lock)
 {
@@ -577,6 +601,9 @@ ZTEST(mutex_api_1cpu, test_orig_prio_floor_when_boosted_at_second_lock)
  * is NOT a true deadlock — B will recover via -EAGAIN. The deadlock
  * detection must NOT fire an assertion. After B times out and releases m2,
  * A must successfully acquire m2.
+ *
+ * @testid{TSPEC-MUTEX-010}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_no_false_deadlock_finite_timeout_cycle)
 {
@@ -628,6 +655,9 @@ ZTEST(mutex_api_1cpu, test_no_false_deadlock_finite_timeout_cycle)
  * When k_mutex_lock() is called with K_NO_WAIT and the mutex is held by
  * another thread, it must return -EBUSY immediately without boosting the
  * owner's priority, modifying held_mutexes, or setting mutex_pended_on.
+ *
+ * @testid{TSPEC-MUTEX-011}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_no_wait_no_boost_no_list)
 {
@@ -710,6 +740,9 @@ static void t_chain_link(void *p1, void *p2, void *p3)
  * complements test_no_false_deadlock_finite_timeout_cycle (which only
  * covers the 2-hop case, where the finite timeout is always at the
  * closing hop) by putting the finite timeout at a different position.
+ *
+ * @testid{TSPEC-MUTEX-012}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_no_false_deadlock_intermediate_hop_finite_timeout)
 {
@@ -883,6 +916,9 @@ ZTEST(mutex_api_1cpu, test_chain_walk_hop_cap_truncates)
  * to an unlock). Both waiters are added before either mutex is unlocked, so
  * held_mutexes_highest_waiter_prio() must scan both live entries and return
  * the correct maximum rather than whichever it happens to see first.
+ *
+ * @testid{TSPEC-MUTEX-013}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_held_mutexes_highest_waiter_scans_all_entries)
 {
@@ -964,6 +1000,9 @@ static void t_handoff_new_owner(void *p1, void *p2, void *p3)
  * becomes the new owner of mutex_a via unlock handoff. held_mutexes must
  * end up with BOTH mutex_a and mutex_b linked -- the handoff append must
  * not clobber or duplicate the list built by T_new's own prior lock.
+ *
+ * @testid{TSPEC-MUTEX-014}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_handoff_to_owner_already_holding_another_mutex)
 {
@@ -1030,6 +1069,9 @@ ZTEST(mutex_api_1cpu, test_handoff_to_owner_already_holding_another_mutex)
  * boost T3, then continue past T3 to boost T2, then continue past T2 to
  * boost T1 -- a genuine 3-hop propagation through 3 distinct mutexes,
  * which test_chain_boost_3threads (2 mutexes, 2 hops) cannot exercise.
+ *
+ * @testid{TSPEC-MUTEX-015}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_chain_boost_3hops_4threads)
 {

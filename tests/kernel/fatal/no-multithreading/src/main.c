@@ -133,6 +133,8 @@ static const exc_trigger_func_t exc_trigger_func[] = {
  * - The fatal handler is invoked with the reason code matching the trigger and
  *   the system halts (the test body never returns).
  *
+ * @testid{TSPEC-FATAL-016}
+ * @draft
  * @see k_oops()
  * @see k_panic()
  * @see z_except_reason()

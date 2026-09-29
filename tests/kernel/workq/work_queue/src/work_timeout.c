@@ -72,6 +72,8 @@ ZTEST_SUITE(workqueue_work_timeout, NULL, test_setup, NULL, NULL, NULL);
  * - With CONFIG_WORKQUEUE_WORK_TIMEOUT enabled the thread is aborted (join
  *   returns 0); otherwise the join times out with -EAGAIN.
  *
+ * @testid{TSPEC-WORKQ-055}
+ * @draft
  * @see k_work_queue_start()
  * @see k_work_submit_to_queue()
  * @ingroup kernel_workqueue_tests

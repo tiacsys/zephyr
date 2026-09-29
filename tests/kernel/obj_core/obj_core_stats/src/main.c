@@ -80,6 +80,8 @@ void busy_thread_entry(void *p1, void *p2, void *p3)
  * - Each call returns 0 and the per-CPU/aggregate values are no smaller than
  *   the corresponding kernel values.
  *
+ * @testid{TSPEC-OBJCORE-016}
+ * @draft
  * @see k_obj_core_stats_raw()
  * @see k_obj_core_stats_query()
  * @verifies ZEP-SRS-35-5
@@ -189,6 +191,8 @@ ZTEST(obj_core_stats_system, test_obj_core_stats_system)
  * Expected result:
  * - Each call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-017}
+ * @draft
  * @see k_obj_core_stats_reset()
  * @verifies ZEP-SRS-35-7
  */
@@ -218,6 +222,8 @@ ZTEST(obj_core_stats_system, test_obj_core_stats_cpu_reset)
  * Expected result:
  * - Each call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-018}
+ * @draft
  * @see k_obj_core_stats_disable()
  * @verifies ZEP-SRS-35-6
  */
@@ -247,6 +253,8 @@ ZTEST(obj_core_stats_system, test_obj_core_stats_cpu_disable)
  * Expected result:
  * - Each call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-019}
+ * @draft
  * @see k_obj_core_stats_enable()
  * @verifies ZEP-SRS-35-6
  */
@@ -275,6 +283,8 @@ ZTEST(obj_core_stats_system, test_obj_core_stats_cpu_enable)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-020}
+ * @draft
  * @see k_obj_core_stats_reset()
  * @verifies ZEP-SRS-35-7
  */
@@ -301,6 +311,8 @@ ZTEST(obj_core_stats_system, test_obj_core_stats_kernel_reset)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-021}
+ * @draft
  * @see k_obj_core_stats_disable()
  * @verifies ZEP-SRS-35-6
  */
@@ -327,6 +339,8 @@ ZTEST(obj_core_stats_system, test_obj_core_stats_kernel_disable)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-022}
+ * @draft
  * @see k_obj_core_stats_enable()
  * @verifies ZEP-SRS-35-6
  */
@@ -383,6 +397,8 @@ void test_thread_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - Every operation returns 0 and the sampled statistics behave as described.
  *
+ * @testid{TSPEC-OBJCORE-023}
+ * @draft
  * @see k_obj_core_stats_raw()
  * @see k_obj_core_stats_query()
  *      k_obj_core_stats_reset(), k_obj_core_stats_enable(),
@@ -568,6 +584,8 @@ ZTEST(obj_core_stats_thread, test_obj_core_stats_thread_test)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-024}
+ * @draft
  * @see k_obj_core_stats_enable()
  * @verifies ZEP-SRS-35-6
  */
@@ -595,6 +613,8 @@ ZTEST(obj_core_stats_mem_block, test_sys_mem_block_enable)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-025}
+ * @draft
  * @see k_obj_core_stats_disable()
  * @verifies ZEP-SRS-35-6
  */
@@ -680,6 +700,8 @@ static void test_mem_block_query(const char *str,
  * - Every sample matches the expected values and reset rebases the max-usage
  *   counters to the current usage.
  *
+ * @testid{TSPEC-OBJCORE-026}
+ * @draft
  * @see k_obj_core_stats_raw()
  * @see k_obj_core_stats_query()
  *      k_obj_core_stats_reset()
@@ -787,6 +809,8 @@ ZTEST(obj_core_stats_mem_block, test_obj_core_stats_mem_block)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-027}
+ * @draft
  * @see k_obj_core_stats_enable()
  * @see k_obj_core_stats_disable()
  * @verifies ZEP-SRS-35-6
@@ -815,6 +839,8 @@ ZTEST(obj_core_stats_mem_slab,  test_mem_slab_enable)
  * Expected result:
  * - The call returns -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-028}
+ * @draft
  * @see k_obj_core_stats_disable()
  * @verifies ZEP-SRS-35-6
  */
@@ -897,6 +923,8 @@ static void test_mem_slab_query(const char *str,
  * - Every sample matches the expected values and reset rebases the max-usage
  *   counters to the current usage.
  *
+ * @testid{TSPEC-OBJCORE-029}
+ * @draft
  * @see k_obj_core_stats_raw()
  * @see k_obj_core_stats_query()
  *      k_obj_core_stats_reset()

@@ -54,6 +54,8 @@ static void thread_entry_delay(void *p1, void *p2, void *p3)
  * Expected result:
  * - The thread observes exactly the parameters that were passed to it.
  *
+ * @testid{TSPEC-THREADS-054}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1
  * @verifies ZEP-SRS-1-15
@@ -86,6 +88,8 @@ ZTEST_USER(threads_lifecycle, test_thread_spawn_params)
  * Expected result:
  * - The thread runs and reports the priority it was created with.
  *
+ * @testid{TSPEC-THREADS-055}
+ * @draft
  * @see k_thread_create()
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-1
@@ -119,6 +123,8 @@ ZTEST(threads_lifecycle, test_thread_spawn_priority)
  * Expected result:
  * - The sentinel is untouched, so the thread had not run yet.
  *
+ * @testid{TSPEC-THREADS-056}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1
  * @verifies ZEP-SRS-1-5
@@ -158,6 +164,8 @@ ZTEST_USER(threads_lifecycle, test_thread_spawn_delay)
  * Expected result:
  * - Yielding does not run the thread; k_thread_start() does.
  *
+ * @testid{TSPEC-THREADS-057}
+ * @draft
  * @see k_thread_create()
  * @see k_thread_start()
  * @verifies ZEP-SRS-1-1
@@ -201,6 +209,8 @@ ZTEST(threads_lifecycle, test_thread_spawn_forever)
  * Expected result:
  * - The second start does nothing, so the value stays as it was reset.
  *
+ * @testid{TSPEC-THREADS-058}
+ * @draft
  * @see k_thread_start()
  * @verifies ZEP-SRS-1-1
  * @verifies ZEP-SRS-1-14
@@ -252,6 +262,8 @@ static void user_start_thread(void *p1, void *p2, void *p3)
  * Expected result:
  * - The started thread runs and writes its value.
  *
+ * @testid{TSPEC-THREADS-059}
+ * @draft
  * @see k_thread_start()
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-14

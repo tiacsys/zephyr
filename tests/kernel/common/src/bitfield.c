@@ -50,6 +50,8 @@
  * - Every set/clear/test reflects the expected bit value and every test-and-modify
  *   call reports the correct previous state.
  *
+ * @testid{TSPEC-COMMON-013}
+ * @draft
  * @see sys_set_bit()
  * @verifies ZEP-SRS-19-1
  */

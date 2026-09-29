@@ -62,6 +62,8 @@ static void offload_function(const void *param)
  * Expected result:
  * - The sentinel global equals the value passed to irq_offload().
  *
+ * @testid{TSPEC-COMMON-068}
+ * @draft
  * @see irq_offload()
  * @verifies ZEP-SRS-7-13
  */
@@ -141,6 +143,8 @@ static void offload_thread_fn(void *p0, void *p1, void *p2)
  * Expected result:
  * - Both the timer handler and the nested offload handler report having executed.
  *
+ * @testid{TSPEC-COMMON-069}
+ * @draft
  * @see irq_offload()
  * @verifies ZEP-SRS-7-13
  */

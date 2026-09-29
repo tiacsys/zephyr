@@ -95,6 +95,9 @@ static void thread_handler(void *p1, void *p2, void *p3)
  * @details Create 3 threads of priority -2, -1 and 0.
  * Yield the main thread which is cooperative. Check
  * if all the threads gets executed.
+ *
+ * @testid{TSPEC-SCHED-013}
+ * @draft
  * @verifies ZEP-SRS-2-14
  * @verifies ZEP-SRS-2-15
  */
@@ -124,6 +127,9 @@ ZTEST(threads_scheduling, test_yield_cooperative)
  * Check if all the threads gets executed.
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-014}
+ * @draft
  * @verifies ZEP-SRS-2-14
  */
 ZTEST(threads_scheduling, test_sleep_cooperative)
@@ -161,6 +167,8 @@ ZTEST(threads_scheduling, test_sleep_cooperative)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-015}
+ * @draft
  * @see k_busy_wait()
  * @verifies ZEP-SRS-2-14
  * @verifies ZEP-SRS-28-13
@@ -190,6 +198,8 @@ ZTEST(threads_scheduling, test_busy_wait_cooperative)
  * Now, wake up the -1 priority thread and check if it starts
  * executing.
  *
+ * @testid{TSPEC-SCHED-016}
+ * @draft
  * @see k_wakeup()
  *
  * @ingroup tests_kernel_sched
@@ -230,6 +240,8 @@ static void coop_thread(void *p1, void *p2, void *p3)
  * it wait for semaphore. Then calls k_wakeup(). The k_wakeup()
  * call should return gracefully without waking up the thread
  *
+ * @testid{TSPEC-SCHED-017}
+ * @draft
  * @see k_wakeup()
  *
  * @ingroup tests_kernel_sched
@@ -269,6 +281,9 @@ ZTEST(threads_scheduling, test_pending_thread_wakeup)
  * with equal priorities are executed in time slice.
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-018}
+ * @draft
  * @verifies ZEP-SRS-2-11
  */
 ZTEST(threads_scheduling, test_time_slicing_preemptible)
@@ -306,6 +321,8 @@ ZTEST(threads_scheduling, test_time_slicing_preemptible)
  * Also run k_busy_wait() for 5 secs and check if other threads
  * are not executed at that time.
  *
+ * @testid{TSPEC-SCHED-019}
+ * @draft
  * @see k_busy_wait()
  *
  * @ingroup tests_kernel_sched
@@ -342,6 +359,9 @@ ZTEST(threads_scheduling, test_time_slicing_disable_preemptible)
  * have executed.
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-020}
+ * @draft
  * @verifies ZEP-SRS-2-16
  */
 ZTEST(threads_scheduling, test_lock_preemptible)
@@ -375,6 +395,8 @@ ZTEST(threads_scheduling, test_lock_preemptible)
  * that the threads are not executed. Call k_sched_unlock()
  * and check if the threads have executed.
  *
+ * @testid{TSPEC-SCHED-021}
+ * @draft
  * @see k_sched_lock(), k_sched_unlock()
  *
  * @ingroup tests_kernel_sched
@@ -413,6 +435,8 @@ ZTEST(threads_scheduling, test_unlock_preemptible)
  * cooperative thread haven't executed.  Unlock it again to see the
  * thread have executed this time.
  *
+ * @testid{TSPEC-SCHED-022}
+ * @draft
  * @see k_sched_lock(), k_sched_unlock()
  *
  * @ingroup tests_kernel_sched
@@ -463,6 +487,8 @@ ZTEST(threads_scheduling, test_unlock_nested_sched_lock)
  * call k_wakeup(), even the thread is not in sleep state neither
  * in pending state
  *
+ * @testid{TSPEC-SCHED-023}
+ * @draft
  * @see k_wakeup()
  *
  * @ingroup tests_kernel_sched

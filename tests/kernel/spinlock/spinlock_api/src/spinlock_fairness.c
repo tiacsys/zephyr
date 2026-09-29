@@ -119,6 +119,8 @@ static void test_init(void)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-009}
+ * @draft
  * @see k_spin_lock(), k_spin_unlock()
  */
 ZTEST(spinlock, test_spinlock_fairness)

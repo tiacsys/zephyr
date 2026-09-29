@@ -61,6 +61,9 @@ static void fault_inside_printk(void *p1, void *p2, void *p3)
  * the fault handler.
  *
  * @ingroup kernel_fatal_tests
+ *
+ * @testid{TSPEC-FATAL-017}
+ * @draft
  */
 ZTEST(printk_reentrancy, test_fault_inside_printk)
 {

@@ -51,6 +51,9 @@ uint32_t timeout(uint64_t prev, uint64_t now)
  * 64-bit cycle count.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-SYSTIMER-001}
+ * @draft
  * @see k_cycle_get_64()
  * @verifies ZEP-SRS-28-6
  */

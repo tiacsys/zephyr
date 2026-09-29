@@ -184,6 +184,9 @@ void regression_thread(void *arg1, void *arg2, void *arg3)
  * from an interrupt service routine.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-001}
+ * @draft
  * @see k_work_queue_start()
  * @verifies ZEP-SRS-38-12
  */

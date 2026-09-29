@@ -431,6 +431,8 @@ void scenario_entry(void *stack_obj, size_t obj_size, size_t reported_size,
  * - Every stack reports the size and alignment its declaration implies, and a
  *   thread can write the whole buffer without faulting.
  *
+ * @testid{TSPEC-THREADS-083}
+ * @draft
  * @see K_THREAD_STACK_DEFINE()
  * @see K_KERNEL_STACK_DEFINE()
  * @see K_THREAD_STACK_SIZEOF()
@@ -530,6 +532,8 @@ void no_op_entry(void *p1, void *p2, void *p3)
  * - The query succeeds and the idle thread stack still has unused space, so
  *   the cleanup did not overflow it.
  *
+ * @testid{TSPEC-THREADS-084}
+ * @draft
  * @see k_thread_stack_space_get()
  */
 ZTEST(userspace_thread_stack, test_thread_stack_idle_no_overflow)

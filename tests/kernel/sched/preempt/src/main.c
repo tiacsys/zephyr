@@ -318,6 +318,8 @@ void worker(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-006}
+ * @draft
  * @see k_wakeup()
  * @see k_sched_lock()
  * @verifies ZEP-SRS-2-4

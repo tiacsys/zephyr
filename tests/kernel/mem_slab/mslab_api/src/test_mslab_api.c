@@ -214,6 +214,9 @@ static void helper_thread(void *p0, void *p1, void *p2)
  * is 0 and free blocks is equal to number of blocks initialized.
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-002}
+ * @draft
  * @verifies ZEP-SRS-9-13
  * @verifies ZEP-SRS-9-17
  */
@@ -238,6 +241,8 @@ ZTEST(mslab_api, test_mslab_kinit)
  *
  * @ingroup kernel_memory_slab_tests
  *
+ * @testid{TSPEC-SLAB-003}
+ * @draft
  * @see k_mem_slab_init(), k_mem_slab_alloc(), k_mem_slab_free()
  * @verifies ZEP-SRS-9-2
  */
@@ -283,6 +288,9 @@ ZTEST(mslab_api, test_mslab_object)
  * is 0 and free blocks is equal to number of blocks initialized.
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-004}
+ * @draft
  * @verifies ZEP-SRS-9-12
  * @verifies ZEP-SRS-9-17
  */
@@ -299,6 +307,9 @@ ZTEST(mslab_api, test_mslab_kdefine)
  * with the expected block size, block count, and type alignment.
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-005}
+ * @draft
  * @verifies ZEP-SRS-9-12
  */
 ZTEST(mslab_api, test_mslab_kdefine_type)
@@ -311,6 +322,9 @@ ZTEST(mslab_api, test_mslab_kdefine_type)
  * @brief Verify alloc and free of blocks from mem_slab
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-006}
+ * @draft
  * @verifies ZEP-SRS-9-14
  * @verifies ZEP-SRS-9-16
  */
@@ -328,6 +342,9 @@ ZTEST(mslab_api, test_mslab_alloc_free_thread)
  * and free them.
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-007}
+ * @draft
  * @verifies ZEP-SRS-9-14
  */
 ZTEST(mslab_api, test_mslab_alloc_align)
@@ -351,6 +368,9 @@ ZTEST(mslab_api, test_mslab_alloc_align)
  * was made and return of -EAGAIN.
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-008}
+ * @draft
  * @verifies ZEP-SRS-9-14
  * @verifies ZEP-SRS-9-15
  */
@@ -373,6 +393,9 @@ ZTEST(mslab_api, test_mslab_alloc_timeout)
  * return value -ENOMEM. It also checks the allocation with
  * timeout. Again checks for used block and free blocks
  * number using @see k_mem_slab_num_used_get() and
+ *
+ * @testid{TSPEC-SLAB-009}
+ * @draft
  * @see k_mem_slab_num_free_get().
  *
  * @ingroup kernel_memory_slab_tests
@@ -394,6 +417,9 @@ ZTEST(mslab_api, test_mslab_used_get)
  * a memory block until helper thread free one.
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-010}
+ * @draft
  * @verifies ZEP-SRS-9-14
  * @verifies ZEP-SRS-9-15
  */

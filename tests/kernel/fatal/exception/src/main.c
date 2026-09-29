@@ -343,6 +343,8 @@ static void run_crash_thread(k_thread_entry_t entry, bool abort)
  * - The handler is invoked with K_ERR_CPU_EXCEPTION and the offending thread is
  *   terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-001}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1
@@ -372,6 +374,8 @@ ZTEST(fatal_exception, test_fatal_cpu_exception)
  * - The handler is invoked with K_ERR_CPU_EXCEPTION and the offending thread is
  *   terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-002}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1
@@ -402,6 +406,8 @@ ZTEST(fatal_exception, test_fatal_cpu_exception_extended)
  * - The handler is invoked with K_ERR_KERNEL_OOPS and the offending thread is
  *   terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-003}
+ * @draft
  * @see k_oops()
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
@@ -433,6 +439,8 @@ ZTEST(fatal_exception, test_fatal_oops)
  * - The handler is invoked with K_ERR_KERNEL_PANIC and the offending thread is
  *   terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-004}
+ * @draft
  * @see k_panic()
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
@@ -465,6 +473,8 @@ ZTEST(fatal_exception, test_fatal_panic)
  * - The handler is invoked with K_ERR_KERNEL_PANIC and the offending thread is
  *   terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-005}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-2
@@ -495,6 +505,8 @@ ZTEST(fatal_exception, test_fatal_assert_fail)
  * - The handler is invoked with the exact reason code supplied and the
  *   offending thread is terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-006}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-2
@@ -523,6 +535,8 @@ ZTEST(fatal_exception, test_fatal_except_reason_positive)
  * - The handler is invoked with the exact reason code supplied and the
  *   offending thread is terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-007}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-2
@@ -553,6 +567,8 @@ ZTEST(fatal_exception, test_fatal_except_reason_negative)
  * - The fatal handler is invoked with K_ERR_STACK_CHK_FAIL and the offending
  *   thread is terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-008}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-2
@@ -579,6 +595,8 @@ ZTEST(fatal_exception, test_fatal_stack_sentinel_timer)
  * - The fatal handler is invoked with K_ERR_STACK_CHK_FAIL and the offending
  *   thread is terminated (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-009}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-2
@@ -610,6 +628,8 @@ ZTEST(fatal_exception, test_fatal_stack_sentinel_swap)
  * - Both overflows fault into the fatal handler and terminate the offending
  *   thread (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-010}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1
@@ -641,6 +661,8 @@ ZTEST(fatal_exception, test_fatal_stack_hw_overflow)
  * - Both overflows fault into the fatal handler and terminate the offending
  *   thread (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-011}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1
@@ -673,6 +695,8 @@ ZTEST(fatal_exception, test_fatal_stack_hw_overflow_fpu)
  * - Both overflows fault into the fatal handler and terminate the offending
  *   thread (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-012}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1
@@ -714,6 +738,8 @@ ZTEST(fatal_exception, test_fatal_stack_hw_overflow_user)
  * - Both overflows fault into the fatal handler and terminate the offending
  *   thread (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-013}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1
@@ -746,6 +772,8 @@ ZTEST(fatal_exception, test_fatal_stack_hw_overflow_user_priv)
  * - Both overflows fault into the fatal handler and terminate the offending
  *   thread (rv is not TC_FAIL).
  *
+ * @testid{TSPEC-FATAL-014}
+ * @draft
  * @see k_sys_fatal_error_handler()
  * @ingroup kernel_fatal_tests
  * @verifies ZEP-SRS-16-1

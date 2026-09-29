@@ -73,6 +73,9 @@ static void usr_fp_thread_entry_2(void *p1, void *p2, void *p3)
  * returns -ENOTSUP.
  *
  * @ingroup kernel_fpsharing_tests
+ *
+ * @testid{TSPEC-FPU-001}
+ * @draft
  * @verifies ZEP-SRS-29-1
  * @verifies ZEP-SRS-29-3
  * @verifies ZEP-SRS-29-5
@@ -144,6 +147,9 @@ ZTEST(k_float_disable, test_k_float_disable_common)
  * supported, -ENOTSUP otherwise).
  *
  * @ingroup kernel_fpsharing_tests
+ *
+ * @testid{TSPEC-FPU-002}
+ * @draft
  * @verifies ZEP-SRS-29-3
  * @verifies ZEP-SRS-29-5
  */
@@ -312,6 +318,8 @@ static void sup_fp_thread_entry(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_fpsharing_tests
  *
+ * @testid{TSPEC-FPU-003}
+ * @draft
  * @see k_float_disable()
  * @verifies ZEP-SRS-29-1
  * @verifies ZEP-SRS-29-4

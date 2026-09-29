@@ -124,6 +124,8 @@ static void thread_entry(void *p1, void *p2, void *p3)
  * - The thread runs at the defined priority and receives the defined
  *   parameters.
  *
+ * @testid{TSPEC-THREADS-079}
+ * @draft
  * @see K_THREAD_DEFINE()
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-13
@@ -166,6 +168,8 @@ ZTEST_USER(thread_init, test_thread_init_kdefine_preempt)
  * - The thread runs at the defined cooperative priority and receives the
  *   defined parameters.
  *
+ * @testid{TSPEC-THREADS-080}
+ * @draft
  * @see K_THREAD_DEFINE()
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-13
@@ -210,6 +214,8 @@ ZTEST_USER(thread_init, test_thread_init_kdefine_coop)
  * - Creation succeeds and the thread runs at the requested priority with the
  *   requested parameters.
  *
+ * @testid{TSPEC-THREADS-081}
+ * @draft
  * @see k_thread_create()
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-1
@@ -267,6 +273,8 @@ ZTEST_USER(thread_init, test_thread_init_create_preempt)
  *   and it runs at the requested cooperative priority with the requested
  *   parameters.
  *
+ * @testid{TSPEC-THREADS-082}
+ * @draft
  * @see k_thread_create()
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-1

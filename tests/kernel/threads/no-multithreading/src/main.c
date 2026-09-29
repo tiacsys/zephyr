@@ -31,6 +31,8 @@
  * - The uptime advances, and the elapsed time is within 2 ms of the 10 ms
  *   that were requested.
  *
+ * @testid{TSPEC-THREADS-010}
+ * @draft
  * @see k_busy_wait()
  * @see k_uptime_get()
  * @verifies ZEP-SRS-28-13
@@ -90,6 +92,8 @@ K_TIMER_DEFINE(timer, timeout_handler, NULL);
  * - The handler does not run while interrupts are locked.
  * - The handler runs once interrupts are unlocked.
  *
+ * @testid{TSPEC-THREADS-011}
+ * @draft
  * @see irq_lock()
  * @see irq_unlock()
  * @see k_timer_start()
@@ -154,6 +158,8 @@ ZTEST(no_multithreading, test_no_multithreading_irq_lock)
  * - At least the requested 10 ms elapsed, and no more than one tick plus a
  *   small measurement margin beyond it.
  *
+ * @testid{TSPEC-THREADS-012}
+ * @draft
  * @see k_cpu_idle()
  * @see k_timer_start()
  * @verifies ZEP-SRS-13-14
@@ -225,6 +231,8 @@ ZTEST(no_multithreading, test_no_multithreading_cpu_idle)
  * Expected result:
  * - The variable holds the value it was initialized with.
  *
+ * @testid{TSPEC-THREADS-013}
+ * @draft
  * @see Z_THREAD_LOCAL
  */
 ZTEST(no_multithreading, test_no_multithreading_tls)
@@ -276,6 +284,8 @@ FOR_EACH(SYS_INIT_CREATE, (;), PRE_KERNEL_1, PRE_KERNEL_2, POST_KERNEL);
  * Expected result:
  * - All three init functions ran, in level order, leaving the counter at 3.
  *
+ * @testid{TSPEC-THREADS-014}
+ * @draft
  * @see SYS_INIT()
  * @verifies ZEP-SRS-1-22
  */

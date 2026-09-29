@@ -71,6 +71,8 @@ static void tmslab_api(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memory_slab_tests
  *
+ * @testid{TSPEC-SLAB-015}
+ * @draft
  * @verifies ZEP-SRS-9-14
  * @verifies ZEP-SRS-9-16
  */

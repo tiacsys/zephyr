@@ -229,6 +229,9 @@ static void tThread_waiter(void *p1, void *p2, void *p3)
  * - Both operations succeed without any prior k_mutex_init() call.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-016}
+ * @draft
  * @see K_MUTEX_DEFINE
  * @verifies ZEP-SRS-6-2
  */
@@ -254,6 +257,9 @@ ZTEST(mutex_api, test_mutex_define)
  * - Initialization returns 0 and the mutex is immediately usable.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-017}
+ * @draft
  * @see k_mutex_init()
  * @verifies ZEP-SRS-6-3
  */
@@ -273,6 +279,9 @@ ZTEST(mutex_api, test_mutex_init)
  * run-time initialized mutex and a compile-time K_MUTEX_DEFINE() mutex.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-018}
+ * @draft
  * @see k_mutex_init()
  * @see k_mutex_lock()
  * @see k_mutex_unlock()
@@ -299,6 +308,9 @@ ZTEST_USER(mutex_api_1cpu, test_mutex_reent_lock_forever)
  * return without blocking. Exercised on a run-time and a K_MUTEX_DEFINE() mutex.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-019}
+ * @draft
  * @see k_mutex_lock()
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-6-1
@@ -321,6 +333,9 @@ ZTEST_USER(mutex_api, test_mutex_reent_lock_no_wait)
  * the timeout elapses without the mutex being released.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-020}
+ * @draft
  * @see k_mutex_lock()
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-6-1
@@ -344,6 +359,9 @@ ZTEST_USER(mutex_api, test_mutex_reent_lock_timeout_fail)
  * releases the mutex before the timeout elapses.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-021}
+ * @draft
  * @see k_mutex_lock()
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-6-1
@@ -367,6 +385,9 @@ ZTEST_USER(mutex_api_1cpu, test_mutex_reent_lock_timeout_pass)
  * K_MUTEX_DEFINE() mutex.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-022}
+ * @draft
  * @see k_mutex_init()
  * @see k_mutex_lock()
  * @see k_mutex_unlock()
@@ -389,6 +410,9 @@ ZTEST_USER(mutex_api_1cpu, test_mutex_lock_unlock)
  * succeed and waiters will be unblocked only when the number of locks
  * reaches zero.
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-023}
+ * @draft
  * @verifies ZEP-SRS-6-1
  * @verifies ZEP-SRS-6-9
  */
@@ -443,6 +467,9 @@ ZTEST_USER(mutex_api, test_mutex_recursive)
  * - case 3. When priority T2 > T3 > T1, priority inheritance happened but T2
  *   wait for timeout and T3 got the mutex.
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-024}
+ * @draft
  * @verifies ZEP-SRS-6-1
  * @verifies ZEP-SRS-6-11
  * @verifies ZEP-SRS-6-12
@@ -564,6 +591,8 @@ static void tThread_mutex_lock_should_fail(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_mutex_tests
  *
+ * @testid{TSPEC-MUTEX-025}
+ * @draft
  * @see k_mutex_lock()
  * @verifies ZEP-SRS-6-7
  * @verifies ZEP-SRS-6-12

@@ -49,6 +49,8 @@ ZTEST(printk, test_printk)
  * - Each extracted field equals its corresponding KERNEL_VERSION_* /
  *   KERNEL_PATCHLEVEL build-time constant.
  *
+ * @testid{TSPEC-COMMON-071}
+ * @draft
  * @see sys_kernel_version_get()
  */
 ZTEST(common, test_version)
@@ -84,6 +86,8 @@ ZTEST(common, test_version)
  * - The in-bounds index is returned as-is (17); the out-of-bounds index is
  *   clamped to 0 when userspace is enabled.
  *
+ * @testid{TSPEC-COMMON-072}
+ * @draft
  * @see k_array_index_sanitize()
  */
 ZTEST(common, test_bounds_check_mitigation)

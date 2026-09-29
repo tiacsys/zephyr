@@ -201,6 +201,8 @@ static void helper_thread(void *p1, void *p2, void *p3)
  * - Uncancelled sleeps elapse for the requested duration (within slop).
  * - Every k_wakeup() cancels the sleep promptly and test_failure stays false.
  *
+ * @testid{TSPEC-SLEEP-001}
+ * @draft
  * @see k_sleep()
  * @see k_wakeup()
  * @see k_uptime_get_32()
@@ -284,6 +286,8 @@ static void forever_thread_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - The thread stays asleep until woken and k_sleep() returns K_TICKS_FOREVER.
  *
+ * @testid{TSPEC-SLEEP-002}
+ * @draft
  * @see k_sleep()
  * @see k_wakeup()
  * @verifies ZEP-SRS-28-8
@@ -341,6 +345,8 @@ static void early_wake_thread_entry(void *p1, void *p2, void *p3)
  * - k_sleep() returns a value greater than zero and less than the requested
  *   10000 ms, i.e. it reports the time that was still remaining.
  *
+ * @testid{TSPEC-SLEEP-003}
+ * @draft
  * @see k_sleep()
  * @see k_wakeup()
  * @verifies ZEP-SRS-28-12

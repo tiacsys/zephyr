@@ -41,6 +41,9 @@ static const char *tag(void)
  * advancing monotonically without regressing or overflowing.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-036}
+ * @draft
  * @see k_uptime_get_32()
  * @see sys_clock_tick_get()
  * @verifies ZEP-SRS-28-1

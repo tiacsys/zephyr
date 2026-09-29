@@ -61,6 +61,8 @@ static void threads_suspend_resume(int prio)
  * Expected result:
  * - The thread does not run while suspended and does run once resumed.
  *
+ * @testid{TSPEC-THREADS-060}
+ * @draft
  * @see k_thread_suspend()
  * @see k_thread_resume()
  * @verifies ZEP-SRS-1-3
@@ -92,6 +94,8 @@ ZTEST(threads_lifecycle_1cpu, test_thread_suspend_resume_coop)
  * Expected result:
  * - The thread does not run while suspended and does run once resumed.
  *
+ * @testid{TSPEC-THREADS-061}
+ * @draft
  * @see k_thread_suspend()
  * @see k_thread_resume()
  * @verifies ZEP-SRS-1-3
@@ -133,6 +137,8 @@ void suspend_myself(void *arg0, void *arg1, void *arg2)
  * - The flag stays clear while the thread is suspended and is set once it is
  *   resumed, so the suspend switched away before the following statement.
  *
+ * @testid{TSPEC-THREADS-062}
+ * @draft
  * @see k_thread_suspend()
  * @verifies ZEP-SRS-1-3
  */
@@ -186,6 +192,8 @@ void sleep_suspended(void *arg0, void *arg1, void *arg2)
  * Expected result:
  * - The thread does not wake up, so the flag stays clear.
  *
+ * @testid{TSPEC-THREADS-063}
+ * @draft
  * @see k_thread_suspend()
  * @see k_sleep()
  * @verifies ZEP-SRS-1-3
@@ -231,6 +239,8 @@ ZTEST(threads_lifecycle, test_thread_suspend_timeout)
  * Expected result:
  * - The thread state is unchanged by the resume.
  *
+ * @testid{TSPEC-THREADS-064}
+ * @draft
  * @see k_thread_resume()
  * @see k_thread_state_str()
  * @verifies ZEP-SRS-1-4

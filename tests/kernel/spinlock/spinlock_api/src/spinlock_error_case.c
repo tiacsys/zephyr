@@ -92,6 +92,8 @@ void assert_post_action(const char *file, unsigned int line)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-005}
+ * @draft
  * @see k_spin_lock()
  */
 ZTEST(spinlock, test_spinlock_no_recursive)
@@ -113,6 +115,8 @@ ZTEST(spinlock, test_spinlock_no_recursive)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-006}
+ * @draft
  * @see k_spin_unlock()
  */
 ZTEST(spinlock, test_spinlock_unlock_error)
@@ -132,6 +136,8 @@ ZTEST(spinlock, test_spinlock_unlock_error)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-007}
+ * @draft
  * @see k_spin_release()
  */
 ZTEST(spinlock, test_spinlock_release_error)
@@ -153,6 +159,8 @@ ZTEST(spinlock, test_spinlock_release_error)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-008}
+ * @draft
  * @see k_spin_unlock()
  */
 ZTEST(spinlock, test_spinlock_lock_time_limit)

@@ -176,6 +176,8 @@ void condvar_wait_wake_task(void *p1, void *p2, void *p3)
  *   condvar_wait_wake_task()).
  * - k_condvar_signal() returns 0.
  *
+ * @testid{TSPEC-CONDVAR-001}
+ * @draft
  * @see k_condvar_wait()
  * @see k_condvar_signal()
  * @verifies ZEP-SRS-21-1
@@ -220,6 +222,8 @@ ZTEST_USER(condvar_tests, test_condvar_wait_forever_wake)
  * - k_condvar_wait() returns 0 (verified in condvar_wait_wake_task()).
  * - k_condvar_signal() returns 0.
  *
+ * @testid{TSPEC-CONDVAR-002}
+ * @draft
  * @see k_condvar_wait()
  * @see k_condvar_signal()
  * @verifies ZEP-SRS-21-6
@@ -263,6 +267,8 @@ ZTEST_USER(condvar_tests, test_condvar_wake_before_timeout)
  * Expected result:
  * - k_condvar_wait() returns -EAGAIN (verified in condvar_wait_task()).
  *
+ * @testid{TSPEC-CONDVAR-003}
+ * @draft
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-6
  * @verifies ZEP-SRS-21-7
@@ -301,6 +307,8 @@ ZTEST_USER(condvar_tests, test_condvar_wait_timeout)
  *   still blocked). A return of 0 would mean a spurious wakeup let the helper
  *   terminate, which condvar_wait_task() also catches with zassert_unreachable().
  *
+ * @testid{TSPEC-CONDVAR-004}
+ * @draft
  * @see k_condvar_wait()
  * @see k_thread_join()
  * @verifies ZEP-SRS-21-5
@@ -338,6 +346,8 @@ ZTEST_USER(condvar_tests, test_condvar_wait_forever)
  * Expected result:
  * - k_condvar_wait() returns -EAGAIN (verified in condvar_wait_task()).
  *
+ * @testid{TSPEC-CONDVAR-005}
+ * @draft
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-5
  */
@@ -369,6 +379,8 @@ ZTEST_USER(condvar_tests, test_condvar_wait_nowait)
  * - k_condvar_wait() returns -EAGAIN (verified in condvar_wait_wake_task()).
  * - k_condvar_signal() returns 0 with no waiter present.
  *
+ * @testid{TSPEC-CONDVAR-006}
+ * @draft
  * @see k_condvar_wait()
  * @see k_condvar_signal()
  * @verifies ZEP-SRS-21-5
@@ -414,6 +426,8 @@ ZTEST_USER(condvar_tests, test_condvar_nowait_returns_eagain)
  * @note This is a kernel-mode test (ZTEST, not ZTEST_USER) because signalling is
  *       performed from an ISR.
  *
+ * @testid{TSPEC-CONDVAR-007}
+ * @draft
  * @see k_condvar_wait()
  * @see k_condvar_signal()
  * @verifies ZEP-SRS-21-9
@@ -450,6 +464,8 @@ ZTEST(condvar_tests, test_condvar_wait_forever_wake_from_isr)
  * - k_condvar_broadcast() returns TOTAL_THREADS_WAITING.
  * - Each k_condvar_wait() returns 0 (verified in condvar_wait_wake_task()).
  *
+ * @testid{TSPEC-CONDVAR-008}
+ * @draft
  * @see k_condvar_broadcast()
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-4
@@ -555,6 +571,8 @@ void condvar_multiple_wake_task(void *p1, void *p2, void *p3)
  *       condvar_multiple_wake_task() always takes its k_condvar_broadcast()
  *       branch, so its k_condvar_signal() path is not exercised here.
  *
+ * @testid{TSPEC-CONDVAR-009}
+ * @draft
  * @see k_condvar_signal()
  * @see k_condvar_broadcast()
  * @verifies ZEP-SRS-21-4
@@ -630,6 +648,8 @@ static void cond_init_null(void *p1, void *p2, void *p3)
  * - A valid fault is taken at k_condvar_init(NULL); the guard ztest_test_fail()
  *   in cond_init_null() is never reached.
  *
+ * @testid{TSPEC-CONDVAR-010}
+ * @draft
  * @see k_condvar_init()
  * @verifies ZEP-SRS-21-1
  */
@@ -701,6 +721,8 @@ static void cond_wait_null(void *p1, void *p2, void *p3)
  * - A valid fault is taken at k_condvar_signal(NULL); the guard ztest_test_fail()
  *   in cond_signal_null() is never reached.
  *
+ * @testid{TSPEC-CONDVAR-011}
+ * @draft
  * @see k_condvar_signal()
  * @verifies ZEP-SRS-21-3
  */
@@ -726,6 +748,8 @@ ZTEST_USER(condvar_tests, test_condvar_signal_null)
  * - A valid fault is taken at k_condvar_broadcast(NULL); the guard
  *   ztest_test_fail() in cond_broadcast_null() is never reached.
  *
+ * @testid{TSPEC-CONDVAR-012}
+ * @draft
  * @see k_condvar_broadcast()
  * @verifies ZEP-SRS-21-4
  */
@@ -753,6 +777,8 @@ ZTEST_USER(condvar_tests, test_condvar_broadcast_null)
  * - A valid fault is taken at k_condvar_wait(NULL, NULL, ...); the guard
  *   ztest_test_fail() in cond_wait_null() is never reached.
  *
+ * @testid{TSPEC-CONDVAR-013}
+ * @draft
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-5
  */
@@ -867,6 +893,8 @@ void _condvar_usecase(long multi)
  *   (2 x TCOUNT) plus 125 added by the watcher after it is released
  *   (verified by zassert_equal() in _condvar_usecase()).
  *
+ * @testid{TSPEC-CONDVAR-014}
+ * @draft
  * @see k_condvar_signal()
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-3
@@ -890,6 +918,8 @@ ZTEST_USER(condvar_tests, test_condvar_usecase_signal)
  * Expected result:
  * - Final count equals 145 (verified by zassert_equal() in _condvar_usecase()).
  *
+ * @testid{TSPEC-CONDVAR-015}
+ * @draft
  * @see k_condvar_broadcast()
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-4
@@ -942,6 +972,8 @@ static void *condvar_tests_setup(void)
  * - k_mutex_unlock() succeeds; a regression that failed to re-lock the mutex
  *   would make it return -EPERM (mutex not locked by the calling thread).
  *
+ * @testid{TSPEC-CONDVAR-016}
+ * @draft
  * @see k_condvar_wait()
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-21-7
@@ -1048,6 +1080,8 @@ static void recursive_mtx_contender(void *p1, void *p2, void *p3)
  * - Exactly one waiter runs past k_condvar_wait() (woken_count == 1); the rest
  *   remain blocked until a later broadcast drains them.
  *
+ * @testid{TSPEC-CONDVAR-017}
+ * @draft
  * @see k_condvar_signal()
  * @see k_condvar_broadcast()
  * @verifies ZEP-SRS-21-3
@@ -1097,6 +1131,8 @@ ZTEST_USER(condvar_tests, test_condvar_signal_wakes_one)
  * @note Skipped when CONFIG_MP_MAX_NUM_CPUS > 1: with multiple CPUs waiters can
  *       run concurrently, so a strict wakeup order is not guaranteed.
  *
+ * @testid{TSPEC-CONDVAR-018}
+ * @draft
  * @see k_condvar_signal()
  * @verifies ZEP-SRS-21-3
  * @verifies ZEP-SRS-21-9
@@ -1164,6 +1200,8 @@ ZTEST_USER(condvar_tests, test_condvar_signal_wakes_highest_priority)
  * - k_condvar_wait() returns -EAGAIN.
  * - k_mutex_unlock() succeeds (returns -EPERM if ownership was lost).
  *
+ * @testid{TSPEC-CONDVAR-019}
+ * @draft
  * @see k_condvar_wait()
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-21-5
@@ -1197,6 +1235,8 @@ ZTEST(condvar_tests, test_condvar_wait_nowait_keeps_mutex)
  * - k_condvar_wait() returns 0 (signaled).
  * - k_mutex_unlock() succeeds (returns -EPERM if the mutex was not re-locked).
  *
+ * @testid{TSPEC-CONDVAR-020}
+ * @draft
  * @see k_condvar_wait()
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-21-9
@@ -1237,6 +1277,8 @@ ZTEST(condvar_tests, test_condvar_wait_signaled_keeps_mutex)
  * - k_condvar_signal()/k_condvar_broadcast() with no waiter return 0.
  * - A blocked k_condvar_wait() is released by a signal and returns 0.
  *
+ * @testid{TSPEC-CONDVAR-021}
+ * @draft
  * @see K_CONDVAR_DEFINE
  * @see k_condvar_wait()
  * @verifies ZEP-SRS-21-2
@@ -1277,6 +1319,8 @@ ZTEST(condvar_tests, test_condvar_static_define)
  * - k_condvar_signal() returns 0.
  * - k_condvar_broadcast() returns 0.
  *
+ * @testid{TSPEC-CONDVAR-022}
+ * @draft
  * @see k_condvar_signal()
  * @see k_condvar_broadcast()
  * @verifies ZEP-SRS-21-3
@@ -1314,6 +1358,8 @@ ZTEST_USER(condvar_tests, test_condvar_wake_no_waiters)
  *       to fully release a recursively locked mutex, this expectation must be
  *       updated (the contender would then succeed).
  *
+ * @testid{TSPEC-CONDVAR-023}
+ * @draft
  * @see k_condvar_wait()
  * @see k_mutex_lock()
  * @verifies ZEP-SRS-21-8

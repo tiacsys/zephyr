@@ -58,6 +58,8 @@ static void func(void *arg1, void *arg2, void *arg3)
  * - Both allocations succeed, the thread runs and sets its flag, and the
  *   stack is freed without error.
  *
+ * @testid{TSPEC-THREADS-005}
+ * @draft
  * @see k_thread_stack_alloc()
  * @see k_object_alloc()
  * @see k_thread_create()
@@ -122,6 +124,8 @@ ZTEST_USER(dynamic_thread_stack, test_dynamic_thread_stack_userspace_dyn_obj)
  * - The pool satisfies every allocation, all threads run, and all stacks are
  *   freed without error.
  *
+ * @testid{TSPEC-THREADS-006}
+ * @draft
  * @see k_thread_stack_alloc()
  * @see k_thread_stack_free()
  * @verifies ZEP-SRS-1-8
@@ -201,6 +205,8 @@ ZTEST(dynamic_thread_stack, test_dynamic_thread_stack_pool)
  * - Every allocation succeeds, all threads run, and all stacks are freed
  *   without error.
  *
+ * @testid{TSPEC-THREADS-007}
+ * @draft
  * @see k_thread_stack_alloc()
  * @see k_thread_stack_free()
  * @verifies ZEP-SRS-1-8
@@ -252,7 +258,12 @@ ZTEST(dynamic_thread_stack, test_dynamic_thread_stack_alloc)
 	}
 }
 
-/** @brief Reject dynamically allocated kernel stacks with overflowing sizes. */
+/**
+ * @brief Reject dynamically allocated kernel stacks with overflowing sizes.
+ *
+ * @testid{TSPEC-THREADS-008}
+ * @draft
+ */
 ZTEST(dynamic_thread_stack, test_dynamic_thread_stack_size_overflow)
 {
 	k_thread_stack_t *stack;
@@ -330,6 +341,8 @@ static void perm_func_violator(void *arg1, void *arg2, void *arg3)
  * - The attempt faults instead of freeing the stack, and the code after it is
  *   never reached.
  *
+ * @testid{TSPEC-THREADS-009}
+ * @draft
  * @see k_thread_stack_free()
  * @see k_thread_stack_alloc()
  * @verifies ZEP-SRS-1-24

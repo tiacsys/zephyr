@@ -131,6 +131,8 @@ static void permission_test(void)
  * - The thread raises a kernel oops on the object it was not granted, and the
  *   end semaphore is never given, so the take times out.
  *
+ * @testid{TSPEC-THREADS-001}
+ * @draft
  * @see k_object_alloc()
  * @see k_object_access_grant()
  */
@@ -165,6 +167,8 @@ ZTEST(thread_dynamic, test_dyn_thread_perms)
  * - At least one thread object is created, the heap allocation succeeds,
  *   and the freed thread index is reused for the new allocation.
  *
+ * @testid{TSPEC-THREADS-002}
+ * @draft
  * @see k_object_alloc()
  * @see k_object_free()
  */
@@ -252,6 +256,8 @@ ZTEST(thread_dynamic, test_dyn_thread_index_recycle)
  * - The allocation succeeds and the dynamic user thread completes the
  *   handshake within the timeout.
  *
+ * @testid{TSPEC-THREADS-003}
+ * @draft
  * @see k_object_alloc()
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1
@@ -288,6 +294,8 @@ ZTEST(thread_dynamic, test_dyn_thread_create_from_kernel)
  * - The allocation succeeds and the dynamic user thread completes the
  *   handshake within the timeout.
  *
+ * @testid{TSPEC-THREADS-004}
+ * @draft
  * @see k_object_alloc()
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1

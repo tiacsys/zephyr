@@ -95,6 +95,8 @@ static void entry_extra2(void *p1, void *p2, void *p3)
  * - The wait queue head is NULL (no waiters).
  * - The set of posted events is 0.
  *
+ * @testid{TSPEC-EVENTS-001}
+ * @draft
  * @see k_event_init()
  *
  * @verifies ZEP-SRS-27-1
@@ -379,6 +381,8 @@ static void drive_reset_on_wait(void)
  *   union of everything posted so far, and each call returns the previous
  *   state of the affected bits.
  *
+ * @testid{TSPEC-EVENTS-002}
+ * @draft
  * @see k_event_post()
  * @see k_event_test()
  *
@@ -425,6 +429,8 @@ ZTEST_USER(events_api, test_event_post)
  * - After each call the stored events (read via k_event_test()) match the
  *   set value exactly, and each call returns the complete previous set.
  *
+ * @testid{TSPEC-EVENTS-003}
+ * @draft
  * @see k_event_set()
  * @see k_event_test()
  *
@@ -471,6 +477,8 @@ ZTEST_USER(events_api, test_event_set)
  *   the prior state only in the masked bits, and each call returns the
  *   previous state of the masked bits.
  *
+ * @testid{TSPEC-EVENTS-004}
+ * @draft
  * @see k_event_set_masked()
  * @see k_event_test()
  *
@@ -535,6 +543,8 @@ ZTEST_USER(events_api, test_event_set_masked)
  *   state of the requested events, and clearing unset events changes
  *   nothing.
  *
+ * @testid{TSPEC-EVENTS-005}
+ * @draft
  * @see k_event_clear()
  * @see k_event_test()
  * @verifies ZEP-SRS-27-7
@@ -596,6 +606,8 @@ ZTEST_USER(events_api, test_k_event_clear)
  *   only the overlapping bits (0x0234), and a matching all-wait returns
  *   exactly the requested bits (0x1234).
  *
+ * @testid{TSPEC-EVENTS-006}
+ * @draft
  * @see k_event_wait()
  * @see k_event_wait_all()
  *
@@ -638,6 +650,8 @@ ZTEST(events_api, test_event_receive_existing)
  * - Each unsatisfied wait returns 0, the timed waits only return once their
  *   timeout has expired.
  *
+ * @testid{TSPEC-EVENTS-007}
+ * @draft
  * @see k_event_wait()
  * @see k_event_wait_all()
  *
@@ -695,6 +709,8 @@ ZTEST_USER(events_api, test_event_wait_timeout)
  *   are reset), unsatisfied waits time out, and satisfied waits wake the
  *   receiver and return the matching events.
  *
+ * @testid{TSPEC-EVENTS-008}
+ * @draft
  * @see k_event_post()
  * @see k_event_wait()
  * @see k_event_wait_all()
@@ -737,6 +753,8 @@ ZTEST(events_api, test_event_reset_on_wait)
  * - Both waiting threads are woken by the single delivery and report
  *   exactly the events that matched their respective wait conditions.
  *
+ * @testid{TSPEC-EVENTS-009}
+ * @draft
  * @see k_event_set()
  * @see k_event_wait()
  * @see k_event_wait_all()
@@ -793,6 +811,8 @@ ZTEST(events_api, test_event_wake_multiple)
  * - Each call returns only the matching bits that were present and removes
  *   them, so re-waiting for already-consumed bits yields 0.
  *
+ * @testid{TSPEC-EVENTS-010}
+ * @draft
  * @see k_event_wait_safe()
  *
  * @verifies ZEP-SRS-27-10
@@ -836,6 +856,8 @@ ZTEST_USER(events_api, test_k_event_wait_safe)
  * - A partial match returns 0 and consumes nothing; a complete match returns
  *   the requested bits and removes them from the object.
  *
+ * @testid{TSPEC-EVENTS-011}
+ * @draft
  * @see k_event_wait_all_safe()
  *
  * @verifies ZEP-SRS-27-11

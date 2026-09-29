@@ -48,6 +48,9 @@ static struct k_timer tm;
  * The ramp is logrithmic up to what amounts to approximately 10 seconds of ticks.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-025}
+ * @draft
  * @see k_timer_start()
  * @verifies ZEP-SRS-4-5
  */

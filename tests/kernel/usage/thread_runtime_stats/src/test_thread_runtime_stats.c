@@ -50,6 +50,9 @@ void busy_loop(uint32_t ticks)
  *    - Idle time should not increase
  *    - current, peak and average cycles should be different
  * @ingroup kernel_thread_tests
+ *
+ * @testid{TSPEC-USAGE-001}
+ * @draft
  * @verifies ZEP-SRS-1-28
  * @verifies ZEP-SRS-1-29
  */
@@ -202,6 +205,9 @@ ZTEST(usage_api, test_all_stats_usage)
 /**
  * @brief Test the k_thread_runtime_stats_enable/disable APIs
  * @ingroup kernel_thread_tests
+ *
+ * @testid{TSPEC-USAGE-002}
+ * @draft
  * @verifies ZEP-SRS-1-34
  */
 ZTEST(usage_api, test_thread_stats_enable_disable)
@@ -283,6 +289,9 @@ ZTEST(usage_api, test_thread_stats_enable_disable)
 #if defined(CONFIG_SCHED_THREAD_USAGE_ANALYSIS) && defined(CONFIG_SCHED_THREAD_USAGE_ALL)
 /**
  * @brief Test the enable/disable APIs on the current thread
+ *
+ * @testid{TSPEC-USAGE-003}
+ * @draft
  */
 ZTEST(usage_api, test_thread_stats_enable_disable_current)
 {
@@ -354,6 +363,9 @@ ZTEST(usage_api, test_thread_stats_enable_disable_current)
 /**
  * @brief Test the k_sys_runtime_stats_enable/disable APIs
  * @ingroup kernel_thread_tests
+ *
+ * @testid{TSPEC-USAGE-004}
+ * @draft
  * @verifies ZEP-SRS-1-34
  */
 ZTEST(usage_api, test_sys_stats_enable_disable)
@@ -480,6 +492,9 @@ void resume_main(struct k_timer *timer)
  * that the contents of the fields guarded by CONFIG_SCHED_THREAD_USAGE
  * are correct.
  * @ingroup kernel_thread_tests
+ *
+ * @testid{TSPEC-USAGE-005}
+ * @draft
  */
 ZTEST(usage_api, test_thread_stats_usage)
 {

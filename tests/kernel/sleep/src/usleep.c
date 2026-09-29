@@ -106,6 +106,8 @@
  *   k_usleep() sleeps for at least the minimal granularity and no longer than
  *   the expected alignment overhead.
  *
+ * @testid{TSPEC-SLEEP-004}
+ * @draft
  * @see k_usleep()
  * @see k_uptime_get()
  * @verifies ZEP-SRS-28-9

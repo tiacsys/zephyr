@@ -71,6 +71,9 @@ static void t_waiter_fn(void *p1, void *p2, void *p3)
  * blocks on mutex_a at a higher priority, which must boost T_owner while it
  * continues to execute concurrently on CPU 1. Releasing the mutex then
  * hands ownership to T_waiter across the same core boundary.
+ *
+ * @testid{TSPEC-MUTEX-031}
+ * @draft
  */
 ZTEST(mutex_smp, test_cross_cpu_priority_boost)
 {

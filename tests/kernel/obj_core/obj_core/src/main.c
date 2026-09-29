@@ -154,6 +154,8 @@ static void common_obj_core_test(uint32_t type_id, const char *str,
  * Expected result:
  * - Both threads are found while alive and absent after being aborted.
  *
+ * @testid{TSPEC-OBJCORE-001}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -227,6 +229,8 @@ ZTEST(obj_core, test_obj_core_thread)
  * Expected result:
  * - Every CPU object core and the kernel object core are found.
  *
+ * @testid{TSPEC-OBJCORE-002}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -270,6 +274,8 @@ ZTEST(obj_core, test_obj_core_system)
  * Expected result:
  * - The registered system memory block object core is found.
  *
+ * @testid{TSPEC-OBJCORE-003}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -300,6 +306,8 @@ ZTEST(obj_core, test_obj_core_sys_mem_block)
  * Expected result:
  * - Both the static and dynamic memory slab object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-004}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -330,6 +338,8 @@ ZTEST(obj_core, test_obj_core_mem_slab)
  * Expected result:
  * - Both the static and dynamic timer object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-005}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -360,6 +370,8 @@ ZTEST(obj_core, test_obj_core_timer)
  * Expected result:
  * - Both the static and dynamic stack object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-006}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -390,6 +402,8 @@ ZTEST(obj_core, test_obj_core_stack)
  * Expected result:
  * - Both the static and dynamic FIFO object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-007}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -420,6 +434,8 @@ ZTEST(obj_core, test_obj_core_fifo)
  * Expected result:
  * - Both the static and dynamic LIFO object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-008}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -450,6 +466,8 @@ ZTEST(obj_core, test_obj_core_lifo)
  * Expected result:
  * - Both the static and dynamic pipe object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-009}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -481,6 +499,8 @@ ZTEST(obj_core, test_obj_core_pipe)
  * Expected result:
  * - Both the static and dynamic message queue object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-010}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -511,6 +531,8 @@ ZTEST(obj_core, test_obj_core_msgq)
  * Expected result:
  * - Both the static and dynamic mailbox object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-011}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -542,6 +564,8 @@ ZTEST(obj_core, test_obj_core_mbox)
  * Expected result:
  * - Both the static and dynamic condition variable object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-012}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -572,6 +596,8 @@ ZTEST(obj_core, test_obj_core_condvar)
  * Expected result:
  * - Both the static and dynamic event object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-013}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -602,6 +628,8 @@ ZTEST(obj_core, test_obj_core_event)
  * Expected result:
  * - Both the static and dynamic mutex object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-014}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()
@@ -633,6 +661,8 @@ ZTEST(obj_core, test_obj_core_mutex)
  * Expected result:
  * - Both the static and dynamic semaphore object cores are found.
  *
+ * @testid{TSPEC-OBJCORE-015}
+ * @draft
  * @see k_obj_type_find()
  * @see k_obj_type_walk_locked()
  * @see k_obj_type_walk_unlocked()

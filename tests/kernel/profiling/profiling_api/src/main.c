@@ -45,6 +45,8 @@ static void work_handler(struct k_work *w)
  *
  * @ingroup kernel_profiling_tests
  *
+ * @testid{TSPEC-PROFILING-001}
+ * @draft
  * @see k_thread_foreach(), log_stack_usage()
  */
 ZTEST(profiling_api, test_call_stacks_analyze_main)
@@ -61,6 +63,8 @@ ZTEST(profiling_api, test_call_stacks_analyze_main)
  *
  * @ingroup kernel_profiling_tests
  *
+ * @testid{TSPEC-PROFILING-002}
+ * @draft
  * @see k_thread_foreach(), pm_system_suspend(), pm_system_resume(),
  * log_stack_usage()
  */
@@ -78,6 +82,8 @@ ZTEST(profiling_api_1cpu, test_call_stacks_analyze_idle)
  *
  * @ingroup kernel_profiling_tests
  *
+ * @testid{TSPEC-PROFILING-003}
+ * @draft
  * @see k_thread_foreach(), k_work_init(), k_work_submit(),
  * log_stack_usage()
  */

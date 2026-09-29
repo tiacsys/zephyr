@@ -337,6 +337,8 @@ static void _test_kernel_cpu_idle(int atomic)
  * - The CPU idles until the timer fires and the elapsed time matches the timer
  *   duration within tolerance.
  *
+ * @testid{TSPEC-CONTEXT-001}
+ * @draft
  * @see k_cpu_atomic_idle()
  * @verifies ZEP-SRS-13-14
  */
@@ -372,6 +374,8 @@ ZTEST(context_cpu_idle, test_cpu_idle_atomic)
  * Expected result:
  * - The CPU idles and resumes after the expected time has elapsed.
  *
+ * @testid{TSPEC-CONTEXT-002}
+ * @draft
  * @see k_cpu_idle()
  * @verifies ZEP-SRS-13-14
  */
@@ -476,6 +480,8 @@ static void _test_kernel_interrupts(disable_int_func disable_int,
  * Expected result:
  * - Ticks do not advance while interrupts are locked and resume after unlock.
  *
+ * @testid{TSPEC-CONTEXT-003}
+ * @draft
  * @see irq_lock()
  * @see irq_unlock()
  */
@@ -508,6 +514,8 @@ ZTEST(context, test_interrupts)
  * - Reports enabled in thread context and after unlock; disabled while locked.
  * - Repeated calls return the same value (the probe does not flip the state).
  *
+ * @testid{TSPEC-CONTEXT-004}
+ * @draft
  * @see arch_cpu_irqs_are_enabled()
  */
 ZTEST(context, test_arch_cpu_irqs_are_enabled)
@@ -557,6 +565,8 @@ ZTEST(context, test_arch_cpu_irqs_are_enabled)
  * - Interrupts stay masked across the inner unlock and are only restored by the
  *   unlock balancing the outermost lock.
  *
+ * @testid{TSPEC-CONTEXT-005}
+ * @draft
  * @see irq_lock()
  * @see irq_unlock()
  * @see arch_cpu_irqs_are_enabled()
@@ -609,6 +619,8 @@ ZTEST(context, test_irq_lock_nested)
  * Expected result:
  * - k_can_yield() is true in thread context and false in ISR context.
  *
+ * @testid{TSPEC-CONTEXT-006}
+ * @draft
  * @see k_can_yield()
  */
 ZTEST(context, test_k_can_yield)
@@ -652,6 +664,8 @@ ZTEST(context, test_k_can_yield)
  *   already-expired entries. Kernel timeouts must not be used after this test —
  *   RUN THIS TEST LAST IN THE SUITE.
  *
+ * @testid{TSPEC-CONTEXT-007}
+ * @draft
  * @see irq_disable()
  * @see irq_enable()
  */
@@ -691,6 +705,8 @@ ZTEST(context_one_cpu, test_timer_interrupts)
  * - The ISR observes the calling thread's id and K_ISR context, and the thread
  *   context is intact after interrupt exit.
  *
+ * @testid{TSPEC-CONTEXT-008}
+ * @draft
  * @see k_current_get()
  * @see k_is_in_isr()
  */
@@ -1003,6 +1019,8 @@ static void delayed_thread(void *num, void *arg2, void *arg3)
  * Expected result:
  * - The semaphore take succeeds (the busy-wait thread ran to completion).
  *
+ * @testid{TSPEC-CONTEXT-009}
+ * @draft
  * @see k_busy_wait()
  */
 ZTEST(context_one_cpu, test_busy_wait)
@@ -1043,6 +1061,8 @@ ZTEST(context_one_cpu, test_busy_wait)
  * - The sleeper wakes within the expected window.
  * - Delayed threads run strictly in delay order; cancelled ones never run.
  *
+ * @testid{TSPEC-CONTEXT-010}
+ * @draft
  * @see k_sleep()
  * @see k_thread_create()
  */
@@ -1182,6 +1202,8 @@ ZTEST(context_one_cpu, test_k_sleep)
  * - k_yield() switches to equal/higher-priority threads and never to a
  *   lower-priority thread.
  *
+ * @testid{TSPEC-CONTEXT-011}
+ * @draft
  * @see k_yield()
  * @see k_thread_create()
  */
@@ -1226,6 +1248,8 @@ ZTEST(context_one_cpu, test_k_yield)
  * - The worker runs to completion, its identity differs from the spawner, and
  *   all context/identity checks pass.
  *
+ * @testid{TSPEC-CONTEXT-012}
+ * @draft
  * @see k_thread_create()
  * @see k_current_get()
  * @see k_is_in_isr()

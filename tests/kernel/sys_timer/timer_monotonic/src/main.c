@@ -46,6 +46,8 @@ int test_frequency(void)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-SYSTIMER-002}
+ * @draft
  * @see k_cycle_get_32(), sys_clock_hw_cycles_per_sec()
  */
 ZTEST(timer_fn, test_timer)
@@ -85,6 +87,9 @@ ZTEST(timer_fn, test_timer)
  *
  * Verifies that k_cycle_get_32() remains monotonic and correctly accounts
  * for elapsed cycles even across a timer expiration when interrupts are disabled.
+ *
+ * @testid{TSPEC-SYSTIMER-003}
+ * @draft
  */
 ZTEST(timer_fn, test_timer_monotonic_irq_locked)
 {

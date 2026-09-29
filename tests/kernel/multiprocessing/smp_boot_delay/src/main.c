@@ -50,6 +50,8 @@ static void thread_fn(void *a, void *b, void *c)
  * automatically at start up. Bring up a secondary CPU at run time with
  * k_smp_cpu_start() and verify a thread becomes able to run on it.
  *
+ * @testid{TSPEC-MP-038}
+ * @draft
  * @see k_smp_cpu_start()
  * @verifies ZEP-SRS-34-7
  * @verifies ZEP-SRS-34-14
@@ -120,6 +122,8 @@ void custom_init_fn(void *arg)
  * custom initialization function, and verify the function is invoked on the
  * started CPU before it begins scheduling.
  *
+ * @testid{TSPEC-MP-039}
+ * @draft
  * @see k_smp_cpu_start()
  * @verifies ZEP-SRS-34-7
  * @verifies ZEP-SRS-34-8

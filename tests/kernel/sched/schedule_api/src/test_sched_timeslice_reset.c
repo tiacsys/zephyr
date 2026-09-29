@@ -88,6 +88,8 @@ static void thread_time_slice(void *p1, void *p2, void *p3)
  *
  * Skipped when CONFIG_TIMESLICING is disabled.
  *
+ * @testid{TSPEC-SCHED-024}
+ * @draft
  * @see k_sched_time_slice_set(), k_sem_reset(), k_cycle_get_32(),
  *      k_uptime_get_32()
  *

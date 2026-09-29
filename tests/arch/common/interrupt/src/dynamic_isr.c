@@ -104,7 +104,7 @@ ZTEST(interrupt_feature, test_isr_dynamic)
  * @see irq_enable()
  * @see irq_disable()
  */
-ZTEST(interrupt_feature, test_isr_dynamic)
+ZTEST(interrupt_feature, test_isr_dynamic_trigger)
 {
 	int vector_num;
 

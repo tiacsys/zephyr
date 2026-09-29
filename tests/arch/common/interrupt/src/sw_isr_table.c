@@ -23,6 +23,9 @@ extern const struct _irq_parent_entry _lvl2_irq_list[];
  *
  * @details Validates that:
  * - z_get_sw_isr_table_idx() returns the corresponding SW ISR table index for an IRQN
+ *
+ * @testid{TSPEC-ARCHCOMMON-023}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(interrupt_feature, test_sw_isr_irq_parent_table_idx)
@@ -56,6 +59,9 @@ ZTEST(interrupt_feature, test_sw_isr_irq_parent_table_idx)
  * @details Validates that:
  * - z_get_sw_isr_device_from_irq() returns the parent interrupt controller for an IRQN
  * - z_get_sw_isr_irq_from_device() returns the IRQN of a parent interrupt controller
+ *
+ * @testid{TSPEC-ARCHCOMMON-024}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(interrupt_feature, test_sw_isr_irq_parent_table_dev)

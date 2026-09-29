@@ -177,6 +177,8 @@ static void ro_write_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - Both accesses succeed with no fault.
  *
+ * @testid{TSPEC-MEMPROT-073}
+ * @draft
  * @see k_mem_domain_add_thread()
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-17
@@ -207,6 +209,8 @@ ZTEST(mem_protect_domain, test_mem_domain_valid_access)
  * Expected result:
  * - Both accesses fault.
  *
+ * @testid{TSPEC-MEMPROT-074}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-17
  * @verifies ZEP-SRS-8-24
@@ -236,6 +240,8 @@ ZTEST(mem_protect_domain, test_mem_domain_invalid_access)
  * Expected result:
  * - The write faults.
  *
+ * @testid{TSPEC-MEMPROT-075}
+ * @draft
  * @verifies ZEP-SRS-8-17
  */
 ZTEST(mem_protect_domain, test_mem_domain_no_writes_to_ro)
@@ -263,6 +269,8 @@ ZTEST(mem_protect_domain, test_mem_domain_no_writes_to_ro)
  * Expected result:
  * - Access follows the domain's current partition set at each step.
  *
+ * @testid{TSPEC-MEMPROT-076}
+ * @draft
  * @see k_mem_domain_remove_partition()
  * @see k_mem_domain_add_partition()
  * @verifies ZEP-SRS-8-17
@@ -347,6 +355,8 @@ static void mem_domain_add_thread_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - Each call faults before doing anything.
  *
+ * @testid{TSPEC-MEMPROT-077}
+ * @draft
  * @see k_mem_domain_init()
  * @see k_mem_domain_add_partition()
  * @see k_mem_domain_remove_partition()
@@ -379,6 +389,9 @@ ZTEST(mem_protect_domain, test_mem_domain_api_supervisor_only)
  *
  * Expected result:
  * - Both belong to k_mem_domain_default.
+ *
+ * @testid{TSPEC-MEMPROT-078}
+ * @draft
  */
 ZTEST(mem_protect_domain, test_mem_domain_boot_threads)
 {
@@ -510,6 +523,8 @@ ZTEST(mem_protect_domain, test_mem_domain_migration)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-079}
+ * @draft
  * @see k_mem_domain_add_partition()
  * @verifies ZEP-SRS-8-21
  */
@@ -541,6 +556,9 @@ K_MEM_PARTITION_DEFINE(exceed_part, exceed_buf, sizeof(exceed_buf),
  *   k_mem_domain_add_partition() returns non-zero.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-080}
+ * @draft
  * @verifies ZEP-SRS-8-21
  */
 ZTEST(mem_protect_domain, test_mem_part_assert_add_overmax)
@@ -575,6 +593,9 @@ K_MEM_PARTITION_DEFINE(find_no_part, misc_buf, sizeof(misc_buf),
  * k_mem_domain_remove_partition() should return non-zero.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-081}
+ * @draft
  * @verifies ZEP-SRS-8-22
  */
 ZTEST(mem_protect_domain, test_mem_domain_remove_part_fail)
@@ -601,6 +622,9 @@ ZTEST(mem_protect_domain, test_mem_domain_remove_part_fail)
  * k_mem_domain_init() should return non-zero.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-082}
+ * @draft
  * @verifies ZEP-SRS-8-20
  */
 ZTEST(mem_protect_domain, test_mem_domain_init_fail)
@@ -628,6 +652,9 @@ ZTEST(mem_protect_domain, test_mem_domain_init_fail)
  * conditions.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-083}
+ * @draft
  * @verifies ZEP-SRS-8-20
  */
 ZTEST(mem_protect_domain, test_mem_domain_deinit_fail)
@@ -676,6 +703,9 @@ ZTEST(mem_protect_domain, test_mem_domain_deinit_fail)
  * k_mem_domain_add_partition() should return error.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-084}
+ * @draft
  * @verifies ZEP-SRS-8-21
  */
 ZTEST(mem_protect_domain, test_mem_part_add_error_null)
@@ -699,6 +729,9 @@ K_MEM_PARTITION_DEFINE(nonsize_part, nosize_buf, sizeof(nosize_buf),
  * k_mem_domain_add_partition() should return error.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-085}
+ * @draft
  * @verifies ZEP-SRS-8-21
  */
 ZTEST(mem_protect_domain, test_mem_part_add_error_zerosize)
@@ -722,6 +755,9 @@ ZTEST(mem_protect_domain, test_mem_part_add_error_zerosize)
  * k_mem_domain_add_partition() should return error.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-086}
+ * @draft
  * @verifies ZEP-SRS-8-21
  */
 ZTEST(mem_protect_domain, test_mem_part_error_wraparound)
@@ -749,6 +785,9 @@ ZTEST(mem_protect_domain, test_mem_part_error_wraparound)
  * in k_mem_domain_remove_partition() returning error.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-087}
+ * @draft
  * @verifies ZEP-SRS-8-22
  */
 ZTEST(mem_protect_domain, test_mem_part_remove_error_zerosize)

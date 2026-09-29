@@ -53,6 +53,8 @@ ISR_DIRECT_DECLARE(direct_isr2)
  *
  * @ingroup kernel_interrupt_tests
  *
+ * @testid{TSPEC-ARCHX86-002}
+ * @draft
  * @see IRQ_DIRECT_CONNECT(), ISR_DIRECT_DECLARE()
  * @verifies ZEP-SRS-7-3
  * @verifies ZEP-SRS-7-11

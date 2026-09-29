@@ -95,6 +95,8 @@ static void cache_get(struct log_cache *cache, uintptr_t id,
  * - Hit/miss results and counters match expectations and the oldest entry is
  *   evicted when capacity is exceeded.
  *
+ * @testid{TSPEC-LOGGING-026}
+ * @draft
  * @see log_cache_get()
  * @ingroup logging_tests
  */

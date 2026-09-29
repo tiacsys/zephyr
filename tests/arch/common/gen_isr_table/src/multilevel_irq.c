@@ -69,6 +69,9 @@ static void test_multi_level_bit_masks_fn(uint32_t irq1, uint32_t irq2, uint32_t
 /**
  * @brief Encode and decode level-1 multi-level interrupt numbers
  * @ingroup kernel_interrupt_tests
+ *
+ * @testid{TSPEC-ARCHCOMMON-007}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(gen_isr_table_multilevel, test_multi_level_bit_masks_l1)
@@ -91,6 +94,9 @@ ZTEST(gen_isr_table_multilevel, test_multi_level_bit_masks_l1)
 /**
  * @brief Encode and decode level-2 multi-level interrupt numbers
  * @ingroup kernel_interrupt_tests
+ *
+ * @testid{TSPEC-ARCHCOMMON-008}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(gen_isr_table_multilevel, test_multi_level_bit_masks_l2)
@@ -121,6 +127,9 @@ ZTEST(gen_isr_table_multilevel, test_multi_level_bit_masks_l2)
 /**
  * @brief Encode and decode level-3 multi-level interrupt numbers
  * @ingroup kernel_interrupt_tests
+ *
+ * @testid{TSPEC-ARCHCOMMON-009}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(gen_isr_table_multilevel, test_multi_level_bit_masks_l3)

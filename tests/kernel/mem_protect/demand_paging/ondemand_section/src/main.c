@@ -43,6 +43,8 @@ static void __ondemand_func evictable_function(void)
  * - The first call and the call after each eviction fault; the call while
  *   resident and the call after an explicit page-in do not.
  *
+ * @testid{TSPEC-MEMPROT-012}
+ * @draft
  * @see k_mem_page_out()
  * @see k_mem_page_in()
  * @see k_mem_num_pagefaults_get()

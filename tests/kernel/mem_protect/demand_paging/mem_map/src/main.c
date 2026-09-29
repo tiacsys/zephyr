@@ -102,6 +102,8 @@ static const char *nums = "0123456789";
  * Expected result:
  * - The over-committed mapping succeeds and returns a usable arena.
  *
+ * @testid{TSPEC-MEMPROT-001}
+ * @draft
  * @see k_mem_map()
  * @verifies ZEP-SRS-36-8
  */
@@ -247,6 +249,8 @@ static void touch_anon_pages(bool zig, bool zag)
  * - All data survives eviction and page-in, and the fault and eviction
  *   statistics show the paging happened.
  *
+ * @testid{TSPEC-MEMPROT-002}
+ * @draft
  * @see k_mem_paging_stats_get()
  * @see k_mem_paging_thread_stats_get()
  * @see k_mem_num_pagefaults_get()
@@ -276,6 +280,8 @@ ZTEST(demand_paging, test_touch_anon_pages)
  * - Identical to the linear case: data survives and the paging statistics
  *   show faults and evictions.
  *
+ * @testid{TSPEC-MEMPROT-003}
+ * @draft
  * @see k_mem_paging_stats_get()
  * @verifies ZEP-SRS-36-8
  */
@@ -300,6 +306,8 @@ ZTEST(demand_paging, test_touch_anon_pages_zigzag1)
  * - Identical to the linear case: data survives and the paging statistics
  *   show faults and evictions.
  *
+ * @testid{TSPEC-MEMPROT-004}
+ * @draft
  * @see k_mem_paging_stats_get()
  * @verifies ZEP-SRS-36-8
  */
@@ -326,6 +334,8 @@ ZTEST(demand_paging, test_touch_anon_pages_zigzag2)
  * Expected result:
  * - The access faults; the code after it is never reached.
  *
+ * @testid{TSPEC-MEMPROT-005}
+ * @draft
  * @see k_mem_unmap()
  * @verifies ZEP-SRS-36-2
  */
@@ -392,6 +402,8 @@ static void test_k_mem_page_out(void)
  * Expected result:
  * - Zero page faults are taken while writing the paged-in range.
  *
+ * @testid{TSPEC-MEMPROT-006}
+ * @draft
  * @see k_mem_page_in()
  * @see k_mem_page_out()
  * @verifies ZEP-SRS-36-10
@@ -443,6 +455,8 @@ ZTEST(demand_paging_api, test_k_mem_page_in)
  * Expected result:
  * - Zero page faults are taken in the pinned range despite the pressure.
  *
+ * @testid{TSPEC-MEMPROT-007}
+ * @draft
  * @see k_mem_pin()
  * @verifies ZEP-SRS-36-11
  */
@@ -495,6 +509,8 @@ ZTEST(demand_paging_api, test_k_mem_pin)
  * - The unpinned range pages out and faults back in normally, and the
  *   oversized page-out fails with -ENOMEM.
  *
+ * @testid{TSPEC-MEMPROT-008}
+ * @draft
  * @see k_mem_unpin()
  * @see k_mem_page_out()
  * @verifies ZEP-SRS-36-9
@@ -535,6 +551,8 @@ ZTEST(demand_paging_api, test_k_mem_unpin)
  * Expected result:
  * - The writes complete with page faults still being handled at capacity.
  *
+ * @testid{TSPEC-MEMPROT-009}
+ * @draft
  * @see k_mem_map()
  * @see k_mem_num_pagefaults_get()
  * @verifies ZEP-SRS-36-9
@@ -600,6 +618,8 @@ ZTEST(demand_paging_stat, test_backing_store_capacity)
  * - Both queries succeed from user mode and report the paging activity that
  *   already took place.
  *
+ * @testid{TSPEC-MEMPROT-010}
+ * @draft
  * @see k_mem_paging_stats_get()
  * @see k_mem_paging_thread_stats_get()
  * @verifies ZEP-SRS-36-13
@@ -679,6 +699,8 @@ static bool print_histogram(struct k_mem_paging_histogram_t *hist)
  * Expected result:
  * - All three histograms are readable from user mode and carry samples.
  *
+ * @testid{TSPEC-MEMPROT-011}
+ * @draft
  * @see k_mem_paging_histogram_eviction_get()
  * @see k_mem_paging_histogram_backing_store_page_in_get()
  * @see k_mem_paging_histogram_backing_store_page_out_get()

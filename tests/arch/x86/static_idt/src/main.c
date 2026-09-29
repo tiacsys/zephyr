@@ -105,6 +105,8 @@ extern void *_EXCEPTION_STUB_NAME(exc_divide_error_handler, IV_DIVIDE_ERROR);
  * @details This test examines the IDT and verifies that the static interrupt
  * and exception stubs are installed at the correct place.
  *
+ * @testid{TSPEC-ARCHX86-006}
+ * @draft
  */
 ZTEST(static_idt, test_idt_stub)
 {
@@ -155,6 +157,8 @@ void idt_spur_task(void *arg1, void *arg2, void *arg3)
  * exception with _EXCEPTION_CONNECT_NOCODE(); triggering the exception
  * confirms the assigned handler is invoked.
  *
+ * @testid{TSPEC-ARCHX86-007}
+ * @draft
  * @verifies ZEP-SRS-16-3
  */
 

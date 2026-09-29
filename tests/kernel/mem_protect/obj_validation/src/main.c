@@ -98,6 +98,8 @@ void object_permission_checks(struct k_sem *sem, bool skip_init)
  *   not yet initialized report -EINVAL, usable objects validate successfully,
  *   and a freed object goes back to reporting -EBADF.
  *
+ * @testid{TSPEC-MEMPROT-090}
+ * @draft
  * @see k_object_alloc()
  * @see k_object_access_grant()
  * @see k_object_free()
@@ -159,6 +161,8 @@ ZTEST(object_validation, test_kobj_validate_states)
  * - The allocation succeeds, the object lies in the thread's pool, and the
  *   thread can initialize it without being granted access explicitly.
  *
+ * @testid{TSPEC-MEMPROT-091}
+ * @draft
  * @see k_object_alloc()
  * @see k_sem_init()
  * @verifies ZEP-SRS-8-2
@@ -209,6 +213,8 @@ ZTEST(object_validation, test_kobj_assign_perms_on_alloc_obj)
  * - The object is no longer in the table, reported as -EBADF, so its memory
  *   was released.
  *
+ * @testid{TSPEC-MEMPROT-092}
+ * @draft
  * @see k_object_alloc()
  * @see k_object_access_revoke()
  * @verifies ZEP-SRS-8-16

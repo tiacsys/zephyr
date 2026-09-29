@@ -74,6 +74,8 @@ static struct k_thread alt_thread_data;
  * - The observed stack pointer differs between threads at least once, so the
  *   initial stack pointer is not fixed.
  *
+ * @testid{TSPEC-MEMPROT-098}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-8-27
  */

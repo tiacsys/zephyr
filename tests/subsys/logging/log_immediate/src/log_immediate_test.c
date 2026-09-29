@@ -72,6 +72,8 @@ static void thread_func(void *p1, void *p2, void *p3)
  * - The system survives frequent preemption during immediate logging with no
  *   assertion or fault.
  *
+ * @testid{TSPEC-LOGGING-053}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-8

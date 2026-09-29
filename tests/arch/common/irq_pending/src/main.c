@@ -57,6 +57,8 @@ static unsigned int pend_disabled_irq_line(void)
  * @details Control case for test_irq_clear_pending(). Without it the clear
  * test could pass simply because nothing was ever latched.
  *
+ * @testid{TSPEC-ARCHCOMMON-028}
+ * @draft
  * @see k_irq_enable()
  */
 ZTEST(irq_pending, test_irq_pending_without_clear)
@@ -78,6 +80,8 @@ ZTEST(irq_pending, test_irq_pending_without_clear)
  * the line. The handler must not run, because the pending state was dropped
  * before delivery could happen.
  *
+ * @testid{TSPEC-ARCHCOMMON-029}
+ * @draft
  * @see k_irq_clear_pending()
  */
 ZTEST(irq_pending, test_irq_clear_pending)
@@ -101,6 +105,8 @@ ZTEST(irq_pending, test_irq_clear_pending)
  * then enables the line and checks the handler ran exactly once, without the
  * peripheral trigger path being involved at all.
  *
+ * @testid{TSPEC-ARCHCOMMON-030}
+ * @draft
  * @see k_irq_set_pending()
  */
 ZTEST(irq_pending, test_irq_set_pending)
@@ -126,6 +132,8 @@ ZTEST(irq_pending, test_irq_set_pending)
  * @details Walks one interrupt line through not-pending, pending and
  * cleared states, checking k_irq_is_pending() reports each transition.
  *
+ * @testid{TSPEC-ARCHCOMMON-031}
+ * @draft
  * @see k_irq_is_pending()
  */
 ZTEST(irq_pending, test_irq_is_pending)

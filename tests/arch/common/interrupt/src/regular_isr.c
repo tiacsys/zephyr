@@ -48,6 +48,8 @@ void isr_comm(const void *param)
  *
  * @ingroup kernel_interrupt_tests
  *
+ * @testid{TSPEC-ARCHCOMMON-021}
+ * @draft
  * @see IRQ_CONNECT(), irq_enable(), irq_disable(),
  * irq_unlock(),
  * @verifies ZEP-SRS-7-1

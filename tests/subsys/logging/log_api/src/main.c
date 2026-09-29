@@ -177,6 +177,8 @@ static bool dbg_enabled(void)
  * - Every message is delivered at its severity level with correctly formatted
  *   text.
  *
+ * @testid{TSPEC-LOGGING-001}
+ * @draft
  * @see LOG_ERR()
  * @see LOG_WRN()
  * @see LOG_INF()
@@ -275,6 +277,8 @@ ZTEST(test_log_api, test_log_various_messages)
  * - Info messages reach only the higher-level backend; warning messages reach
  *   both backends and the frontend.
  *
+ * @testid{TSPEC-LOGGING-002}
+ * @draft
  * @see log_filter_set()
  * @see log_filter_get()
  * @see log_frontend_filter_set()
@@ -458,6 +462,8 @@ static uint8_t log_buf[CONFIG_LOG_BUFFER_SIZE];
  * - The oldest message is discarded to make room, and an oversized message that
  *   cannot fit is dropped.
  *
+ * @testid{TSPEC-LOGGING-003}
+ * @draft
  * @see LOG_HEXDUMP_INF()
  * @see LOG_INF()
  * @ingroup logging_tests
@@ -560,6 +566,8 @@ ZTEST(test_log_api, test_log_overflow)
  * Expected result:
  * - Every message is formatted with all of its arguments rendered correctly.
  *
+ * @testid{TSPEC-LOGGING-004}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -639,6 +647,8 @@ ZTEST(test_log_api, test_log_arguments)
  * Expected result:
  * - Messages from the declared module's other file use the module's source id.
  *
+ * @testid{TSPEC-LOGGING-005}
+ * @draft
  * @see LOG_MODULE_DECLARE()
  * @see log_source_id_get()
  * @ingroup logging_tests
@@ -758,6 +768,8 @@ static void log_n_messages(uint32_t n_msg, uint32_t exp_dropped)
  * - The backend's reported drop count matches the number of messages that did
  *   not fit.
  *
+ * @testid{TSPEC-LOGGING-006}
+ * @draft
  * @see log_backend_dropped()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6
@@ -811,6 +823,8 @@ ZTEST(test_log_api_1cpu, test_log_msg_dropped_notification)
  * - Pending messages are flushed on panic and later messages are processed in
  *   place.
  *
+ * @testid{TSPEC-LOGGING-007}
+ * @draft
  * @see log_panic()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-8
@@ -863,6 +877,8 @@ ZTEST(test_log_api, test_log_panic)
  * Expected result:
  * - printk() output appears on the backend as raw-string log records.
  *
+ * @testid{TSPEC-LOGGING-008}
+ * @draft
  * @see printk()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-20
@@ -907,6 +923,8 @@ ZTEST(test_log_api, test_log_printk)
  * Expected result:
  * - Both macros produce raw-string records on the frontend and backend.
  *
+ * @testid{TSPEC-LOGGING-009}
+ * @draft
  * @see LOG_PRINTK()
  * @see LOG_RAW()
  * @ingroup logging_tests
@@ -952,6 +970,8 @@ ZTEST(test_log_api, test_log_printk_vs_raw)
  * - Each argument is evaluated exactly once; debug arguments are evaluated only
  *   when debug logging is enabled.
  *
+ * @testid{TSPEC-LOGGING-010}
+ * @draft
  * @see LOG_INF()
  * @see LOG_DBG()
  * @ingroup logging_tests
@@ -1028,6 +1048,8 @@ static void log_wrn_once_run(int i)
  * Expected result:
  * - Only the first invocation produces a log message.
  *
+ * @testid{TSPEC-LOGGING-011}
+ * @draft
  * @see LOG_WRN_ONCE()
  * @ingroup logging_tests
  */
@@ -1068,6 +1090,8 @@ ZTEST(test_log_api, test_log_wrn_once)
  * - The module's messages are filtered according to the override level rather
  *   than its own configured level.
  *
+ * @testid{TSPEC-LOGGING-012}
+ * @draft
  * @see CONFIG_LOG_OVERRIDE_LEVEL
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-9

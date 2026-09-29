@@ -79,6 +79,8 @@ static inline void z_vrfy_test_cpu_write_reg(void)
  * Expected result:
  * - No register read back in user mode contains 0xDEADBEEF; all were scrubbed.
  *
+ * @testid{TSPEC-ARCHX86-001}
+ * @draft
  * @see test_cpu_write_reg()
  */
 ZTEST_USER(x86_cpu_scrubs_regs, test_syscall_cpu_scrubs_regs)

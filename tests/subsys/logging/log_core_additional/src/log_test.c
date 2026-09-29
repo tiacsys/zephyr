@@ -224,6 +224,8 @@ static bool log_test_process(void)
  * Expected result:
  * - log_backend_is_active() tracks the activate/deactivate transitions.
  *
+ * @testid{TSPEC-LOGGING-027}
+ * @draft
  * @see log_backend_activate()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5
@@ -257,6 +259,8 @@ ZTEST(test_log_core_additional, test_log_backend)
  * Expected result:
  * - The backend receives the message with the expected local domain id.
  *
+ * @testid{TSPEC-LOGGING-028}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  */
@@ -293,6 +297,8 @@ ZTEST(test_log_core_additional, test_log_domain_id)
  * Expected result:
  * - Both messages are delivered immediately, with no deferred processing.
  *
+ * @testid{TSPEC-LOGGING-029}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-8
@@ -333,6 +339,8 @@ ZTEST(test_log_core_additional, test_log_sync)
  * Expected result:
  * - Every message logged before backend activation is delivered after it.
  *
+ * @testid{TSPEC-LOGGING-030}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6
@@ -390,6 +398,8 @@ ZTEST(test_log_core_additional, test_log_early_logging)
  * Expected result:
  * - Three messages are delivered, each tagged with its severity level.
  *
+ * @testid{TSPEC-LOGGING-031}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-7
@@ -434,6 +444,8 @@ ZTEST(test_log_core_additional, test_log_severity)
  * Expected result:
  * - Each delivered message carries the timestamp produced by the custom source.
  *
+ * @testid{TSPEC-LOGGING-032}
+ * @draft
  * @see log_set_timestamp_func()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-14
@@ -498,6 +510,8 @@ ZTEST(test_log_core_additional, test_log_timestamping)
  * Expected result:
  * - Multiple backends are registered and discoverable concurrently.
  *
+ * @testid{TSPEC-LOGGING-033}
+ * @draft
  * @see log_backend_enable()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5
@@ -543,6 +557,8 @@ ZTEST(test_log_core_additional, test_multiple_backends)
  * Expected result:
  * - The dedicated logging thread delivers all messages and clears the queue.
  *
+ * @testid{TSPEC-LOGGING-098}
+ * @draft
  * @see log_data_pending()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-1
@@ -600,6 +616,8 @@ ZTEST(test_log_core_additional, test_log_thread)
  * Expected result:
  * - Triggering the logging thread promptly delivers all queued messages.
  *
+ * @testid{TSPEC-LOGGING-099}
+ * @draft
  * @see log_thread_trigger()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-1
@@ -661,6 +679,8 @@ static void call_log_generic(const char *fmt, ...)
  * Expected result:
  * - All formatted messages are accepted and processed without error.
  *
+ * @testid{TSPEC-LOGGING-034}
+ * @draft
  * @see log_generic()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -700,6 +720,8 @@ ZTEST(test_log_core_additional, test_log_generic)
  * Expected result:
  * - Messages built through each primitive are processed successfully.
  *
+ * @testid{TSPEC-LOGGING-035}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  */
@@ -751,6 +773,8 @@ ZTEST(test_log_core_additional, test_log_msg_create)
  * Expected result:
  * - Messages built from user space are processed without fault.
  *
+ * @testid{TSPEC-LOGGING-036}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  */

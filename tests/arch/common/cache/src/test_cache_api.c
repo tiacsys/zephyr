@@ -49,6 +49,8 @@ static ZTEST_BMEM uint8_t user_buffer[SIZE];
  * Expected result:
  * - Every call returns 0 or -ENOTSUP.
  *
+ * @testid{TSPEC-ARCHCOMMON-001}
+ * @draft
  * @see sys_cache_instr_flush_all()
  * @see sys_cache_instr_invd_all()
  * @see sys_cache_instr_flush_and_invd_all()
@@ -111,6 +113,8 @@ ZTEST(cache_api, test_instr_cache_api)
  * Expected result:
  * - Every call returns 0 or -ENOTSUP.
  *
+ * @testid{TSPEC-ARCHCOMMON-002}
+ * @draft
  * @see sys_cache_data_flush_all()
  * @see sys_cache_data_invd_all()
  * @see sys_cache_data_flush_and_invd_all()
@@ -171,6 +175,8 @@ ZTEST(cache_api, test_data_cache_api)
  * Expected result:
  * - Every call returns 0 or -ENOTSUP, and no user-mode fault occurs.
  *
+ * @testid{TSPEC-ARCHCOMMON-003}
+ * @draft
  * @see sys_cache_data_flush_range()
  * @see sys_cache_data_invd_range()
  * @see sys_cache_data_flush_and_invd_range()

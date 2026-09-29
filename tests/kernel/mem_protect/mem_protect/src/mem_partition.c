@@ -23,6 +23,9 @@ static volatile K_APP_BMEM(ztest_mem_partition) int bss_var;
  * variables using macros K_APP_BMEM() and K_APP_DMEM
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-088}
+ * @draft
  * @verifies ZEP-SRS-8-19
  */
 ZTEST_USER(mem_protect_part, test_mem_part_assign_bss_vars_zero)
@@ -59,6 +62,9 @@ K_APP_BMEM(part_arch) uint8_t __aligned(MEM_REGION_ALLOC)
  *   match the base address of buf_arc.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-089}
+ * @draft
  * @verifies ZEP-SRS-8-19
  */
 ZTEST(mem_protect_part, test_mem_part_auto_determ_size)

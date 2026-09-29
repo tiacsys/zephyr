@@ -191,6 +191,8 @@ static void futex_multiple_wait_wake_task(void *p1, void *p2, void *p3)
  * Expected result:
  * - The value is unchanged: the waiter blocked and never woke.
  *
+ * @testid{TSPEC-MEMPROT-013}
+ * @draft
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-1
  */
@@ -231,6 +233,8 @@ ZTEST(futex, test_futex_wait_forever)
  * Expected result:
  * - The waiter timed out and ran its post-wait code, so the value is zero.
  *
+ * @testid{TSPEC-MEMPROT-014}
+ * @draft
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-1
  */
@@ -269,6 +273,8 @@ ZTEST(futex, test_futex_wait_timeout)
  * Expected result:
  * - The waiter returned immediately with -ETIMEDOUT and ran on.
  *
+ * @testid{TSPEC-MEMPROT-015}
+ * @draft
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-1
  */
@@ -309,6 +315,8 @@ ZTEST(futex, test_futex_wait_nowait)
  * - The wake reports one thread woken and the waiter resumed, so the value
  *   is zero.
  *
+ * @testid{TSPEC-MEMPROT-016}
+ * @draft
  * @see k_futex_wake()
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-1
@@ -364,6 +372,8 @@ ZTEST(futex, test_futex_wait_forever_wake)
  * - The waiter was woken (returning 0, not -ETIMEDOUT) and ran its post-wait
  *   code before the timeout elapsed.
  *
+ * @testid{TSPEC-MEMPROT-017}
+ * @draft
  * @see k_futex_wake()
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-1
@@ -417,6 +427,8 @@ ZTEST(futex, test_futex_wait_timeout_wake)
  * Expected result:
  * - The wake reports no threads woken.
  *
+ * @testid{TSPEC-MEMPROT-018}
+ * @draft
  * @see k_futex_wake()
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-2
@@ -464,6 +476,8 @@ ZTEST(futex, test_futex_wait_nowait_wake)
  * Expected result:
  * - The waiter is woken by the ISR and runs its post-wait code.
  *
+ * @testid{TSPEC-MEMPROT-019}
+ * @draft
  * @see k_futex_wake()
  * @see irq_offload()
  * @verifies ZEP-SRS-37-2
@@ -512,6 +526,8 @@ ZTEST(futex, test_futex_wait_forever_wake_from_isr)
  * Expected result:
  * - All waiters resume off one wake and the reported count matches.
  *
+ * @testid{TSPEC-MEMPROT-020}
+ * @draft
  * @see k_futex_wake()
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-2
@@ -568,6 +584,8 @@ ZTEST(futex, test_futex_multiple_threads_wait_wake)
  * Expected result:
  * - Every waiter is woken exactly by its own futex's wake.
  *
+ * @testid{TSPEC-MEMPROT-021}
+ * @draft
  * @see k_futex_wake()
  * @see k_futex_wait()
  * @verifies ZEP-SRS-37-1
@@ -627,6 +645,8 @@ ZTEST(futex, test_futex_independent_wait_wake)
  * Expected result:
  * - Each call fails with exactly the error its input deserves.
  *
+ * @testid{TSPEC-MEMPROT-022}
+ * @draft
  * @see k_futex_wait()
  * @see k_futex_wake()
  * @verifies ZEP-SRS-37-3
@@ -715,6 +735,8 @@ static void futex_wake(void *p1, void *p2, void *p3)
  * - Show that user threads can write to futex value
  * - Show that user threads can make wait/wake syscalls on it.
  *
+ * @testid{TSPEC-MEMPROT-023}
+ * @draft
  * @see atomic_set(), atomic_sub(), k_futex_wake(), k_futex_wait()
  *
  * @ingroup kernel_futex_tests

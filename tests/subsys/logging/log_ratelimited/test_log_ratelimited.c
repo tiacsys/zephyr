@@ -31,6 +31,8 @@ static uint8_t test_data[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
  * Expected result:
  * - All macros compile and execute without error.
  *
+ * @testid{TSPEC-LOGGING-086}
+ * @draft
  * @see LOG_INF_RATELIMIT()
  * @ingroup logging_tests
  */

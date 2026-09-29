@@ -40,6 +40,8 @@ LOG_MODULE_REGISTER(user);
  * Expected result:
  * - User-space messages are buffered and then processed off the queue.
  *
+ * @testid{TSPEC-LOGGING-037}
+ * @draft
  * @see log_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6
@@ -75,6 +77,8 @@ ZTEST_USER(test_log_core_additional, test_log_from_user)
  * Expected result:
  * - The binary data is logged as a hex dump without fault.
  *
+ * @testid{TSPEC-LOGGING-038}
+ * @draft
  * @see LOG_HEXDUMP_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-12
@@ -113,6 +117,8 @@ static void call_log_generic(uint32_t source_id, const char *fmt, ...)
  * Expected result:
  * - The formatted message is accepted and processed without fault.
  *
+ * @testid{TSPEC-LOGGING-039}
+ * @draft
  * @see log_generic()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -142,6 +148,8 @@ ZTEST_USER(test_log_core_additional, test_log_generic_user)
  * Expected result:
  * - The runtime filter is applied without fault.
  *
+ * @testid{TSPEC-LOGGING-040}
+ * @draft
  * @see log_filter_set()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-10
@@ -167,6 +175,8 @@ ZTEST_USER(test_log_core_additional, test_log_filter_set)
  * Expected result:
  * - Pending messages are flushed and the panic path completes without fault.
  *
+ * @testid{TSPEC-LOGGING-041}
+ * @draft
  * @see log_panic()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-13
@@ -198,6 +208,8 @@ ZTEST_USER(test_log_core_additional, test_log_panic)
  * Expected result:
  * - The printk-style output is processed without fault.
  *
+ * @testid{TSPEC-LOGGING-042}
+ * @draft
  * @see LOG_PRINTK()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-19

@@ -251,6 +251,9 @@ static void run_test_offload(int case_type, int real_irq)
  *   jobs will not execute immediately.
  *
  * We test this by irq_offload().
+ *
+ * @testid{TSPEC-ARCHCOMMON-014}
+ * @draft
  * @verifies ZEP-SRS-7-13
  */
 ZTEST(interrupt_feature, test_isr_offload_job_multiple)
@@ -277,6 +280,9 @@ ZTEST(interrupt_feature, test_isr_offload_job_multiple)
  *   jobs will not execute immediately.
  *
  * We test this by irq_offload().
+ *
+ * @testid{TSPEC-ARCHCOMMON-015}
+ * @draft
  * @verifies ZEP-SRS-7-13
  */
 ZTEST(interrupt_feature, test_isr_offload_job_identi)
@@ -296,6 +302,9 @@ ZTEST(interrupt_feature, test_isr_offload_job_identi)
  * @details Validate isr can offload workload to work queue, and the
  * offload jobs could execute immediately base on it's priority.
  * We test this by dynamic interrupt.
+ *
+ * @testid{TSPEC-ARCHCOMMON-016}
+ * @draft
  * @verifies ZEP-SRS-7-5
  * @verifies ZEP-SRS-7-13
  */

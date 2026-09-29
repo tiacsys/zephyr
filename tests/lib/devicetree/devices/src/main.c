@@ -79,6 +79,9 @@ DEVICE_DT_DEFINE(TEST_NOLABEL, dev_init, NULL,
  * - Each init entry's device pointer equals the corresponding device.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DTDEVICES-001}
+ * @draft
  * @see DEVICE_INIT_DT_GET()
  * @see DEVICE_DT_GET()
  */
@@ -137,6 +140,9 @@ ZTEST(devicetree_devices, test_init_get)
  * - The recorded initialization sequence matches the expected handle order.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DTDEVICES-002}
+ * @draft
  * @see device_handle_get()
  */
 ZTEST(devicetree_devices, test_init_order)
@@ -201,6 +207,9 @@ static int device_visitor(const struct device *dev,
  * report the devices that a given device depends on.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DTDEVICES-003}
+ * @draft
  * @see device_required_handles_get, device_required_foreach
  * @verifies ZEP-SRS-14-11
  */
@@ -300,6 +309,9 @@ ZTEST(devicetree_devices, test_requires)
  *   the injected device's handle.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DTDEVICES-004}
+ * @draft
  * @see device_injected_handles_get()
  */
 ZTEST(devicetree_devices, test_injected)
@@ -337,6 +349,9 @@ ZTEST(devicetree_devices, test_injected)
  *   NULL.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DTDEVICES-005}
+ * @draft
  * @see DEVICE_DT_GET_OR_NULL()
  */
 ZTEST(devicetree_devices, test_get_or_null)
@@ -357,6 +372,9 @@ ZTEST(devicetree_devices, test_get_or_null)
  * device_supported_foreach() report the devices that depend on a given device.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DTDEVICES-006}
+ * @draft
  * @see device_supported_handles_get, device_supported_foreach
  * @verifies ZEP-SRS-14-11
  */

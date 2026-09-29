@@ -40,6 +40,8 @@ static struct k_pipe pipe;
  * Expected result:
  * - Every write returns a positive count and the full payload is written.
  *
+ * @testid{TSPEC-PIPE-017}
+ * @draft
  * @see k_pipe_write()
  *
  * @verifies ZEP-SRS-32-3
@@ -79,6 +81,8 @@ ZTEST(k_pipe_stress, test_pipe_write)
  * Expected result:
  * - Every read and write makes forward progress across all iterations.
  *
+ * @testid{TSPEC-PIPE-018}
+ * @draft
  * @see k_pipe_write()
  * @see k_pipe_read()
  *

@@ -216,6 +216,8 @@ static void test_thread_put_timeout(void *p1, void *p2, void *p3)
  * Expected result:
  * - Items are returned newest-first (item 1, then item 0).
  *
+ * @testid{TSPEC-LIFO-007}
+ * @draft
  * @see k_lifo_put()
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-2
@@ -258,6 +260,8 @@ ZTEST(lifo_usage_1cpu, test_lifo_nowait)
  * Expected result:
  * - The pending reader wakes and receives both items in order.
  *
+ * @testid{TSPEC-LIFO-008}
+ * @draft
  * @see k_lifo_get()
  * @see k_lifo_put()
  * @verifies ZEP-SRS-23-2
@@ -303,6 +307,8 @@ ZTEST(lifo_usage_1cpu, test_lifo_wait)
  * Expected result:
  * - The timed get returns NULL after the timeout; K_NO_WAIT returns NULL at once.
  *
+ * @testid{TSPEC-LIFO-009}
+ * @draft
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-4
  */
@@ -342,6 +348,8 @@ ZTEST(lifo_usage_1cpu, test_timeout_empty_lifo)
  * Expected result:
  * - Both gets return the queued item without blocking.
  *
+ * @testid{TSPEC-LIFO-010}
+ * @draft
  * @see k_lifo_get()
  * @see k_lifo_put()
  * @verifies ZEP-SRS-23-2
@@ -386,6 +394,8 @@ ZTEST(lifo_usage, test_timeout_non_empty_lifo)
  * - The getter receives data supplied in time; the reply flags reflect LIFO
  *   availability for each timeout variant.
  *
+ * @testid{TSPEC-LIFO-011}
+ * @draft
  * @see k_lifo_get()
  * @see k_lifo_put()
  * @verifies ZEP-SRS-23-2
@@ -504,6 +514,8 @@ void test_thread_pend_and_timeout(void *p1, void *p2, void *p3)
  * Expected result:
  * - Threads time out strictly in increasing-timeout order.
  *
+ * @testid{TSPEC-LIFO-012}
+ * @draft
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-4
  */

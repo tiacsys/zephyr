@@ -57,6 +57,8 @@ static void attrs_get(struct k_msgq *q)
  * Expected result:
  * - used_msgs reports 0, full, then 0 as messages are added and removed.
  *
+ * @testid{TSPEC-MSGQ-001}
+ * @draft
  * @see k_msgq_get_attrs()
  * @verifies ZEP-SRS-31-15
  * @verifies ZEP-SRS-31-16
@@ -84,6 +86,8 @@ ZTEST(msgq_api, test_msgq_attrs_get)
  * Expected result:
  * - used_msgs is reported correctly from user mode.
  *
+ * @testid{TSPEC-MSGQ-002}
+ * @draft
  * @see k_msgq_get_attrs()
  * @see k_msgq_alloc_init()
  * @verifies ZEP-SRS-31-15

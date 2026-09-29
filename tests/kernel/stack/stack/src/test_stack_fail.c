@@ -40,6 +40,9 @@ void tStack_pop_entry(void *p1, void *p2, void *p3)
 
 /**
  * @brief Verifies stack pop functionality
+ *
+ * @testid{TSPEC-STACK-015}
+ * @draft
  * @see k_stack_init(), k_stack_pop()
  * @verifies ZEP-SRS-30-11
  */
@@ -53,6 +56,9 @@ ZTEST(stack_fail, test_stack_pop_fail)
 /**
  * @brief Verifies cleanup a stack that still be needed by another
  * thread.
+ *
+ * @testid{TSPEC-STACK-016}
+ * @draft
  * @see k_stack_cleanup()
  * @verifies ZEP-SRS-30-4
  */
@@ -76,6 +82,9 @@ ZTEST(stack_fail, test_stack_cleanup_error)
 
 /**
  * @brief Verifies push a data in the full stack.
+ *
+ * @testid{TSPEC-STACK-017}
+ * @draft
  * @see k_stack_push()
  * @verifies ZEP-SRS-30-7
  */
@@ -95,6 +104,9 @@ ZTEST(stack_fail, test_stack_push_full)
 #ifdef CONFIG_USERSPACE
 /**
  * @brief Verifies stack pop from a user thread
+ *
+ * @testid{TSPEC-STACK-018}
+ * @draft
  * @see k_stack_init(), k_stack_pop()
  * @verifies ZEP-SRS-30-11
  */
@@ -111,6 +123,9 @@ ZTEST_USER(stack_fail, test_stack_user_pop_fail)
 
 /**
  * @brief Verifies stack alloc and initialize a null pointer.
+ *
+ * @testid{TSPEC-STACK-019}
+ * @draft
  * @see k_stack_alloc_init()
  * @verifies ZEP-SRS-30-3
  */
@@ -123,6 +138,9 @@ ZTEST_USER(stack_fail, test_stack_user_init_null)
 /**
  * @brief Verify that alloc and initialize a stack with
  * 0 memory.
+ *
+ * @testid{TSPEC-STACK-020}
+ * @draft
  * @see k_stack_alloc_init()
  * @verifies ZEP-SRS-30-3
  */
@@ -138,6 +156,9 @@ ZTEST_USER(stack_fail, test_stack_user_init_invalid_value)
 /**
  * @brief Verify that push some data into a NULL
  * pointer.
+ *
+ * @testid{TSPEC-STACK-021}
+ * @draft
  * @see k_stack_push()
  * @verifies ZEP-SRS-30-5
  */
@@ -149,6 +170,9 @@ ZTEST_USER(stack_fail, test_stack_user_push_null)
 
 /**
  * @brief Verifies pop data from a NULL pointer.
+ *
+ * @testid{TSPEC-STACK-022}
+ * @draft
  * @see k_stack_pop()
  * @verifies ZEP-SRS-30-6
  */
@@ -161,6 +185,9 @@ ZTEST_USER(stack_fail, test_stack_user_pop_null)
 /**
  * @brief Verifies cleanup a stack that its data still be waited by
  * another thread.
+ *
+ * @testid{TSPEC-STACK-023}
+ * @draft
  * @see k_stack_pop()
  * @verifies ZEP-SRS-30-11
  */

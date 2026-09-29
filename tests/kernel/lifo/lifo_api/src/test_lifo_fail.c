@@ -30,6 +30,8 @@
  * Expected result:
  * - Both k_lifo_get() calls return NULL.
  *
+ * @testid{TSPEC-LIFO-005}
+ * @draft
  * @see k_lifo_get()
  * @verifies ZEP-SRS-23-4
  */

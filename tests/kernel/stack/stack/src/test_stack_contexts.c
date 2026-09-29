@@ -111,6 +111,8 @@ static void tstack_thread_isr(struct k_stack *pstack)
  *
  * @ingroup kernel_stack_tests
  *
+ * @testid{TSPEC-STACK-005}
+ * @draft
  * @see k_stack_init(), k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-5
  * @verifies ZEP-SRS-30-6
@@ -135,6 +137,8 @@ ZTEST(stack_contexts, test_stack_thread2thread)
  *
  * @ingroup kernel_stack_tests
  *
+ * @testid{TSPEC-STACK-006}
+ * @draft
  * @see #K_STACK_DEFINE(x), k_stack_push(), k_stack_pop()
  * @verifies ZEP-SRS-30-1
  */
@@ -160,6 +164,8 @@ ZTEST(stack_contexts, test_stack_define)
  *
  * @ingroup kernel_stack_tests
  *
+ * @testid{TSPEC-STACK-007}
+ * @draft
  * @see k_stack_init(), k_stack_push(), k_stack_pop()
  * @verifies ZEP-SRS-30-2
  */
@@ -187,6 +193,8 @@ ZTEST(stack_contexts, test_stack_init)
  *
  * @ingroup kernel_stack_tests
  *
+ * @testid{TSPEC-STACK-008}
+ * @draft
  * @see k_stack_push(), k_stack_pop()
  * @verifies ZEP-SRS-30-6
  */
@@ -210,6 +218,9 @@ ZTEST(stack_contexts, test_stack_pop_order)
 #ifdef CONFIG_USERSPACE
 /**
  * @brief Verifies data passing between user threads via stack
+ *
+ * @testid{TSPEC-STACK-009}
+ * @draft
  * @see k_stack_init(), k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-5
  * @verifies ZEP-SRS-30-6
@@ -228,6 +239,9 @@ ZTEST_USER(stack_contexts, test_stack_user_thread2thread)
 
 /**
  * @brief Verifies data passing between thread and ISR via stack
+ *
+ * @testid{TSPEC-STACK-010}
+ * @draft
  * @see k_stack_init(), k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop()
  * @verifies ZEP-SRS-30-5
  * @verifies ZEP-SRS-30-6
@@ -243,6 +257,8 @@ ZTEST(stack_contexts, test_stack_thread2isr)
 }
 
 /**
+ * @testid{TSPEC-STACK-011}
+ * @draft
  * @see k_stack_alloc_init(), k_stack_push(), #K_STACK_DEFINE(x), k_stack_pop(),
  * k_stack_cleanup()
  * @verifies ZEP-SRS-30-3
@@ -319,6 +335,9 @@ static void high_prio_t2_wait_for_stack(void *p1, void *p2, void *p3)
  * thread that has waited longest.
  *
  * @ingroup kernel_stack_tests
+ *
+ * @testid{TSPEC-STACK-012}
+ * @draft
  * @verifies ZEP-SRS-30-6
  */
 ZTEST(stack_contexts, test_stack_multithread_competition)
@@ -379,6 +398,9 @@ ZTEST(stack_contexts, test_stack_multithread_competition)
  * then see if returns an expected value.
  *
  * @ingroup kernel_stack_tests
+ *
+ * @testid{TSPEC-STACK-013}
+ * @draft
  * @verifies ZEP-SRS-30-3
  */
 ZTEST(stack_contexts, test_stack_alloc_null)
@@ -393,6 +415,9 @@ ZTEST(stack_contexts, test_stack_alloc_null)
 
 /**
  * @brief Reject stack entry counts that overflow the allocation size.
+ *
+ * @testid{TSPEC-STACK-014}
+ * @draft
  */
 ZTEST(stack_contexts, test_stack_alloc_size_overflow)
 {

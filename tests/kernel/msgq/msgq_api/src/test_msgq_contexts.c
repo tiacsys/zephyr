@@ -290,6 +290,8 @@ static void prepend_full_entry(void *p1, void *p2, void *p3)
  *       CONFIG_TEST_MSGQ_PUT_FRONT=y, exercising k_msgq_put_front() in place of
  *       k_msgq_put() and checking the resulting prepend (LIFO) ordering.
  *
+ * @testid{TSPEC-MSGQ-003}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_put_front()
  * @see k_msgq_get()
@@ -327,6 +329,8 @@ ZTEST(msgq_api_1cpu, test_msgq_thread)
  * Expected result:
  * - The statically defined queue accepts and delivers messages as-is.
  *
+ * @testid{TSPEC-MSGQ-004}
+ * @draft
  * @see K_MSGQ_DEFINE
  * @verifies ZEP-SRS-31-1
  */
@@ -363,6 +367,8 @@ ZTEST_USER(msgq_api, test_msgq_define)
  * Expected result:
  * - The initialized queue is empty and accepts and delivers messages.
  *
+ * @testid{TSPEC-MSGQ-005}
+ * @draft
  * @see k_msgq_init()
  * @verifies ZEP-SRS-31-2
  */
@@ -398,6 +404,8 @@ ZTEST(msgq_api, test_msgq_init)
  * Expected result:
  * - The front-inserted message is received first, the end-queued one second.
  *
+ * @testid{TSPEC-MSGQ-006}
+ * @draft
  * @see k_msgq_put_front()
  * @see k_msgq_get()
  * @verifies ZEP-SRS-31-5
@@ -437,6 +445,8 @@ ZTEST_USER(msgq_api, test_msgq_put_front_order)
  * - Peek returns the front message without removing it and fails with
  *   -ENOMSG on an empty queue.
  *
+ * @testid{TSPEC-MSGQ-007}
+ * @draft
  * @see k_msgq_peek()
  * @verifies ZEP-SRS-31-12
  */
@@ -482,6 +492,8 @@ ZTEST_USER(msgq_api, test_msgq_peek)
  * Expected result:
  * - Messages pass correctly and the write pointer wraps within the ring buffer.
  *
+ * @testid{TSPEC-MSGQ-008}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_get()
  * @verifies ZEP-SRS-31-4
@@ -523,6 +535,8 @@ ZTEST(msgq_api, test_msgq_thread_overflow)
  * Expected result:
  * - Messages pass in order from user mode.
  *
+ * @testid{TSPEC-MSGQ-009}
+ * @draft
  * @see k_msgq_alloc_init()
  * @see k_msgq_put()
  * @see k_msgq_get()
@@ -558,6 +572,8 @@ ZTEST_USER(msgq_api, test_msgq_user_thread)
  * Expected result:
  * - Messages pass correctly with buffer wrap from user mode.
  *
+ * @testid{TSPEC-MSGQ-010}
+ * @draft
  * @see k_msgq_alloc_init()
  * @see k_msgq_put()
  * @see k_msgq_get()
@@ -598,6 +614,8 @@ ZTEST_USER(msgq_api, test_msgq_user_thread_overflow)
  *       CONFIG_TEST_MSGQ_PUT_FRONT=y, so the ISR enqueues via k_msgq_put_front()
  *       and the thread checks the prepend (LIFO) ordering.
  *
+ * @testid{TSPEC-MSGQ-011}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_put_front()
  * @see k_msgq_get()
@@ -635,6 +653,8 @@ ZTEST(msgq_api, test_msgq_isr)
  *       (CONFIG_TEST_MSGQ_PUT_FRONT=y) the writer uses k_msgq_put_front(), which
  *       does not block: on a full queue it returns -ENOMSG instead of pending.
  *
+ * @testid{TSPEC-MSGQ-012}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_put_front()
  * @see k_msgq_get()
@@ -667,6 +687,8 @@ ZTEST(msgq_api_1cpu, test_msgq_pend_thread)
  * Expected result:
  * - Success for a valid request; -ENOMEM and -EINVAL for the failing requests.
  *
+ * @testid{TSPEC-MSGQ-013}
+ * @draft
  * @see k_msgq_alloc_init()
  * @see k_msgq_cleanup()
  * @verifies ZEP-SRS-31-3
@@ -708,6 +730,8 @@ ZTEST(msgq_api, test_msgq_alloc)
  * - The get returns -ENOMSG/-EAGAIN as appropriate, cleanup returns -EBUSY, and
  *   the K_FOREVER get completes once a message is put.
  *
+ * @testid{TSPEC-MSGQ-014}
+ * @draft
  * @see k_msgq_get()
  * @see k_msgq_cleanup()
  * @verifies ZEP-SRS-31-10
@@ -757,6 +781,8 @@ ZTEST(msgq_api_1cpu, test_msgq_empty)
  * Expected result:
  * - The put returns -ENOMSG/-EAGAIN as appropriate and blocks under K_FOREVER.
  *
+ * @testid{TSPEC-MSGQ-015}
+ * @draft
  * @see k_msgq_put()
  * @verifies ZEP-SRS-31-6
  */
@@ -802,6 +828,8 @@ ZTEST(msgq_api_1cpu, test_msgq_full)
  *       k_msgq_put_front(), checking that a full-queue prepend returns -ENOMSG
  *       and that the front-inserted message is dequeued first.
  *
+ * @testid{TSPEC-MSGQ-016}
+ * @draft
  * @see k_msgq_put()
  * @see k_msgq_put_front()
  * @verifies ZEP-SRS-31-6
@@ -851,6 +879,8 @@ ZTEST(msgq_api_1cpu, test_msgq_thread_pending)
  * count stays unchanged). Also verify that peeking at an index beyond the
  * number of queued messages returns -ENOMSG.
  *
+ * @testid{TSPEC-MSGQ-017}
+ * @draft
  * @see k_msgq_peek_at()
  * @verifies ZEP-SRS-31-13
  */

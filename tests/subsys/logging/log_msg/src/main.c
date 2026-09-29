@@ -216,6 +216,8 @@ void validate_base_message_set(const struct log_source_const_data *source,
  * Expected result:
  * - All three paths produce equivalent messages that decode to the original fields and text.
  *
+ * @testid{TSPEC-LOGGING-063}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -267,6 +269,8 @@ ZTEST(log_msg, test_log_msg_0_args_msg)
  * Expected result:
  * - The packed message renders to exactly the printf-formatted reference output.
  *
+ * @testid{TSPEC-LOGGING-064}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -323,6 +327,8 @@ ZTEST(log_msg, test_log_msg_various_args)
  * Expected result:
  * - The binary payload is preserved and read back unchanged.
  *
+ * @testid{TSPEC-LOGGING-065}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -371,6 +377,8 @@ ZTEST(log_msg, test_log_msg_only_data)
  * Expected result:
  * - Both the rendered string and binary payload are read back intact.
  *
+ * @testid{TSPEC-LOGGING-066}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -425,6 +433,8 @@ ZTEST(log_msg, test_log_msg_string_and_data)
  * Expected result:
  * - The packed floating-point arguments render to the printf-formatted reference output.
  *
+ * @testid{TSPEC-LOGGING-067}
+ * @draft
  * @see z_log_msg_runtime_create()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -499,6 +509,8 @@ static void get_msg_validate_length(uint32_t exp_len)
  * Expected result:
  * - The message word length matches the computed expected length.
  *
+ * @testid{TSPEC-LOGGING-068}
+ * @draft
  * @see log_msg_generic_get_wlen()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -552,6 +564,8 @@ ZTEST(log_msg, test_mode_size_plain_string)
  * Expected result:
  * - The message word length matches the computed expected length.
  *
+ * @testid{TSPEC-LOGGING-069}
+ * @draft
  * @see log_msg_generic_get_wlen()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -602,6 +616,8 @@ ZTEST(log_msg, test_mode_size_data_only)
  * Expected result:
  * - The message word length matches the computed expected length.
  *
+ * @testid{TSPEC-LOGGING-070}
+ * @draft
  * @see log_msg_generic_get_wlen()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -653,6 +669,8 @@ ZTEST(log_msg, test_mode_size_plain_str_data)
  * Expected result:
  * - The message word length matches the computed expected length.
  *
+ * @testid{TSPEC-LOGGING-071}
+ * @draft
  * @see log_msg_generic_get_wlen()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -712,6 +730,8 @@ ZTEST(log_msg, test_mode_size_str_with_strings)
  * Expected result:
  * - The message word length matches the computed expected length.
  *
+ * @testid{TSPEC-LOGGING-072}
+ * @draft
  * @see log_msg_generic_get_wlen()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -784,6 +804,8 @@ static log_timestamp_t timestamp_get_inc(void)
  * Expected result:
  * - Surplus messages are dropped and counted; buffered messages are claimed in order.
  *
+ * @testid{TSPEC-LOGGING-073}
+ * @draft
  * @see z_log_dropped_read_and_clear()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6

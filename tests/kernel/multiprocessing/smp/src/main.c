@@ -863,6 +863,8 @@ void z_trace_sched_ipi(void)
  * - This test using for the platform that support SMP, in our current scenario
  *   , only x86_64 and arc supported.
  *
+ * @testid{TSPEC-MP-042}
+ * @draft
  * @see arch_sched_broadcast_ipi()
  * @verifies ZEP-SRS-34-11
  */

@@ -178,6 +178,8 @@ ZTEST_USER(mutex_api_error, test_mutex_lock_null)
  *
  * @ingroup kernel_mutex_tests
  *
+ * @testid{TSPEC-MUTEX-033}
+ * @draft
  * @see k_mutex_lock()
  * @verifies ZEP-SRS-6-4
  */
@@ -213,6 +215,8 @@ ZTEST_USER(mutex_api_error, test_mutex_unlock_null)
  *
  * @ingroup kernel_mutex_tests
  *
+ * @testid{TSPEC-MUTEX-034}
+ * @draft
  * @see k_mutex_unlock()
  * @verifies ZEP-SRS-6-10
  */

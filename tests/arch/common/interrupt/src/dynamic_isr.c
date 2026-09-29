@@ -42,6 +42,8 @@ struct _isr_table_entry _sw_isr_table[];
  * configured function, and verifies that the ISR is successfully installed
  * by checking the software ISR table entry.
  *
+ * @testid{TSPEC-ARCHCOMMON-010}
+ * @draft
  * @see arch_irq_connect_dynamic()
  * @verifies ZEP-SRS-7-5
  * @verifies ZEP-SRS-7-5
@@ -100,6 +102,8 @@ ZTEST(interrupt_feature, test_isr_dynamic)
  * the line, trigger it and confirm the handler runs with the configured
  * parameter, then disable the line again.
  *
+ * @testid{TSPEC-ARCHCOMMON-011}
+ * @draft
  * @see arch_irq_connect_dynamic()
  * @see irq_enable()
  * @see irq_disable()

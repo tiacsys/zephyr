@@ -78,6 +78,8 @@ static void outer_isr(const void *arg)
  *
  * @ingroup kernel_interrupt_tests
  *
+ * @testid{TSPEC-ARCHCOMMON-025}
+ * @draft
  * @see k_irq_get_active()
  */
 ZTEST(irq_active_tracking, test_irq_active_none_in_thread)
@@ -95,6 +97,8 @@ ZTEST(irq_active_tracking, test_irq_active_none_in_thread)
  * k_irq_get_active(): it must see the line it was connected to, and the thread
  * must see no active line once the handler has returned.
  *
+ * @testid{TSPEC-ARCHCOMMON-026}
+ * @draft
  * @see k_irq_get_active()
  */
 ZTEST(irq_active_tracking, test_irq_active_in_isr)
@@ -125,6 +129,8 @@ ZTEST(irq_active_tracking, test_irq_active_in_isr)
  * it returns the outer handler must see its own line again, exercising the
  * save/restore of the tracked value across a nested interrupt.
  *
+ * @testid{TSPEC-ARCHCOMMON-027}
+ * @draft
  * @see k_irq_get_active()
  */
 ZTEST(irq_active_tracking, test_irq_active_nested)

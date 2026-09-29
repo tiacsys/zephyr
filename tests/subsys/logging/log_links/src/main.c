@@ -132,6 +132,8 @@ LOG_LINK_DEF(mock_link2, mock_log_link_api, 0, &mock_link_b);
  * Expected result:
  * - The domain count matches the sum of local and linked domains.
  *
+ * @testid{TSPEC-LOGGING-057}
+ * @draft
  * @see log_domains_count()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5
@@ -168,6 +170,8 @@ ZTEST(log_links, test_log_domain_count)
  * Expected result:
  * - Each domain reports the expected number of registered sources.
  *
+ * @testid{TSPEC-LOGGING-058}
+ * @draft
  * @see log_src_cnt_get()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-11
@@ -220,6 +224,8 @@ static void test_single_compile_level(uint8_t d, uint16_t s, uint32_t exp_level)
  * Expected result:
  * - Each compiled level matches the declared level of the link source.
  *
+ * @testid{TSPEC-LOGGING-059}
+ * @draft
  * @see log_filter_get()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-9
@@ -283,6 +289,8 @@ static void test_single_runtime_level(uint8_t d, uint16_t s, uint8_t *link_level
  * Expected result:
  * - Per-backend runtime levels are applied and the link level is their maximum.
  *
+ * @testid{TSPEC-LOGGING-060}
+ * @draft
  * @see log_filter_set()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-10
@@ -313,6 +321,8 @@ ZTEST(log_links, test_log_runtime_level_set)
  * Expected result:
  * - Each domain id maps to its expected domain name.
  *
+ * @testid{TSPEC-LOGGING-061}
+ * @draft
  * @see log_domain_name_get()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-25
@@ -360,6 +370,8 @@ static void test_single_log_source_name_get(uint8_t d, uint16_t s,
  * Expected result:
  * - Each queried source reports its expected name.
  *
+ * @testid{TSPEC-LOGGING-062}
+ * @draft
  * @see log_source_name_get()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-11

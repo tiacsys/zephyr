@@ -111,6 +111,9 @@ void create_thread(bool is_front, bool is_user)
  * Expected result:
  * - The write faults on the guard page and the thread is terminated; the code
  *   after the write is never reached.
+ *
+ * @testid{TSPEC-MEMPROT-102}
+ * @draft
  */
 ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_front)
 {
@@ -141,6 +144,9 @@ ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_front)
  * Expected result:
  * - The write faults on the guard page and the thread is terminated; the code
  *   after the write is never reached.
+ *
+ * @testid{TSPEC-MEMPROT-103}
+ * @draft
  */
 ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_rear)
 {
@@ -171,6 +177,9 @@ ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_rear)
  * Expected result:
  * - The write faults on the guard page and the thread is terminated; the code
  *   after the write is never reached.
+ *
+ * @testid{TSPEC-MEMPROT-104}
+ * @draft
  */
 ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_front_user)
 {
@@ -201,6 +210,9 @@ ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_front_user)
  * Expected result:
  * - The write faults on the guard page and the thread is terminated; the code
  *   after the write is never reached.
+ *
+ * @testid{TSPEC-MEMPROT-105}
+ * @draft
  */
 ZTEST(stackprot_mapped_stack, test_stackprot_guard_page_rear_user)
 {

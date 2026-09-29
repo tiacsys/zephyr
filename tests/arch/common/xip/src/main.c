@@ -43,6 +43,9 @@ uint32_t xip_array[XIP_TEST_ARRAY_SZ] = {
  * @brief Test XIP
  *
  * @ingroup kernel_xip_tests
+ *
+ * @testid{TSPEC-ARCHCOMMON-032}
+ * @draft
  */
 ZTEST(xip, test_globals)
 {

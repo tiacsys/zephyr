@@ -106,6 +106,8 @@ static void check_msg(int exp_timestamp, int line)
  * - Messages are claimed in ascending timestamp order (0, then 1).
  * - No further messages remain.
  *
+ * @testid{TSPEC-LOGGING-054}
+ * @draft
  * @see z_log_msg_enqueue()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-26
@@ -154,6 +156,8 @@ ZTEST(log_link_order, test_log_only_local)
  * - Messages are claimed in commit order (local first, then remote).
  * - No further messages remain.
  *
+ * @testid{TSPEC-LOGGING-055}
+ * @draft
  * @see z_log_msg_enqueue()
  * @ingroup logging_tests
  */
@@ -209,6 +213,8 @@ ZTEST(log_link_order, test_log_local_unordered)
  * - Messages are claimed in ascending timestamp order (0, 1, 2).
  * - No further messages remain.
  *
+ * @testid{TSPEC-LOGGING-056}
+ * @draft
  * @see z_log_msg_enqueue()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-26

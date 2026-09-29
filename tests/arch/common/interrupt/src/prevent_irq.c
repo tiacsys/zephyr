@@ -32,6 +32,9 @@ static void timer_handler(struct k_timer *timer)
  * locking interrupts and busy-waiting to see if the system timer interrupt is
  * serviced while interrupts are locked; in addition, this test also verifies
  * that the system timer interrupt is serviced after interrupts are unlocked.
+ *
+ * @testid{TSPEC-ARCHCOMMON-020}
+ * @draft
  * @verifies ZEP-SRS-7-8
  * @verifies ZEP-SRS-7-9
  */

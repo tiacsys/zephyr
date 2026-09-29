@@ -130,6 +130,8 @@ LOG_BACKEND_DEFINE(backend2, backend_api, true, &context2);
  * - The earlier-ready backend receives both messages; the later-ready backend
  *   receives only the second message.
  *
+ * @testid{TSPEC-LOGGING-018}
+ * @draft
  * @see log_backend_enable()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5

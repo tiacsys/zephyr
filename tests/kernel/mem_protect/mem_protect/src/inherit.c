@@ -99,6 +99,8 @@ static void test_thread_1_for_SU(void *p1, void *p2, void *p3)
 
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-035}
+ * @draft
  * @see k_mem_domain_init(), k_mem_domain_add_thread(),
  * k_thread_access_grant()
  * @verifies ZEP-SRS-8-2
@@ -171,6 +173,8 @@ void parent_handler(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-036}
+ * @draft
  * @see k_thread_heap_assign()
  * @verifies ZEP-SRS-8-18
  */

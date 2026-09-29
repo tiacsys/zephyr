@@ -51,6 +51,8 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, LOG_LEVEL_DBG);
  * Expected result:
  * - The returned function pointer matches the processor for the active format.
  *
+ * @testid{TSPEC-LOGGING-093}
+ * @draft
  * @see log_format_func_t_get()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -110,6 +112,8 @@ const char *module_id = "00";
  * Expected result:
  * - The captured SyS-T record matches the expected encoded message and argument.
  *
+ * @testid{TSPEC-LOGGING-094}
+ * @draft
  * @see validate_msg()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -143,6 +147,8 @@ ZTEST(log_syst, test_log_syst_data)
  * Expected result:
  * - The captured SyS-T record matches the expected encoded message and arguments.
  *
+ * @testid{TSPEC-LOGGING-095}
+ * @draft
  * @see validate_msg()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -175,6 +181,8 @@ ZTEST(log_syst, test_log_syst_data_multiple_args)
  * Expected result:
  * - The captured SyS-T record matches the expected encoded message and float value.
  *
+ * @testid{TSPEC-LOGGING-096}
+ * @draft
  * @see validate_msg()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2

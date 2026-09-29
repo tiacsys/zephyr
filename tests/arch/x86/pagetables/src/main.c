@@ -79,6 +79,9 @@ static pentry_t get_entry(pentry_t *flags, void *addr)
  * Test that MMU flags on RAM virtual address range are set properly
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-ARCHX86-003}
+ * @draft
  */
 ZTEST(x86_pagetables, test_ram_perms)
 {
@@ -209,6 +212,9 @@ ZTEST(x86_pagetables, test_ram_perms)
  * Test that the NULL virtual page is always non-present
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-ARCHX86-004}
+ * @draft
  */
 ZTEST(x86_pagetables, test_null_map)
 {
@@ -257,6 +263,9 @@ void dump_pagetables(void)
  * We don't verify any specific output, but this shouldn't crash
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-ARCHX86-005}
+ * @draft
  */
 ZTEST_USER(x86_pagetables, test_dump_ptables_user)
 {

@@ -189,6 +189,8 @@ ZTEST_EXPECT_FAIL(log_blocking, test_blocking);
  * - Zero messages are dropped and all messages are handled (in the stalled
  *   configuration the test is expected to fail).
  *
+ * @testid{TSPEC-LOGGING-025}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6

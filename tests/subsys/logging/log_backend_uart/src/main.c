@@ -72,6 +72,8 @@ static void uart_emul_before(void *f)
  * Expected result:
  * - Every UART backend instance transmits exactly the logged string.
  *
+ * @testid{TSPEC-LOGGING-019}
+ * @draft
  * @see LOG_RAW()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5

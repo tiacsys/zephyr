@@ -62,6 +62,8 @@ LOG_OUTPUT_DEFINE(log_output, mock_output_func,
  * Expected result:
  * - Output equals "src: test\r\n".
  *
+ * @testid{TSPEC-LOGGING-074}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -99,6 +101,8 @@ ZTEST(test_log_output, test_no_flags)
  * Expected result:
  * - Output equals "test" with no added prefix or newline.
  *
+ * @testid{TSPEC-LOGGING-075}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -135,6 +139,8 @@ ZTEST(test_log_output, test_raw)
  * Expected result:
  * - Output equals "domain/src: test\r\n".
  *
+ * @testid{TSPEC-LOGGING-076}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -171,6 +177,8 @@ ZTEST(test_log_output, test_no_flags_dname)
  * Expected result:
  * - Output equals "<inf> domain/src: test\r\n".
  *
+ * @testid{TSPEC-LOGGING-077}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -210,6 +218,8 @@ ZTEST(test_log_output, test_level_flag)
  * Expected result:
  * - Output is prefixed with "[00000000] " (or 64-bit form) followed by the message.
  *
+ * @testid{TSPEC-LOGGING-078}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -252,6 +262,8 @@ ZTEST(test_log_output, test_ts_flag)
  * Expected result:
  * - Output is prefixed with the configured formatted timestamp string.
  *
+ * @testid{TSPEC-LOGGING-079}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -301,6 +313,8 @@ ZTEST(test_log_output, test_format_ts)
  * Expected result:
  * - Conversions yield 1000 us and 305 us respectively.
  *
+ * @testid{TSPEC-LOGGING-080}
+ * @draft
  * @see log_output_timestamp_to_us()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -349,6 +363,8 @@ static bool use_func_prefix(uint8_t level)
  * Expected result:
  * - Each message carries the correct severity marker and text.
  *
+ * @testid{TSPEC-LOGGING-081}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -410,6 +426,8 @@ ZTEST(test_log_output, test_levels)
  * Expected result:
  * - Each message is wrapped with the expected color codes for its level.
  *
+ * @testid{TSPEC-LOGGING-082}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -497,6 +515,8 @@ ZTEST(test_log_output, test_colors)
  * Expected result:
  * - Output includes the "[prio name]" thread prefix ahead of the message.
  *
+ * @testid{TSPEC-LOGGING-083}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -550,6 +570,8 @@ ZTEST(test_log_output, test_thread_id)
  * Expected result:
  * - Output equals "test\r\n" with no source prefix.
  *
+ * @testid{TSPEC-LOGGING-084}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3

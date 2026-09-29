@@ -52,6 +52,8 @@ static void kobject_access_grant_user_part(void *p1, void *p2, void *p3)
  * Expected result:
  * - The take faults rather than operating on the invalid object.
  *
+ * @testid{TSPEC-MEMPROT-037}
+ * @draft
  * @see k_thread_access_grant()
  * @see k_thread_user_mode_enter()
  * @verifies ZEP-SRS-8-2
@@ -79,6 +81,8 @@ ZTEST(mem_protect_kobj, test_kobject_access_grant)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-038}
+ * @draft
  * @see k_thread_access_grant()
  */
 ZTEST(mem_protect_kobj, test_kobject_access_grant_error)
@@ -94,6 +98,8 @@ ZTEST(mem_protect_kobj, test_kobject_access_grant_error)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-039}
+ * @draft
  * @see k_thread_access_grant()
  * @verifies ZEP-SRS-8-2
  */
@@ -124,6 +130,8 @@ ZTEST_USER(mem_protect_kobj, test_kobject_access_grant_error_user)
  * @details Call function with a NULL parameter, an expected fault
  * happened.
  *
+ * @testid{TSPEC-MEMPROT-040}
+ * @draft
  * @see k_thread_access_grant()
  *
  * @ingroup kernel_memprotect_tests
@@ -142,6 +150,8 @@ ZTEST_USER(mem_protect_kobj, test_kobject_access_grant_error_user_null)
  * @details Call function with a NULL parameter, an expected fault
  * happened.
  *
+ * @testid{TSPEC-MEMPROT-041}
+ * @draft
  * @see k_thread_access_all_grant()
  *
  * @ingroup kernel_memprotect_tests
@@ -174,6 +184,8 @@ static void syscall_invalid_kobject_user_part(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-042}
+ * @draft
  * @see k_thread_access_grant()
  * @verifies ZEP-SRS-8-14
  */
@@ -206,6 +218,8 @@ static void thread_without_kobject_permission_user_part(void *p1, void *p2,
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-043}
+ * @draft
  * @see k_thread_access_grant(), k_thread_user_mode_enter()
  * @verifies ZEP-SRS-8-16
  */
@@ -252,6 +266,8 @@ static void kobject_revoke_access_user_part(void *p1, void *p2, void *p3)
  * Expected result:
  * - The first child succeeds; the second faults on the revoked object.
  *
+ * @testid{TSPEC-MEMPROT-044}
+ * @draft
  * @see k_object_access_revoke()
  * @see k_thread_access_grant()
  * @verifies ZEP-SRS-8-7
@@ -316,6 +332,8 @@ static void kobject_grant_access_extra_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - The extra thread uses the semaphore granted to it by the child.
  *
+ * @testid{TSPEC-MEMPROT-045}
+ * @draft
  * @see k_object_access_grant()
  * @verifies ZEP-SRS-8-2
  */
@@ -363,6 +381,8 @@ static void grant_access_kobj_invalid_child(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-046}
+ * @draft
  * @see k_thread_access_grant()
  * @verifies ZEP-SRS-8-2
  */
@@ -410,6 +430,8 @@ static void release_from_user_child(void *p1, void *p2, void *p3)
  * Expected result:
  * - The use before the release succeeds and the one after it faults.
  *
+ * @testid{TSPEC-MEMPROT-047}
+ * @draft
  * @see k_object_release()
  * @verifies ZEP-SRS-8-7
  */
@@ -435,6 +457,8 @@ ZTEST(mem_protect_kobj, test_kobject_release_from_user)
  *
  * @details Validate release and access grant an invalid kernel object.
  *
+ * @testid{TSPEC-MEMPROT-048}
+ * @draft
  * @see k_object_release(), k_object_access_all_grant()
  *
  * @ingroup kernel_memprotect_tests
@@ -472,6 +496,8 @@ static void access_check_child(void *p1, void *p2, void *p3)
  * @details System makes kernel object kobject_public_sem public to all threads
  * Test the access to that kernel object by creating two new user threads.
  *
+ * @testid{TSPEC-MEMPROT-049}
+ * @draft
  * @see k_object_access_all_grant()
  *
  * @ingroup kernel_memprotect_tests
@@ -509,6 +535,8 @@ ZTEST(mem_protect_kobj, test_kobject_access_all_grant)
  * revokes access from all others and tests that no child thread has access
  * anymore.
  *
+ * @testid{TSPEC-MEMPROT-050}
+ * @draft
  * @see k_object_access_revoke_others()
  *
  * @ingroup kernel_memprotect_tests
@@ -567,6 +595,8 @@ static void residual_permissions_child_fail(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-051}
+ * @draft
  * @see k_thread_access_grant()
  * @verifies ZEP-SRS-8-16
  */
@@ -615,6 +645,8 @@ ZTEST(mem_protect_kobj, test_thread_has_residual_permissions)
  * - The calls complete without side effects and the structure still fails
  *   validation.
  *
+ * @testid{TSPEC-MEMPROT-052}
+ * @draft
  * @see k_object_access_grant()
  * @see k_object_access_revoke()
  * @verifies ZEP-SRS-8-2
@@ -639,6 +671,9 @@ ZTEST(mem_protect_kobj, test_kobject_access_grant_to_invalid_thread)
  * @details Test syscall on a kobject which is not present in the hash table.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-053}
+ * @draft
  * @verifies ZEP-SRS-8-14
  */
 ZTEST_USER(mem_protect_kobj, test_kobject_access_invalid_kobject)
@@ -658,6 +693,9 @@ ZTEST_USER(mem_protect_kobj, test_kobject_access_invalid_kobject)
  * and has no access
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-054}
+ * @draft
  * @verifies ZEP-SRS-8-14
  */
 ZTEST_USER(mem_protect_kobj, test_access_kobject_without_init_access)
@@ -696,6 +734,8 @@ static void without_init_with_access_child(void *p1, void *p2, void *p3)
  * Expected result:
  * - The take faults on the uninitialized object despite the valid grant.
  *
+ * @testid{TSPEC-MEMPROT-055}
+ * @draft
  * @see k_thread_access_grant()
  * @verifies ZEP-SRS-8-14
  */
@@ -755,6 +795,8 @@ static void reinitialize_thread_kobj_child(void *p1, void *p2, void *p3)
  * Expected result:
  * - The attempt faults instead of reinitializing the live thread.
  *
+ * @testid{TSPEC-MEMPROT-056}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-8-16
  */
@@ -803,6 +845,9 @@ static void new_thread_from_user_child(void *p1, void *p2, void *p3)
  *   by aborting itself.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-057}
+ * @draft
  * @verifies ZEP-SRS-8-2
  */
 ZTEST(mem_protect_kobj, test_create_new_thread_from_user)
@@ -854,6 +899,9 @@ static void new_user_thrd_child_with_in_use_stack(void *p1, void *p2, void *p3)
  * memory protection is working correctly.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-058}
+ * @draft
  * @verifies ZEP-SRS-8-16
  */
 ZTEST(mem_protect_kobj, test_new_user_thread_with_in_use_stack_obj)
@@ -899,6 +947,9 @@ static void from_user_no_access_stack_child_entry(void *p1, void *p2, void *p3)
  * _handler_k_thread_create validation.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-059}
+ * @draft
  * @verifies ZEP-SRS-8-2
  */
 ZTEST(mem_protect_kobj, test_create_new_thread_from_user_no_access_stack)
@@ -943,6 +994,9 @@ static void from_user_invalid_stacksize_child(void *p1, void *p2, void *p3)
  * size which overflows. This is _handler_k_thread_create validation.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-060}
+ * @draft
  * @verifies ZEP-SRS-8-14
  */
 ZTEST(mem_protect_kobj, test_create_new_thread_from_user_invalid_stacksize)
@@ -994,6 +1048,9 @@ static void user_huge_stacksize_child(void *p1, void *p2, void *p3)
  * validation.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-061}
+ * @draft
  * @verifies ZEP-SRS-8-14
  */
 
@@ -1048,6 +1105,9 @@ static void supervisor_from_user_child(void *p1, void *p2, void *p3)
  * threads.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-062}
+ * @draft
  * @verifies ZEP-SRS-8-8
  */
 ZTEST(mem_protect_kobj, test_create_new_supervisor_thread_from_user)
@@ -1106,6 +1166,8 @@ static void essential_thread_from_user_child(void *p1, void *p2, void *p3)
  * Expected result:
  * - The attempt faults instead of creating an essential thread.
  *
+ * @testid{TSPEC-MEMPROT-063}
+ * @draft
  * @see k_thread_create()
  * @see K_ESSENTIAL
  * @verifies ZEP-SRS-8-8
@@ -1154,6 +1216,9 @@ static void higher_prio_from_user_child(void *p1, void *p2, void *p3)
  * @details  _handler_k_thread_create validation.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-064}
+ * @draft
  * @verifies ZEP-SRS-8-6
  */
 
@@ -1203,6 +1268,9 @@ static void invalid_prio_from_user_child(void *p1, void *p2, void *p3)
  * @details _handler_k_thread_create validation.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-065}
+ * @draft
  * @verifies ZEP-SRS-8-6
  */
 ZTEST(mem_protect_kobj, test_create_new_invalid_prio_thread_from_user)
@@ -1240,6 +1308,9 @@ static void thread_stack_init_objects(void *p1, void *p2, void *p3)
  * the exiting thread and thread stack object as uninitialized
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-066}
+ * @draft
  * @verifies ZEP-SRS-8-16
  */
 ZTEST(mem_protect_kobj, test_mark_thread_exit_uninitialized)
@@ -1291,6 +1362,8 @@ static void tThread_object_free_error(void *p1, void *p2, void *p3)
  *
  * @details Spawn a thread free a NULL, an expected fault happened.
  *
+ * @testid{TSPEC-MEMPROT-067}
+ * @draft
  * @see k_object_free()
  *
  * @ingroup kernel_memprotect_tests
@@ -1321,6 +1394,8 @@ ZTEST(mem_protect_kobj, test_kobject_free_error)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-068}
+ * @draft
  * @see k_object_alloc()
  * @verifies ZEP-SRS-8-16
  */
@@ -1343,6 +1418,8 @@ ZTEST_USER(mem_protect_kobj, test_kobject_init_error)
  * @details Create a dynamic kernel object repeatedly until run out
  * of all heap memory, an expected out of memory error generated.
  *
+ * @testid{TSPEC-MEMPROT-069}
+ * @draft
  * @see k_object_alloc()
  *
  * @ingroup kernel_memprotect_tests
@@ -1441,6 +1518,8 @@ ZTEST(mem_protect_kobj, test_thread_alloc_out_of_idx)
  * @details Allocate all kinds of kernel object and do permission
  * operation functions.
  *
+ * @testid{TSPEC-MEMPROT-070}
+ * @draft
  * @see k_object_alloc()
  *
  * @ingroup kernel_memprotect_tests
@@ -1542,6 +1621,8 @@ static void entry_error_perm(void *p1, void *p2, void *p3)
  * grant access to this thread, will trigger an expected thread
  * permission error.
  *
+ * @testid{TSPEC-MEMPROT-071}
+ * @draft
  * @see k_thread_access_grant()
  *
  * @ingroup kernel_memprotect_tests
@@ -1589,6 +1670,9 @@ extern const char *otype_to_str(enum k_objects otype);
  * @details Get all of the kernel object in kobject list.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-072}
+ * @draft
  */
 ZTEST(mem_protect_kobj, test_all_kobjects_str)
 {

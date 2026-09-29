@@ -30,6 +30,8 @@ int no_obj;
  * Expected result:
  * - The calls return 0, -EPERM, -EBADF and 0 respectively.
  *
+ * @testid{TSPEC-MEMPROT-034}
+ * @draft
  * @see k_object_access_check()
  * @verifies ZEP-SRS-8-2
  */

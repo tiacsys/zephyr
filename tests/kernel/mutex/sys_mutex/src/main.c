@@ -326,6 +326,9 @@ void join_participant_threads(void)
  * recursively locks private_mutex, releases it, then re-locks it.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-035}
+ * @draft
  * @see sys_mutex_lock()
  * @see sys_mutex_unlock()
  * @verifies ZEP-SRS-6-9
@@ -482,6 +485,9 @@ ZTEST(mutex_complex, test_supervisor_access)
  * memory domain it has been granted access to.
  *
  * @ingroup kernel_mutex_tests
+ *
+ * @testid{TSPEC-MUTEX-036}
+ * @draft
  * @see sys_mutex_lock()
  * @verifies ZEP-SRS-6-1
  */

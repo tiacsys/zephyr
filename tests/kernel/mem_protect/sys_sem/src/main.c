@@ -152,6 +152,8 @@ static void sem_multiple_threads_wait_helper(void *p1, void *p2, void *p3)
  * - Every invalid call returns -EINVAL.
  * - The valid initialization succeeds and the take/give cycle completes.
  *
+ * @testid{TSPEC-MEMPROT-106}
+ * @draft
  * @see sys_sem_init()
  * @verifies ZEP-SRS-5-2
  * @verifies ZEP-SRS-5-18
@@ -208,6 +210,8 @@ ZTEST(sys_sem, test_sys_sem_basic)
  * Expected result:
  * - The count equals the number of gives performed so far (1..5).
  *
+ * @testid{TSPEC-MEMPROT-107}
+ * @draft
  * @see sys_sem_give()
  * @see sys_sem_count_get()
  * @verifies ZEP-SRS-5-12
@@ -245,6 +249,8 @@ ZTEST(sys_sem, test_sys_sem_simple_from_isr)
  * Expected result:
  * - The count equals the number of gives performed so far (1..5).
  *
+ * @testid{TSPEC-MEMPROT-108}
+ * @draft
  * @see sys_sem_give()
  * @see sys_sem_count_get()
  * @verifies ZEP-SRS-5-12
@@ -280,6 +286,8 @@ ZTEST_USER(sys_sem, test_sys_sem_simple_from_task)
  * Expected result:
  * - Every take returns 0 and the count decrements 4, 3, 2, 1, 0.
  *
+ * @testid{TSPEC-MEMPROT-109}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_count_get()
  * @verifies ZEP-SRS-5-6
@@ -322,6 +330,8 @@ ZTEST_USER(sys_sem, test_sys_sem_take_no_wait)
  * Expected result:
  * - Every take returns -ETIMEDOUT and the count stays 0.
  *
+ * @testid{TSPEC-MEMPROT-110}
+ * @draft
  * @see sys_sem_take()
  * @verifies ZEP-SRS-5-11
  */
@@ -359,6 +369,8 @@ ZTEST_USER(sys_sem, test_sys_sem_take_no_wait_fails)
  * Expected result:
  * - Every take returns -ETIMEDOUT after the timeout elapses.
  *
+ * @testid{TSPEC-MEMPROT-111}
+ * @draft
  * @see sys_sem_take()
  * @verifies ZEP-SRS-5-10
  */
@@ -391,6 +403,8 @@ ZTEST_USER(sys_sem_1cpu, test_sys_sem_take_timeout_fails)
  * Expected result:
  * - The take returns 0 (the give satisfied it before the timeout).
  *
+ * @testid{TSPEC-MEMPROT-112}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_give()
  * @verifies ZEP-SRS-5-8
@@ -434,6 +448,8 @@ ZTEST_USER(sys_sem, test_sys_sem_take_timeout)
  * Expected result:
  * - The take returns 0 once the helper thread gives the semaphore.
  *
+ * @testid{TSPEC-MEMPROT-113}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_give()
  * @verifies ZEP-SRS-5-8
@@ -476,6 +492,8 @@ ZTEST_USER(sys_sem_1cpu, test_sys_sem_take_timeout_forever)
  * Expected result:
  * - The take returns 0 (satisfied by the ISR give before the timeout).
  *
+ * @testid{TSPEC-MEMPROT-114}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_give()
  * @verifies ZEP-SRS-5-9
@@ -525,6 +543,8 @@ static void sem_take_kernel_user(void *p1, void *p2, void *p3)
  * - The user thread's take succeeds and the kernel thread's take of the
  *   second semaphore returns 0.
  *
+ * @testid{TSPEC-MEMPROT-115}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_give()
  * @verifies ZEP-SRS-5-2
@@ -572,6 +592,8 @@ ZTEST(sys_sem_1cpu, test_sys_sem_take_kernel_user)
  * - The high-priority helper completes on the first give, the mid-priority on
  *   the second, and the low-priority on the third — never out of order.
  *
+ * @testid{TSPEC-MEMPROT-116}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_give()
  * @verifies ZEP-SRS-5-14
@@ -692,6 +714,8 @@ ZTEST_USER(sys_sem_1cpu, test_sys_sem_take_multiple)
  * Expected result:
  * - The count matches the expected value after every give and take.
  *
+ * @testid{TSPEC-MEMPROT-117}
+ * @draft
  * @see sys_sem_give()
  * @see sys_sem_take()
  * @see sys_sem_count_get()
@@ -741,6 +765,8 @@ ZTEST(sys_sem, test_sys_sem_give_take_from_isr)
  * - Gives within the limit return 0; a give at the limit returns -EAGAIN and
  *   the count never exceeds SEM_MAX_VAL.
  *
+ * @testid{TSPEC-MEMPROT-118}
+ * @draft
  * @see sys_sem_give()
  * @see sys_sem_count_get()
  * @verifies ZEP-SRS-5-3
@@ -802,6 +828,8 @@ ZTEST_USER(sys_sem, test_sys_sem_give_limit)
  * Expected result:
  * - Every helper is released (one per give); both counts end at 0 each round.
  *
+ * @testid{TSPEC-MEMPROT-119}
+ * @draft
  * @see sys_sem_take()
  * @see sys_sem_give()
  * @see sys_sem_count_get()

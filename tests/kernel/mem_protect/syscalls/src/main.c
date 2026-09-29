@@ -274,6 +274,8 @@ static inline uint32_t z_vrfy_more_args(uint32_t arg1, uint32_t arg2,
  * - Lengths are returned only for memory the caller is allowed to read, and
  *   every forbidden access is reported through the error argument.
  *
+ * @testid{TSPEC-MEMPROT-120}
+ * @draft
  * @see k_usermode_string_nlen()
  * @verifies ZEP-SRS-8-14
  * @verifies ZEP-SRS-8-15
@@ -330,6 +332,8 @@ ZTEST_USER(syscalls, test_syscall_string_nlen)
  *
  * @ingroup kernel_memprotect_tests
  *
+ * @testid{TSPEC-MEMPROT-121}
+ * @draft
  * @see k_usermode_string_nlen()
  */
 ZTEST(syscalls, test_syscall_string_nlen_maxsize_zero)
@@ -373,6 +377,8 @@ ZTEST(syscalls, test_syscall_string_nlen_maxsize_zero)
  * - Each invalid input is rejected with its own error and only the readable,
  *   fitting string succeeds.
  *
+ * @testid{TSPEC-MEMPROT-122}
+ * @draft
  * @see k_usermode_string_alloc_copy()
  * @verifies ZEP-SRS-8-15
  */
@@ -415,6 +421,8 @@ ZTEST_USER(syscalls, test_syscall_string_alloc_copy)
  * - Each invalid input is rejected with its own error and only the readable,
  *   fitting string succeeds.
  *
+ * @testid{TSPEC-MEMPROT-123}
+ * @draft
  * @see k_usermode_string_copy()
  * @verifies ZEP-SRS-8-15
  */
@@ -456,6 +464,8 @@ ZTEST_USER(syscalls, test_syscall_string_copy)
  * - The unwritable destination is rejected and the writable one receives the
  *   exact data.
  *
+ * @testid{TSPEC-MEMPROT-124}
+ * @draft
  * @see k_usermode_to_copy()
  * @verifies ZEP-SRS-8-14
  */
@@ -493,6 +503,9 @@ void run_test_arg64(void)
  * calls with wide arguments.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-125}
+ * @draft
  * @see syscall_arg64()
  * @verifies ZEP-SRS-8-10
  */
@@ -510,6 +523,9 @@ ZTEST_USER(syscalls, test_syscall_arg64)
  * calls with many arguments.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-126}
+ * @draft
  * @verifies ZEP-SRS-8-10
  */
 ZTEST_USER(syscalls, test_syscall_more_args)
@@ -593,6 +609,8 @@ void syscall_switch_stress(void *arg1, void *arg2, void *arg3)
  * - Every thread completes every iteration without a validation failure or
  *   fault.
  *
+ * @testid{TSPEC-MEMPROT-127}
+ * @draft
  * @verifies ZEP-SRS-8-10
  */
 ZTEST(syscalls_extended, test_syscall_switch_stress)
@@ -669,6 +687,8 @@ void test_syscall_context_user(void *p1, void *p2, void *p3)
  * Expected result:
  * - The predicate is true only inside a system call invoked from user mode.
  *
+ * @testid{TSPEC-MEMPROT-128}
+ * @draft
  * @see k_is_in_user_syscall()
  * @verifies ZEP-SRS-8-10
  */

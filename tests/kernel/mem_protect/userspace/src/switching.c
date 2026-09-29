@@ -183,6 +183,8 @@ static void run_switching(int num_kernel_threads)
  * - Every thread completes its loops and the cross-partition counters stay
  *   zero.
  *
+ * @testid{TSPEC-MEMPROT-170}
+ * @draft
  * @verifies ZEP-SRS-8-23
  */
 ZTEST(userspace_domain_switching, test_userspace_kernel_only_switching)
@@ -222,6 +224,8 @@ ZTEST(userspace_domain_switching, test_userspace_kernel_only_switching)
  * - Every thread completes its loops and the cross-partition counters stay
  *   zero.
  *
+ * @testid{TSPEC-MEMPROT-171}
+ * @draft
  * @see k_mem_domain_add_thread()
  * @verifies ZEP-SRS-8-23
  */
@@ -258,6 +262,8 @@ ZTEST(userspace_domain_switching, test_userspace_user_only_switching)
  * - Every thread completes its loops and the cross-partition counters stay
  *   zero.
  *
+ * @testid{TSPEC-MEMPROT-172}
+ * @draft
  * @see k_mem_domain_add_thread()
  * @verifies ZEP-SRS-8-23
  */

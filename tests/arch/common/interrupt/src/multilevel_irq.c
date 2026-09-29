@@ -19,6 +19,8 @@
  * raw and Zephyr-encoded IRQ numbers, parent (aggregator) resolution and IRQ
  * level queries. This exercises the kernel support for multi-level interrupts.
  *
+ * @testid{TSPEC-ARCHCOMMON-017}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(interrupt_feature, test_multi_level_api)
@@ -85,6 +87,8 @@ ZTEST(interrupt_feature, test_multi_level_api)
  * parent resolution across three interrupt levels. This exercises the kernel
  * support for multi-level interrupts.
  *
+ * @testid{TSPEC-ARCHCOMMON-018}
+ * @draft
  * @verifies ZEP-SRS-7-14
  */
 ZTEST(interrupt_feature, test_multi_level_api_l3)

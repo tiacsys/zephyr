@@ -113,6 +113,8 @@ struct backend_cb backend_ctrl_blk;
  * Expected result:
  * - The number of messages stored before a drop is reported for each case.
  *
+ * @testid{TSPEC-LOGGING-020}
+ * @draft
  * @see LOG_ERR()
  * @ingroup logging_tests
  */
@@ -190,6 +192,8 @@ static void run_log_message_store_time_no_overwrite(void)
  * Expected result:
  * - The average cycles/microseconds per stored message is reported.
  *
+ * @testid{TSPEC-LOGGING-021}
+ * @draft
  * @see LOG_ERR()
  * @ingroup logging_tests
  */
@@ -233,6 +237,8 @@ ZTEST(test_log_benchmark, test_log_message_store_time_no_overwrite)
  * Expected result:
  * - The average overwrite cycles/microseconds per message is reported.
  *
+ * @testid{TSPEC-LOGGING-022}
+ * @draft
  * @see LOG_ERR()
  * @ingroup logging_tests
  */
@@ -273,6 +279,8 @@ ZTEST(test_log_benchmark, test_log_message_store_time_overwrite)
  * Expected result:
  * - The average store time per message from userspace is reported.
  *
+ * @testid{TSPEC-LOGGING-023}
+ * @draft
  * @see LOG_ERR()
  * @ingroup logging_tests
  */
@@ -302,6 +310,8 @@ ZTEST_USER(test_log_benchmark, test_log_message_store_time_no_overwrite_from_use
  * Expected result:
  * - The average time to log a transient-string message is reported.
  *
+ * @testid{TSPEC-LOGGING-024}
+ * @draft
  * @see LOG_ERR()
  * @ingroup logging_tests
  */

@@ -57,6 +57,8 @@ static void tmheap_malloc_align4_handler(void *p1, void *p2, void *p3)
  * read/write is allowed. The test is then teared up by freeing all the
  * blocks allocated.
  *
+ * @testid{TSPEC-MULTIHEAP-008}
+ * @draft
  * @see k_malloc(), k_free()
  * @verifies ZEP-SRS-9-11
  */
@@ -96,6 +98,8 @@ static void tmheap_threadsafe_handler(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_memory_slab_tests
  *
+ * @testid{TSPEC-MULTIHEAP-009}
+ * @draft
  * @verifies ZEP-SRS-9-11
  */
 ZTEST(mheap_api, test_mheap_threadsafe)

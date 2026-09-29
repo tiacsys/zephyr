@@ -210,6 +210,8 @@ static void test_stress(uint32_t delay)
  * - No message is silently lost: dropped equals missing and in-count equals
  *   handled plus dropped.
  *
+ * @testid{TSPEC-LOGGING-087}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6
@@ -239,6 +241,8 @@ ZTEST(log_stress, test_stress_fast_processing)
  * - No message is silently lost: dropped equals missing and in-count equals
  *   handled plus dropped.
  *
+ * @testid{TSPEC-LOGGING-088}
+ * @draft
  * @see LOG_INF()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-6

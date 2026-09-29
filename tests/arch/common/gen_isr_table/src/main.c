@@ -330,6 +330,8 @@ static int check_sw_isr(void *isr, uintptr_t arg, int offset)
  * At the end according to architecture, we manually trigger the interrupt.
  * And all irq handler should get called.
  *
+ * @testid{TSPEC-ARCHCOMMON-004}
+ * @draft
  * @see IRQ_DIRECT_CONNECT(), irq_enable()
  *
  * @verifies ZEP-SRS-7-3
@@ -374,6 +376,8 @@ ZTEST(gen_isr_table, test_build_time_direct_interrupt)
  * At the end according to architecture, we manually trigger the interrupt.
  * And all irq handler should get called.
  *
+ * @testid{TSPEC-ARCHCOMMON-005}
+ * @draft
  * @see IRQ_CONNECT(), irq_enable()
  *
  * @verifies ZEP-SRS-7-1
@@ -421,6 +425,8 @@ ZTEST(gen_isr_table, test_build_time_interrupt)
  * At the end according to architecture, we manually trigger the interrupt.
  * And all irq handler should get called.
  *
+ * @testid{TSPEC-ARCHCOMMON-006}
+ * @draft
  * @see irq_connect_dynamic(), irq_enable()
  *
  * @verifies ZEP-SRS-7-5

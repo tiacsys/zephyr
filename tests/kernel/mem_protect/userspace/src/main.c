@@ -112,6 +112,8 @@ void k_sys_fatal_error_handler(unsigned int reason, const struct arch_esf *pEsf)
  * Expected result:
  * - The thread reports user context.
  *
+ * @testid{TSPEC-MEMPROT-129}
+ * @draft
  * @see k_is_user_context()
  * @verifies ZEP-SRS-8-3
  * @verifies ZEP-SRS-8-9
@@ -139,6 +141,8 @@ ZTEST_USER(userspace, test_userspace_is_usermode)
  * Expected result:
  * - The call succeeds and returns false.
  *
+ * @testid{TSPEC-MEMPROT-130}
+ * @draft
  * @see k_is_pre_kernel()
  * @verifies ZEP-SRS-8-9
  */
@@ -171,6 +175,8 @@ ZTEST_USER(userspace, test_userspace_is_post_kernel)
  * Expected result:
  * - The access faults with K_ERR_CPU_EXCEPTION (or is proven ineffective on Cortex-M).
  *
+ * @testid{TSPEC-MEMPROT-131}
+ * @draft
  * @verifies ZEP-SRS-8-3
  */
 ZTEST_USER(userspace, test_userspace_write_control)
@@ -278,6 +284,8 @@ ZTEST_USER(userspace, test_userspace_write_control)
  * Expected result:
  * - The attempt faults with K_ERR_CPU_EXCEPTION; the code after it is never reached.
  *
+ * @testid{TSPEC-MEMPROT-132}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -394,6 +402,8 @@ ZTEST_USER(userspace, test_userspace_disable_mmu_mpu)
  * Expected result:
  * - The read faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-133}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -427,6 +437,8 @@ ZTEST_USER(userspace, test_userspace_read_kernram)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-134}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -463,6 +475,8 @@ extern int _errno_neg_eagain;
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-135}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -503,6 +517,8 @@ ZTEST_USER(userspace, test_userspace_write_kernro)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-136}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -535,6 +551,8 @@ static int kernel_data;
  * Expected result:
  * - The read faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-137}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -563,6 +581,8 @@ ZTEST_USER(userspace, test_userspace_read_kernel_data)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-138}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -603,6 +623,8 @@ K_APP_DMEM(default_part) int32_t size = (0 - CONFIG_PRIVILEGED_STACK_SIZE -
  * Expected result:
  * - The read faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-139}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -646,6 +668,8 @@ ZTEST_USER(userspace, test_userspace_read_priv_stack)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-140}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -692,6 +716,8 @@ K_APP_BMEM(default_part) static struct k_sem sem;
  * Expected result:
  * - The call oopses with K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-141}
+ * @draft
  * @see k_sem_init()
  * @verifies ZEP-SRS-8-2
  * @verifies ZEP-SRS-8-14
@@ -725,6 +751,8 @@ static struct k_sem ksem;
  * Expected result:
  * - The call oopses with K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-142}
+ * @draft
  * @see k_sem_init()
  * @verifies ZEP-SRS-8-2
  * @verifies ZEP-SRS-8-14
@@ -765,6 +793,8 @@ void thread_body(void *p1, void *p2, void *p3)
  * Expected result:
  * - The call oopses with K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-143}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-8-8
  */
@@ -819,6 +849,8 @@ static void uthread_write_body(void *p1, void *p2, void *p3)
  * Expected result:
  * - The read faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-144}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -864,6 +896,8 @@ ZTEST_USER(userspace, test_userspace_read_other_stack)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-145}
+ * @draft
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-3
  */
@@ -897,6 +931,9 @@ ZTEST_USER(userspace, test_userspace_write_other_stack)
  * the system will assert.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-146}
+ * @draft
  * @verifies ZEP-SRS-8-7
  */
 ZTEST_USER(userspace, test_userspace_revoke_noperms_object)
@@ -930,6 +967,8 @@ ZTEST_USER(userspace, test_userspace_revoke_noperms_object)
  * Expected result:
  * - The take oopses with K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-147}
+ * @draft
  * @see k_object_release()
  * @see k_sem_take()
  * @verifies ZEP-SRS-8-7
@@ -963,6 +1002,9 @@ static void umode_enter_func(void *p1, void *p2, void *p3)
 * ability to drop privileges to user mode.
 *
 * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-148}
+ * @draft
  * @verifies ZEP-SRS-8-9
 */
 ZTEST(userspace, test_userspace_user_mode_enter)
@@ -995,6 +1037,8 @@ K_PIPE_DEFINE(kpipe, PIPE_LEN, BYTES_TO_READ_WRITE);
  * Expected result:
  * - The call oopses with K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-149}
+ * @draft
  * @see k_pipe_read()
  * @verifies ZEP-SRS-8-14
  */
@@ -1031,6 +1075,8 @@ ZTEST_USER(userspace, test_userspace_write_kobject_user_pipe)
  * Expected result:
  * - The call oopses with K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-150}
+ * @draft
  * @see k_pipe_write()
  * @verifies ZEP-SRS-8-14
  */
@@ -1100,6 +1146,8 @@ static void drop_user(volatile bool *to_modify)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-151}
+ * @draft
  * @see k_mem_domain_init()
  * @see k_mem_domain_add_thread()
  * @verifies ZEP-SRS-8-1
@@ -1149,6 +1197,8 @@ extern uint8_t *z_priv_stack_find(void *obj);
  * Expected result:
  * - The write succeeds with no fault.
  *
+ * @testid{TSPEC-MEMPROT-152}
+ * @draft
  * @see k_mem_domain_add_thread()
  * @see k_thread_user_mode_enter()
  * @verifies ZEP-SRS-8-1
@@ -1178,6 +1228,8 @@ ZTEST(userspace_domain, test_userspace_domain_add_thread_drop_to_user)
  * Expected result:
  * - The write succeeds with no fault.
  *
+ * @testid{TSPEC-MEMPROT-153}
+ * @draft
  * @see k_mem_domain_add_partition()
  * @see k_thread_user_mode_enter()
  * @verifies ZEP-SRS-8-17
@@ -1220,6 +1272,8 @@ ZTEST(userspace_domain, test_userspace_domain_add_part_drop_to_user)
  * Expected result:
  * - The write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-154}
+ * @draft
  * @see k_mem_domain_remove_partition()
  * @verifies ZEP-SRS-8-17
  * @verifies ZEP-SRS-8-22
@@ -1263,6 +1317,8 @@ ZTEST(userspace_domain, test_userspace_domain_remove_part_drop_to_user)
  * Expected result:
  * - The spawned thread's write succeeds with no fault.
  *
+ * @testid{TSPEC-MEMPROT-155}
+ * @draft
  * @see k_mem_domain_add_thread()
  * @verifies ZEP-SRS-8-1
  * @verifies ZEP-SRS-8-17
@@ -1290,6 +1346,8 @@ ZTEST(userspace_domain_ctx, test_userspace_domain_add_thread_context_switch)
  * Expected result:
  * - The spawned thread's write succeeds with no fault.
  *
+ * @testid{TSPEC-MEMPROT-156}
+ * @draft
  * @see k_mem_domain_add_partition()
  * @verifies ZEP-SRS-8-17
  */
@@ -1330,6 +1388,8 @@ ZTEST(userspace_domain_ctx, test_userspace_domain_add_part_context_switch)
  * Expected result:
  * - The spawned thread's write faults with K_ERR_CPU_EXCEPTION.
  *
+ * @testid{TSPEC-MEMPROT-157}
+ * @draft
  * @see k_mem_domain_remove_partition()
  * @verifies ZEP-SRS-8-17
  */
@@ -1368,6 +1428,9 @@ void z_impl_missing_syscall(void)
  * calls.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-158}
+ * @draft
  * @verifies ZEP-SRS-8-4
  */
 ZTEST_USER(userspace, test_userspace_unimplemented_syscall)
@@ -1385,6 +1448,9 @@ ZTEST_USER(userspace, test_userspace_unimplemented_syscall)
  * system call was made from user code.
  *
  * @ingroup kernel_memprotect_tests
+ *
+ * @testid{TSPEC-MEMPROT-159}
+ * @draft
  * @verifies ZEP-SRS-8-5
  */
 ZTEST_USER(userspace, test_userspace_bad_syscall)
@@ -1406,6 +1472,8 @@ static struct k_sem recycle_sem;
  * @details Test recycle valid/invalid kernel object, see if
  * perms_count changes as expected.
  *
+ * @testid{TSPEC-MEMPROT-160}
+ * @draft
  * @see k_object_recycle()
  * @see k_object_find()
  *
@@ -1463,6 +1531,8 @@ ZTEST(userspace, test_userspace_object_recycle)
  * Expected result:
  * - The fault arrives as K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-161}
+ * @draft
  * @see k_panic()
  * @verifies ZEP-SRS-16-7
  */
@@ -1486,6 +1556,8 @@ ZTEST_USER(userspace, test_userspace_oops_panic)
  * Expected result:
  * - The fault arrives as K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-162}
+ * @draft
  * @see k_oops()
  * @verifies ZEP-SRS-16-7
  */
@@ -1509,6 +1581,8 @@ ZTEST_USER(userspace, test_userspace_oops_oops)
  * Expected result:
  * - The fault arrives as K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-163}
+ * @draft
  * @verifies ZEP-SRS-16-7
  */
 ZTEST_USER(userspace, test_userspace_oops_exception)
@@ -1531,6 +1605,8 @@ ZTEST_USER(userspace, test_userspace_oops_exception)
  * Expected result:
  * - The fault arrives as K_ERR_KERNEL_OOPS.
  *
+ * @testid{TSPEC-MEMPROT-164}
+ * @draft
  * @verifies ZEP-SRS-16-7
  */
 ZTEST_USER(userspace, test_userspace_oops_maxint)
@@ -1553,6 +1629,8 @@ ZTEST_USER(userspace, test_userspace_oops_maxint)
  * Expected result:
  * - The fault arrives as K_ERR_STACK_CHK_FAIL.
  *
+ * @testid{TSPEC-MEMPROT-165}
+ * @draft
  * @verifies ZEP-SRS-16-7
  */
 ZTEST_USER(userspace, test_userspace_oops_stackcheck)
@@ -1599,6 +1677,8 @@ static inline void z_vrfy_check_syscall_context(void)
  * - Interrupts are unlocked and no ISR context is reported inside the
  *   call.
  *
+ * @testid{TSPEC-MEMPROT-166}
+ * @draft
  * @see k_is_in_isr()
  * @verifies ZEP-SRS-8-10
  */
@@ -1638,6 +1718,8 @@ static void tls_leakage_user_part(void *p1, void *p2, void *p3)
  * Expected result:
  * - No byte of the supervisor-written marker survives into user mode.
  *
+ * @testid{TSPEC-MEMPROT-167}
+ * @draft
  * @see k_thread_user_mode_enter()
  * @verifies ZEP-SRS-8-24
  */
@@ -1686,6 +1768,8 @@ void tls_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - The TLS area lies entirely within the thread's stack object.
  *
+ * @testid{TSPEC-MEMPROT-168}
+ * @draft
  * @verifies ZEP-SRS-8-24
  */
 ZTEST(userspace, test_userspace_tls_pointer)
@@ -1794,6 +1878,8 @@ static K_KERNEL_THREAD_DEFINE(kernel_only_thread,
  * - The kernel-mode half runs, the fatal error fires, and the user-mode
  *   entry point never executes.
  *
+ * @testid{TSPEC-MEMPROT-169}
+ * @draft
  * @see K_KERNEL_THREAD_DEFINE
  * @see k_thread_user_mode_enter()
  * @verifies ZEP-SRS-8-9

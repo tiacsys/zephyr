@@ -71,6 +71,8 @@ void k_sys_fatal_error_handler(unsigned int reason, const struct arch_esf *pEsf)
  * Expected result:
  * - Both aliases show the written data and the read-only write faults.
  *
+ * @testid{TSPEC-MEMPROT-024}
+ * @draft
  * @see k_mem_map_phys_bare()
  * @verifies ZEP-SRS-36-1
  */
@@ -180,6 +182,8 @@ static void transplanted_function(bool *executed)
  * Expected result:
  * - The executable mapping runs the function; the non-executable one faults.
  *
+ * @testid{TSPEC-MEMPROT-025}
+ * @draft
  * @see k_mem_map_phys_bare()
  * @verifies ZEP-SRS-36-1
  */
@@ -242,6 +246,8 @@ ZTEST(mem_map, test_k_mem_map_phys_bare_exec)
  * Expected result:
  * - The buffer is unchanged by the act of mapping it.
  *
+ * @testid{TSPEC-MEMPROT-026}
+ * @draft
  * @see k_mem_map_phys_bare()
  * @verifies ZEP-SRS-36-1
  */
@@ -287,6 +293,8 @@ ZTEST(mem_map, test_k_mem_map_phys_bare_side_effect)
  * Expected result:
  * - The read after the unmap faults; the code after it is never reached.
  *
+ * @testid{TSPEC-MEMPROT-027}
+ * @draft
  * @see k_mem_unmap_phys_bare()
  * @verifies ZEP-SRS-36-2
  */
@@ -333,6 +341,8 @@ ZTEST(mem_map, test_k_mem_unmap_phys_bare)
  * - The originally returned virtual address is handed out again, showing the
  *   unmap reclaimed the region.
  *
+ * @testid{TSPEC-MEMPROT-028}
+ * @draft
  * @see k_mem_map_phys_bare()
  * @see k_mem_unmap_phys_bare()
  * @verifies ZEP-SRS-36-3
@@ -394,6 +404,8 @@ ZTEST(mem_map, test_k_mem_map_phys_bare_unmap_reclaim_addr)
  * - The page is zero-filled and writable, and unmapping returns both the
  *   frames and the virtual region.
  *
+ * @testid{TSPEC-MEMPROT-029}
+ * @draft
  * @see k_mem_map()
  * @see k_mem_unmap()
  * @verifies ZEP-SRS-36-4
@@ -487,6 +499,8 @@ ZTEST(mem_map_api, test_k_mem_map_unmap)
  * - The in-bounds write succeeds and the underrun faults in the guard page;
  *   the code after it is never reached.
  *
+ * @testid{TSPEC-MEMPROT-030}
+ * @draft
  * @see k_mem_map()
  * @verifies ZEP-SRS-36-5
  */
@@ -534,6 +548,8 @@ ZTEST(mem_map_api, test_k_mem_map_guard_before)
  * - The in-bounds write succeeds and the overrun faults in the guard page;
  *   the code after it is never reached.
  *
+ * @testid{TSPEC-MEMPROT-031}
+ * @draft
  * @see k_mem_map()
  * @verifies ZEP-SRS-36-5
  */
@@ -586,6 +602,8 @@ ZTEST(mem_map_api, test_k_mem_map_guard_after)
  * - Exhaustion is reported as NULL after exactly the predicted number of
  *   pages, and unmapping restores the free memory to its initial value.
  *
+ * @testid{TSPEC-MEMPROT-032}
+ * @draft
  * @see k_mem_map()
  * @see k_mem_unmap()
  * @verifies ZEP-SRS-36-7
@@ -721,6 +739,8 @@ static void user_function(void *p1, void *p2, void *p3)
  * - The access to the user-permitted mapping succeeds; the access to the
  *   kernel-only mapping faults.
  *
+ * @testid{TSPEC-MEMPROT-033}
+ * @draft
  * @see k_mem_map_phys_bare()
  * @verifies ZEP-SRS-36-6
  */

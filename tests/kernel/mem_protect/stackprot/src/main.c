@@ -130,6 +130,8 @@ static struct k_thread alt_thread_data;
  * Expected result:
  * - The calls complete normally and no stack check failure is raised.
  *
+ * @testid{TSPEC-MEMPROT-099}
+ * @draft
  * @verifies ZEP-SRS-8-11
  * @verifies ZEP-SRS-8-12
  * @verifies ZEP-SRS-8-25
@@ -163,6 +165,8 @@ ZTEST_USER(stackprot, test_stackprot_no_false_positive)
  * - The thread is terminated by the stack check and never reaches the code
  *   that would flag a failure.
  *
+ * @testid{TSPEC-MEMPROT-100}
+ * @draft
  * @verifies ZEP-SRS-8-12
  * @verifies ZEP-SRS-8-25
  */
@@ -226,6 +230,8 @@ void alternate_thread_canary(void *arg1, void *arg2, void *arg3)
  * - With per-thread canaries the values differ; with a global canary they are
  *   identical.
  *
+ * @testid{TSPEC-MEMPROT-101}
+ * @draft
  * @verifies ZEP-SRS-8-25
  * @verifies ZEP-SRS-8-26
  */

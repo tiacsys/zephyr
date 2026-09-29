@@ -67,6 +67,8 @@ LOG_BACKEND_DEFINE(backend, backend_api, false);
  * - Each rendered message begins with CUSTOM_LOG_PREFIX followed by the
  *   formatted text and arguments.
  *
+ * @testid{TSPEC-LOGGING-043}
+ * @draft
  * @see log_msg_get_package()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3

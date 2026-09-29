@@ -66,6 +66,8 @@ BUILD_ASSERT(IS_ENABLED(CONFIG_LOG_BACKEND_NET), "syslog backend not enabled");
  * Expected result:
  * - Output equals the expected "<134>1 ... domain/src: test" syslog string.
  *
+ * @testid{TSPEC-LOGGING-085}
+ * @draft
  * @see log_output_process()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3

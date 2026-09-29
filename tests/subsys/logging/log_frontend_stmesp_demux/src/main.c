@@ -227,6 +227,8 @@ static void demux_init(void)
  * - Initialization with too many IDs returns -EINVAL.
  * - Initialization within the limit returns 0.
  *
+ * @testid{TSPEC-LOGGING-044}
+ * @draft
  * @see log_frontend_stmesp_demux_init()
  * @ingroup logging_tests
  */
@@ -264,6 +266,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_init)
  * - Each claimed packet matches the written timestamp, length and data.
  * - No packets are reported as dropped.
  *
+ * @testid{TSPEC-LOGGING-045}
+ * @draft
  * @see log_frontend_stmesp_demux_claim()
  * @ingroup logging_tests
  */
@@ -311,6 +315,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_basic)
  * - At least one packet is reported dropped after overflow.
  * - The remaining packets are claimed in order.
  *
+ * @testid{TSPEC-LOGGING-046}
+ * @draft
  * @see log_frontend_stmesp_demux_get_dropped()
  * @ingroup logging_tests
  */
@@ -359,6 +365,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_overwrite)
  * - Both packets are claimed with their correct timestamp, length and payload.
  * - The demux is empty afterwards.
  *
+ * @testid{TSPEC-LOGGING-047}
+ * @draft
  * @see log_frontend_stmesp_demux_packet_start()
  * @ingroup logging_tests
  */
@@ -416,6 +424,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_mix)
  *   dropped counter.
  * - After completing a packet, a new packet can be started with no drops.
  *
+ * @testid{TSPEC-LOGGING-048}
+ * @draft
  * @see log_frontend_stmesp_demux_packet_start()
  * @ingroup logging_tests
  */
@@ -477,6 +487,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_drop_too_many_active)
  * - Returns -ENOTSUP when utilization tracking is not enabled.
  * - Reports zero before any packet and the expected packet size afterwards.
  *
+ * @testid{TSPEC-LOGGING-049}
+ * @draft
  * @see log_frontend_stmesp_demux_max_utilization()
  * @ingroup logging_tests
  */
@@ -522,6 +534,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_max_utilization)
  *   data-present flag/value.
  * - The demux is empty afterwards.
  *
+ * @testid{TSPEC-LOGGING-050}
+ * @draft
  * @see log_frontend_stmesp_demux_claim()
  * @ingroup logging_tests
  */
@@ -585,6 +599,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_trace_point)
  * - Each hardware event is claimed with the expected value and timestamp.
  * - The demux is empty afterwards.
  *
+ * @testid{TSPEC-LOGGING-051}
+ * @draft
  * @see log_frontend_stmesp_demux_claim()
  * @ingroup logging_tests
  */
@@ -626,6 +642,8 @@ ZTEST(log_frontend_stmesp_demux_test, test_hw_event)
  * - The dropped count equals the number of active (incomplete) packets.
  * - The completed packet is still claimable after reset.
  *
+ * @testid{TSPEC-LOGGING-052}
+ * @draft
  * @see log_frontend_stmesp_demux_reset()
  * @ingroup logging_tests
  */

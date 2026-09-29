@@ -74,6 +74,8 @@ int custom_timestamp(const struct log_output *output,
  * - Output uses the custom timestamp text when enabled, else the default
  *   numeric timestamp.
  *
+ * @testid{TSPEC-LOGGING-097}
+ * @draft
  * @see log_custom_timestamp_set()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2

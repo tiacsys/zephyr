@@ -168,6 +168,8 @@ void test_log_switch_format_func_t_get(void)
  * Expected result:
  * - Messages render in the selected format and all format APIs behave as expected.
  *
+ * @testid{TSPEC-LOGGING-089}
+ * @draft
  * @see log_format_set_all_active_backends()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -207,6 +209,8 @@ void custom_formatting(const struct log_output *output, struct log_msg *msg, uin
  * Expected result:
  * - No output is rendered for the custom format with a NULL handler.
  *
+ * @testid{TSPEC-LOGGING-090}
+ * @draft
  * @see log_custom_output_msg_set()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -246,6 +250,8 @@ ZTEST(log_switch_format, test_log_switch_format_custom_output_handles_null)
  * Expected result:
  * - The custom handler is invoked and its formatted output is produced.
  *
+ * @testid{TSPEC-LOGGING-091}
+ * @draft
  * @see log_custom_output_msg_set()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3
@@ -290,6 +296,8 @@ ZTEST(log_switch_format, test_log_switch_format_custom_output_called_when_set)
  * Expected result:
  * - No output is rendered while the custom format handler is uninitialized.
  *
+ * @testid{TSPEC-LOGGING-092}
+ * @draft
  * @see log_backend_format_set()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-3

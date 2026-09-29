@@ -55,6 +55,8 @@ int write_log_to_file(uint8_t *data, size_t length, void *ctx);
  * Expected result:
  * - The write reports the expected length and the mount succeeds.
  *
+ * @testid{TSPEC-LOGGING-013}
+ * @draft
  * @see fs_mount()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5
@@ -92,6 +94,8 @@ ZTEST(test_log_backend_fs, test_fs_nonexist)
  * Expected result:
  * - All prior log files are removed, leaving a clean log directory.
  *
+ * @testid{TSPEC-LOGGING-014}
+ * @draft
  * @see fs_unlink()
  * @ingroup logging_tests
  */
@@ -150,6 +154,8 @@ ZTEST(test_log_backend_fs, test_wipe_fs_logs)
  * Expected result:
  * - The file contains exactly the logged strings in the order written.
  *
+ * @testid{TSPEC-LOGGING-015}
+ * @draft
  * @see fs_read()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-2
@@ -219,6 +225,8 @@ ZTEST(test_log_backend_fs, test_log_fs_file_content)
  * Expected result:
  * - The first file is size-bounded and a second file holds the remaining output.
  *
+ * @testid{TSPEC-LOGGING-016}
+ * @draft
  * @see fs_stat()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5
@@ -299,6 +307,8 @@ ZTEST(test_log_backend_fs, test_log_fs_file_size)
  * Expected result:
  * - Exactly the configured maximum number of files remain, retaining the newest entries.
  *
+ * @testid{TSPEC-LOGGING-017}
+ * @draft
  * @see fs_readdir()
  * @ingroup logging_tests
  * @verifies ZEP-SRS-11-5

@@ -188,6 +188,8 @@ static void realloc_handler(void *p1, void *p2, void *p3)
  * validates k_free() API by freeing up all the blocks which were
  * allocated from the heap memory.
  *
+ * @testid{TSPEC-MULTIHEAP-001}
+ * @draft
  * @see k_malloc()
  * @verifies ZEP-SRS-9-11
  */
@@ -217,6 +219,8 @@ ZTEST(mheap_api, test_mheap_malloc_free)
  * with k_realloc(), growing and shrinking allocations and verifying the
  * contents are preserved and that allocation back to the system heap works.
  *
+ * @testid{TSPEC-MULTIHEAP-002}
+ * @draft
  * @see k_realloc()
  * @verifies ZEP-SRS-9-11
  */
@@ -248,6 +252,8 @@ ZTEST(mheap_api, test_mheap_realloc)
  * blocks are memset to 0 and read/write is allowed. The test is then
  * teared up by freeing all the blocks allocated.
  *
+ * @testid{TSPEC-MULTIHEAP-003}
+ * @draft
  * @see k_calloc()
  * @verifies ZEP-SRS-9-11
  */
@@ -284,6 +290,8 @@ ZTEST(mheap_api, test_mheap_calloc)
  * using several alignment values and verifies each returned pointer satisfies
  * the requested alignment before freeing it.
  *
+ * @testid{TSPEC-MULTIHEAP-004}
+ * @draft
  * @see k_aligned_alloc()
  * @verifies ZEP-SRS-9-11
  */
@@ -327,6 +335,8 @@ ZTEST(mheap_api, test_k_aligned_alloc)
  *
  * @ingroup k_heap_api_tests
  *
+ * @testid{TSPEC-MULTIHEAP-005}
+ * @draft
  * @see k_thread_system_pool_assign()
  * @see z_thread_malloc()
  * @see k_free()
@@ -359,6 +369,8 @@ ZTEST(mheap_api, test_sys_heap_mem_pool_assign)
  *
  * @ingroup k_heap_api_tests
  *
+ * @testid{TSPEC-MULTIHEAP-006}
+ * @draft
  * @see z_thread_malloc()
  * @see k_free()
  * @verifies ZEP-SRS-9-11
@@ -380,6 +392,8 @@ ZTEST(mheap_api, test_malloc_in_isr)
  *
  * @ingroup k_heap_api_tests
  *
+ * @testid{TSPEC-MULTIHEAP-007}
+ * @draft
  * @see z_thread_malloc()
  * @verifies ZEP-SRS-9-11
  */

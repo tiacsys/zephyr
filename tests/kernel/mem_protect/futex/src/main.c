@@ -663,6 +663,10 @@ ZTEST_USER(futex, test_futex_bad_inputs)
 	zassert_equal(ret, -ETIMEDOUT, "didn't time out");
 }
 
+/**
+ * @}
+ */
+
 static void futex_wait_wake(void *p1, void *p2, void *p3)
 {
 	int32_t ret_value;
@@ -752,6 +756,3 @@ void *futex_setup(void)
 }
 
 ZTEST_SUITE(futex, NULL, futex_setup, NULL, NULL, NULL);
-/**
- * @}
- */

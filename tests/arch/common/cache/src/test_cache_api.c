@@ -8,9 +8,17 @@
 #include <zephyr/cache.h>
 
 /**
+ * @brief Tests common to all architectures
+ * @defgroup tests_arch_common Common architecture tests
+ * @ingroup all_tests
+ * @{
+ * @}
+ */
+
+/**
  * @brief Architecture cache management API tests
  * @defgroup tests_arch_cache_api Cache management API
- * @ingroup all_tests
+ * @ingroup tests_arch_common
  * @{
  */
 

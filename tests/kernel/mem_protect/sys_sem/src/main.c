@@ -125,7 +125,7 @@ static void sem_multiple_threads_wait_helper(void *p1, void *p2, void *p3)
  *
  * @defgroup sys_sem_tests System Semaphore
  *
- * @ingroup all_tests
+ * @ingroup tests_kernel_mem_protect
  *
  * This module tests the userspace-capable system semaphore APIs:
  * sys_sem_init(), sys_sem_give(), sys_sem_take() and sys_sem_count_get().

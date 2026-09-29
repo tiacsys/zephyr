@@ -18,7 +18,7 @@
 
 /**
  * @defgroup kernel_irq_offload_tests IRQ Offload
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

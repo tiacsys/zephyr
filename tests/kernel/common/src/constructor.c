@@ -11,7 +11,7 @@
 
 /**
  * @defgroup kernel_constructor_tests Constructors
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

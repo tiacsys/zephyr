@@ -37,7 +37,7 @@ static struct k_thread threads[NUM_TIMEOUTS];
 
 /**
  * @defgroup kernel_timeout_tests Timeout Order
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

@@ -23,7 +23,7 @@
 
 /**
  * @defgroup kernel_bitarray_tests Bit Arrays
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

@@ -9,7 +9,7 @@
 
 /**
  * @defgroup kernel_init_tests Kernel Initialization
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

@@ -11,7 +11,7 @@
 
 /**
  * @defgroup kernel_byteorder_tests Byteorder Operations
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

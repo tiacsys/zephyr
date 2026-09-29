@@ -20,7 +20,7 @@
  *
  * @defgroup kernel_cpu_mask_tests CPU Mask
  *
- * @ingroup all_tests
+ * @ingroup tests_kernel_multiprocessing
  *
  * This module tests the per-thread CPU affinity APIs:
  * k_thread_cpu_mask_clear(), k_thread_cpu_mask_enable_all(),

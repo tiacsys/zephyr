@@ -14,7 +14,7 @@
  *
  * @defgroup kernel_multilib_tests Multilib
  *
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  */

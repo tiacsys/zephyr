@@ -99,7 +99,7 @@ static void suite_teardown(void *fixture)
 /**
  * @brief Thread runtime stack safety tests
  * @defgroup kernel_runtime_stack_safety_tests Thread runtime stack safety
- * @ingroup all_tests
+ * @ingroup kernel_thread_tests
  * @{
  */
 

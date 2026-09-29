@@ -52,7 +52,7 @@ static void errno_thread(void *_n, void *_my_errno, void *_unused)
 }
 /**
  * @defgroup kernel_errno_tests Error Number
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

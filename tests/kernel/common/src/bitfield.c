@@ -20,7 +20,7 @@
 
 /**
  * @defgroup kernel_bitfield_tests Bit Fields
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

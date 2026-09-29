@@ -32,7 +32,7 @@ static ZTEST_BMEM struct timer_data tdata;
 
 /**
  * @defgroup kernel_clock_tests Clock Operations
- * @ingroup all_tests
+ * @ingroup kernel_common_tests
  * @{
  * @}
  *

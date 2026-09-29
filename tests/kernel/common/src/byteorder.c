@@ -39,6 +39,8 @@
  * Expected result:
  * - Both destination buffers match the expected reversed contents.
  *
+ * @testid{TSPEC-COMMON-015}
+ * @draft
  * @see sys_memcpy_swap()
  */
 ZTEST(byteorder, test_byteorder_memcpy_swap)
@@ -75,6 +77,8 @@ ZTEST(byteorder, test_byteorder_memcpy_swap)
  * Expected result:
  * - Both buffers contain their byte-reversed contents.
  *
+ * @testid{TSPEC-COMMON-016}
+ * @draft
  * @see sys_mem_swap()
  */
 ZTEST(byteorder, test_byteorder_mem_swap)
@@ -115,6 +119,8 @@ ZTEST(byteorder, test_byteorder_mem_swap)
  * Expected result:
  * - The result equals the expected byte-reversed value.
  *
+ * @testid{TSPEC-COMMON-017}
+ * @draft
  * @see BSWAP_16()
  */
 ZTEST(byteorder, test_bswap_16)
@@ -149,6 +155,8 @@ ZTEST(byteorder, test_bswap_16)
  * Expected result:
  * - Both calls return the same expected byte-reversed value.
  *
+ * @testid{TSPEC-COMMON-018}
+ * @draft
  * @see BSWAP_24()
  */
 ZTEST(byteorder, test_bswap_24)
@@ -181,6 +189,8 @@ ZTEST(byteorder, test_bswap_24)
  * Expected result:
  * - The result equals the expected byte-reversed value.
  *
+ * @testid{TSPEC-COMMON-019}
+ * @draft
  * @see BSWAP_32()
  */
 ZTEST(byteorder, test_bswap_32)
@@ -215,6 +225,8 @@ ZTEST(byteorder, test_bswap_32)
  * Expected result:
  * - Both calls return the same expected byte-reversed value.
  *
+ * @testid{TSPEC-COMMON-020}
+ * @draft
  * @see BSWAP_40()
  */
 ZTEST(byteorder, test_bswap_40)
@@ -254,6 +266,8 @@ ZTEST(byteorder, test_bswap_40)
  * Expected result:
  * - Both calls return the same expected byte-reversed value.
  *
+ * @testid{TSPEC-COMMON-021}
+ * @draft
  * @see BSWAP_48()
  */
 ZTEST(byteorder, test_bswap_48)
@@ -286,6 +300,8 @@ ZTEST(byteorder, test_bswap_48)
  * Expected result:
  * - The result equals the expected byte-reversed value.
  *
+ * @testid{TSPEC-COMMON-022}
+ * @draft
  * @see BSWAP_64()
  */
 ZTEST(byteorder, test_bswap_64)
@@ -312,6 +328,8 @@ ZTEST(byteorder, test_bswap_64)
  * Expected result:
  * - The returned value equals the expected 64-bit integer.
  *
+ * @testid{TSPEC-COMMON-023}
+ * @draft
  * @see sys_get_be64()
  */
 ZTEST(byteorder, test_sys_get_be64)
@@ -342,6 +360,8 @@ ZTEST(byteorder, test_sys_get_be64)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-024}
+ * @draft
  * @see sys_put_be64()
  */
 ZTEST(byteorder, test_sys_put_be64)
@@ -373,6 +393,8 @@ ZTEST(byteorder, test_sys_put_be64)
  * Expected result:
  * - The returned value equals the expected 40-bit integer.
  *
+ * @testid{TSPEC-COMMON-025}
+ * @draft
  * @see sys_get_be40()
  */
 ZTEST(byteorder, test_sys_get_be40)
@@ -400,6 +422,8 @@ ZTEST(byteorder, test_sys_get_be40)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-026}
+ * @draft
  * @see sys_put_be40()
  */
 ZTEST(byteorder, test_sys_put_be40)
@@ -428,6 +452,8 @@ ZTEST(byteorder, test_sys_put_be40)
  * Expected result:
  * - The returned value equals the expected 48-bit integer.
  *
+ * @testid{TSPEC-COMMON-027}
+ * @draft
  * @see sys_get_be48()
  */
 ZTEST(byteorder, test_sys_get_be48)
@@ -457,6 +483,8 @@ ZTEST(byteorder, test_sys_get_be48)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-028}
+ * @draft
  * @see sys_put_be48()
  */
 ZTEST(byteorder, test_sys_put_be48)
@@ -486,6 +514,8 @@ ZTEST(byteorder, test_sys_put_be48)
  * Expected result:
  * - The returned value equals the expected 32-bit integer.
  *
+ * @testid{TSPEC-COMMON-029}
+ * @draft
  * @see sys_get_be32()
  */
 ZTEST(byteorder, test_sys_get_be32)
@@ -515,6 +545,8 @@ ZTEST(byteorder, test_sys_get_be32)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-030}
+ * @draft
  * @see sys_put_be32()
  */
 ZTEST(byteorder, test_sys_put_be32)
@@ -546,6 +578,8 @@ ZTEST(byteorder, test_sys_put_be32)
  * Expected result:
  * - The returned value equals the expected 24-bit integer.
  *
+ * @testid{TSPEC-COMMON-031}
+ * @draft
  * @see sys_get_be24()
  */
 ZTEST(byteorder, test_sys_get_be24)
@@ -575,6 +609,8 @@ ZTEST(byteorder, test_sys_get_be24)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-032}
+ * @draft
  * @see sys_put_be24()
  */
 ZTEST(byteorder, test_sys_put_be24)
@@ -605,6 +641,8 @@ ZTEST(byteorder, test_sys_put_be24)
  * Expected result:
  * - The returned value equals the expected 16-bit integer.
  *
+ * @testid{TSPEC-COMMON-033}
+ * @draft
  * @see sys_get_be16()
  */
 ZTEST(byteorder, test_sys_get_be16)
@@ -634,6 +672,8 @@ ZTEST(byteorder, test_sys_get_be16)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-034}
+ * @draft
  * @see sys_put_be16()
  */
 ZTEST(byteorder, test_sys_put_be16)
@@ -664,6 +704,8 @@ ZTEST(byteorder, test_sys_put_be16)
  * Expected result:
  * - The returned value equals the expected 16-bit integer.
  *
+ * @testid{TSPEC-COMMON-035}
+ * @draft
  * @see sys_get_le16()
  */
 ZTEST(byteorder, test_sys_get_le16)
@@ -693,6 +735,8 @@ ZTEST(byteorder, test_sys_get_le16)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-036}
+ * @draft
  * @see sys_put_le16()
  */
 ZTEST(byteorder, test_sys_put_le16)
@@ -724,6 +768,8 @@ ZTEST(byteorder, test_sys_put_le16)
  * Expected result:
  * - The returned value equals the expected 24-bit integer.
  *
+ * @testid{TSPEC-COMMON-037}
+ * @draft
  * @see sys_get_le24()
  */
 ZTEST(byteorder, test_sys_get_le24)
@@ -753,6 +799,8 @@ ZTEST(byteorder, test_sys_get_le24)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-038}
+ * @draft
  * @see sys_put_le24()
  */
 ZTEST(byteorder, test_sys_put_le24)
@@ -783,6 +831,8 @@ ZTEST(byteorder, test_sys_put_le24)
  * Expected result:
  * - The returned value equals the expected 32-bit integer.
  *
+ * @testid{TSPEC-COMMON-039}
+ * @draft
  * @see sys_get_le32()
  */
 ZTEST(byteorder, test_sys_get_le32)
@@ -812,6 +862,8 @@ ZTEST(byteorder, test_sys_get_le32)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-040}
+ * @draft
  * @see sys_put_le32()
  */
 ZTEST(byteorder, test_sys_put_le32)
@@ -843,6 +895,8 @@ ZTEST(byteorder, test_sys_put_le32)
  * Expected result:
  * - The returned value equals the expected 40-bit integer.
  *
+ * @testid{TSPEC-COMMON-041}
+ * @draft
  * @see sys_get_le40()
  */
 ZTEST(byteorder, test_sys_get_le40)
@@ -870,6 +924,8 @@ ZTEST(byteorder, test_sys_get_le40)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-042}
+ * @draft
  * @see sys_put_le40()
  */
 ZTEST(byteorder, test_sys_put_le40)
@@ -899,6 +955,8 @@ ZTEST(byteorder, test_sys_put_le40)
  * Expected result:
  * - The returned value equals the expected 48-bit integer.
  *
+ * @testid{TSPEC-COMMON-043}
+ * @draft
  * @see sys_get_le48()
  */
 ZTEST(byteorder, test_sys_get_le48)
@@ -928,6 +986,8 @@ ZTEST(byteorder, test_sys_get_le48)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-044}
+ * @draft
  * @see sys_put_le48()
  */
 ZTEST(byteorder, test_sys_put_le48)
@@ -958,6 +1018,8 @@ ZTEST(byteorder, test_sys_put_le48)
  * Expected result:
  * - The returned value equals the expected 64-bit integer.
  *
+ * @testid{TSPEC-COMMON-045}
+ * @draft
  * @see sys_get_le64()
  */
 ZTEST(byteorder, test_sys_get_le64)
@@ -987,6 +1049,8 @@ ZTEST(byteorder, test_sys_get_le64)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-046}
+ * @draft
  * @see sys_put_le64()
  */
 ZTEST(byteorder, test_sys_put_le64)
@@ -1019,6 +1083,8 @@ ZTEST(byteorder, test_sys_put_le64)
  * Expected result:
  * - The array matches the expected host-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-047}
+ * @draft
  * @see sys_uint16_to_array()
  */
 ZTEST(byteorder, test_sys_uint16_to_array)
@@ -1052,6 +1118,8 @@ ZTEST(byteorder, test_sys_uint16_to_array)
  * Expected result:
  * - The array matches the expected host-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-048}
+ * @draft
  * @see sys_uint32_to_array()
  */
 ZTEST(byteorder, test_sys_uint32_to_array)
@@ -1085,6 +1153,8 @@ ZTEST(byteorder, test_sys_uint32_to_array)
  * Expected result:
  * - The array matches the expected host-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-049}
+ * @draft
  * @see sys_uint64_to_array()
  */
 ZTEST(byteorder, test_sys_uint64_to_array)
@@ -1119,6 +1189,8 @@ ZTEST(byteorder, test_sys_uint64_to_array)
  * Expected result:
  * - The buffer matches the expected host-order byte sequence.
  *
+ * @testid{TSPEC-COMMON-050}
+ * @draft
  * @see sys_le_to_cpu()
  */
 ZTEST(byteorder, test_sys_le_to_cpu)
@@ -1152,6 +1224,8 @@ ZTEST(byteorder, test_sys_le_to_cpu)
  * Expected result:
  * - The buffer matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-051}
+ * @draft
  * @see sys_cpu_to_le()
  */
 ZTEST(byteorder, test_sys_cpu_to_le)
@@ -1186,6 +1260,8 @@ ZTEST(byteorder, test_sys_cpu_to_le)
  * Expected result:
  * - The buffer matches the expected host-order byte sequence.
  *
+ * @testid{TSPEC-COMMON-052}
+ * @draft
  * @see sys_be_to_cpu()
  */
 ZTEST(byteorder, test_sys_be_to_cpu)
@@ -1220,6 +1296,8 @@ ZTEST(byteorder, test_sys_be_to_cpu)
  * Expected result:
  * - The buffer matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-053}
+ * @draft
  * @see sys_cpu_to_be()
  */
 ZTEST(byteorder, test_sys_cpu_to_be)
@@ -1254,6 +1332,8 @@ ZTEST(byteorder, test_sys_cpu_to_be)
  * Expected result:
  * - The destination matches the expected little-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-054}
+ * @draft
  * @see sys_put_le()
  */
 ZTEST(byteorder, test_sys_put_le)
@@ -1289,6 +1369,8 @@ ZTEST(byteorder, test_sys_put_le)
  * Expected result:
  * - The destination matches the expected big-endian byte sequence.
  *
+ * @testid{TSPEC-COMMON-055}
+ * @draft
  * @see sys_put_be()
  */
 ZTEST(byteorder, test_sys_put_be)
@@ -1324,6 +1406,8 @@ ZTEST(byteorder, test_sys_put_be)
  * Expected result:
  * - The destination matches the expected host-order byte sequence.
  *
+ * @testid{TSPEC-COMMON-056}
+ * @draft
  * @see sys_get_le()
  */
 ZTEST(byteorder, test_sys_get_le)
@@ -1359,6 +1443,8 @@ ZTEST(byteorder, test_sys_get_le)
  * Expected result:
  * - The destination matches the expected host-order byte sequence.
  *
+ * @testid{TSPEC-COMMON-057}
+ * @draft
  * @see sys_get_be()
  */
 ZTEST(byteorder, test_sys_get_be)

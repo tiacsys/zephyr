@@ -232,6 +232,8 @@ static void join_participant_threads(void)
  * This thread orchestrates mutex locking on other threads and verifies that
  * the correct thread is holding mutexes at any given step.
  *
+ * @testid{TSPEC-MUTEX-001}
+ * @draft
  * @verifies ZEP-SRS-6-1
  * @verifies ZEP-SRS-6-12
  */

@@ -80,6 +80,9 @@ void ztest_post_fatal_error_hook(unsigned int reason,
  * performs deadlock detection lives inside the PI code path.
  * ztest_set_fault_valid(true) tells the test framework to expect the
  * fatal error so the test passes rather than crashing.
+ *
+ * @testid{TSPEC-MUTEX-026}
+ * @draft
  */
 ZTEST(mutex_deadlock, test_deadlock_detection)
 {

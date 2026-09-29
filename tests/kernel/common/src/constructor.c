@@ -55,6 +55,8 @@ void __attribute__((__constructor__(1000))) __constructor_init_priority_1000(voi
  * - All three constructors ran (count is 3), priority 101 ran first, priority
  *   1000 ran second, and the unprioritized constructor ran last.
  *
+ * @testid{TSPEC-COMMON-065}
+ * @draft
  * @see ZTEST_SUITE()
  * @verifies ZEP-SRS-12-10
  */

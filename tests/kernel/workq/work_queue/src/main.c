@@ -230,6 +230,9 @@ static void resubmit_work_handler(struct k_work *work)
  *   recorded in order.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-036}
+ * @draft
  * @see k_work_submit()
  * @see k_work_schedule()
  * @verifies ZEP-SRS-38-13
@@ -351,6 +354,9 @@ static void coop_delayed_work_cancel_main(void *p1, void *p2, void *p3)
  * - The handler is never invoked (zero results recorded).
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-037}
+ * @draft
  * @see k_work_schedule()
  * @see k_work_cancel_delayable()
  * @verifies ZEP-SRS-38-24
@@ -396,6 +402,9 @@ ZTEST(workqueue_delayed, test_delayed_cancel)
  *   each step.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-038}
+ * @draft
  * @see k_work_delayable_is_pending()
  * @see k_work_schedule()
  * @verifies ZEP-SRS-38-16
@@ -452,6 +461,9 @@ ZTEST(workqueue_delayed, test_delayed_pending)
  * - All delayable work items are submitted on delay expiry and processed.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-039}
+ * @draft
  * @see k_work_schedule()
  * @see k_work_reschedule()
  * @verifies ZEP-SRS-38-21
@@ -561,6 +573,9 @@ static void test_triggered_trigger(void)
  * - Every triggered handler runs with a poll result of 0.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-040}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  * @verifies ZEP-SRS-38-51
@@ -607,6 +622,9 @@ ZTEST(workqueue_triggered, test_triggered)
  * - Every triggered handler runs with a poll result of 0.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-041}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  */
@@ -671,6 +689,9 @@ static void triggered_resubmit_work_handler(struct k_work *work)
  * - The handler runs once per iteration and all results are recorded in order.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-042}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  * @verifies ZEP-SRS-38-52
@@ -728,6 +749,9 @@ ZTEST(workqueue_triggered, test_triggered_resubmit)
  * - Every triggered handler runs with a poll result of 0.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-043}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  */
@@ -772,6 +796,9 @@ ZTEST(workqueue_triggered, test_triggered_no_wait)
  * - Every triggered handler runs with a poll result of -EAGAIN.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-044}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  */
@@ -814,6 +841,9 @@ ZTEST(workqueue_triggered, test_triggered_no_wait_expired)
  * - Every triggered handler runs with a poll result of 0.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-045}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  */
@@ -861,6 +891,9 @@ ZTEST(workqueue_triggered, test_triggered_wait)
  *   poll result of -EAGAIN.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-046}
+ * @draft
  * @see k_work_poll_init(), k_work_poll_submit()
  * @verifies ZEP-SRS-38-27
  */
@@ -959,6 +992,9 @@ static void test_triggered_from_msgq_start(void)
  *   the message queue lock.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-047}
+ * @draft
  * @see k_work_poll_init()
  * @see k_work_poll_submit_to_queue()
  * @verifies ZEP-SRS-38-27
@@ -995,6 +1031,9 @@ ZTEST(workqueue_triggered, test_triggered_from_msgq)
  * - The statically defined and run-time initialized items are identical.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-048}
+ * @draft
  * @see K_WORK_DELAYABLE_DEFINE()
  * @see k_work_init_delayable()
  * @verifies ZEP-SRS-38-20
@@ -1029,6 +1068,9 @@ ZTEST(workqueue_triggered, test_delayed_work_define)
  *   return -EINVAL.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-049}
+ * @draft
  * @see k_work_poll_cancel()
  * @verifies ZEP-SRS-38-28
  */

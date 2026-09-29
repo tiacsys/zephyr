@@ -37,6 +37,8 @@ volatile int trylock_successes;
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-001}
+ * @draft
  * @see k_spin_lock(), k_spin_unlock()
  * @verifies ZEP-SRS-34-3
  */
@@ -145,6 +147,8 @@ static void cpu1_fn(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-002}
+ * @draft
  * @see arch_cpu_start()
  */
 ZTEST(spinlock, test_spinlock_bounce)
@@ -176,6 +180,8 @@ ZTEST(spinlock, test_spinlock_bounce)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-003}
+ * @draft
  * @see k_spin_lock(), k_spin_unlock()
  */
 ZTEST(spinlock, test_spinlock_mutual_exclusion)
@@ -227,6 +233,8 @@ static void trylock_fn(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_spinlock_tests
  *
+ * @testid{TSPEC-SPINLOCK-004}
+ * @draft
  * @see k_spin_trylock()
  */
 ZTEST(spinlock, test_trylock)

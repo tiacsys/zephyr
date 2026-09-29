@@ -214,6 +214,8 @@ static int ram_console_out(int character)
  * Expected result:
  * - Both the captured printk output and the snprintk buffer equal the expected string.
  *
+ * @testid{TSPEC-COMMON-075}
+ * @draft
  * @see printk()
  */
 ZTEST(printk, test_printk)

@@ -97,6 +97,8 @@ void thread_callback_unlocked(const struct k_thread *thread, void *user_data)
  * - The first walk visits at least one thread, and the second visits exactly
  *   one more than the first.
  *
+ * @testid{TSPEC-THREADS-040}
+ * @draft
  * @see k_thread_foreach()
  * @verifies ZEP-SRS-1-26
  */
@@ -156,6 +158,8 @@ ZTEST(threads_lifecycle_1cpu, test_thread_foreach)
  * - The first walk visits at least one thread, the second visits exactly one
  *   more, and aborting from the callback does not disturb the walk.
  *
+ * @testid{TSPEC-THREADS-041}
+ * @draft
  * @see k_thread_foreach_unlocked()
  * @verifies ZEP-SRS-1-26
  */
@@ -225,6 +229,8 @@ ZTEST(threads_lifecycle_1cpu, test_thread_foreach_unlocked)
  * Expected result:
  * - The call raises the expected fatal error and does not return.
  *
+ * @testid{TSPEC-THREADS-042}
+ * @draft
  * @see k_thread_foreach()
  * @verifies ZEP-SRS-1-26
  */
@@ -248,6 +254,8 @@ ZTEST(threads_lifecycle_1cpu, test_thread_foreach_null_cb)
  * Expected result:
  * - The call raises the expected fatal error and does not return.
  *
+ * @testid{TSPEC-THREADS-043}
+ * @draft
  * @see k_thread_foreach_unlocked()
  * @verifies ZEP-SRS-1-26
  */
@@ -277,6 +285,8 @@ ZTEST(threads_lifecycle_1cpu, test_thread_foreach_unlocked_null_cb)
  * - Every state, including combinations and the empty state, renders as its
  *   documented name.
  *
+ * @testid{TSPEC-THREADS-044}
+ * @draft
  * @see k_thread_state_str()
  * @verifies ZEP-SRS-1-7
  * @verifies ZEP-SRS-1-21

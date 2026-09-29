@@ -36,6 +36,8 @@
  * Expected result:
  * - The division yields 33, confirming the proper multilib is linked.
  *
+ * @testid{TSPEC-COMMON-073}
+ * @draft
  * @see ZTEST_SUITE()
  */
 ZTEST(multilib, test_multilib)

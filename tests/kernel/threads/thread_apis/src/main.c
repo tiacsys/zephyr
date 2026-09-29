@@ -57,6 +57,8 @@ static ZTEST_DMEM int tp = 10;
  * Expected result:
  * - The main thread runs at the configured priority.
  *
+ * @testid{TSPEC-THREADS-021}
+ * @draft
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-31
  */
@@ -83,6 +85,8 @@ ZTEST(threads_lifecycle, test_thread_main_priority)
  * Expected result:
  * - The running thread's priority is higher than the idle priority.
  *
+ * @testid{TSPEC-THREADS-022}
+ * @draft
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-32
  */
@@ -128,6 +132,8 @@ static void customdata_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - Each read returns the value this thread most recently set.
  *
+ * @testid{TSPEC-THREADS-023}
+ * @draft
  * @see k_thread_custom_data_set()
  * @see k_thread_custom_data_get()
  * @verifies ZEP-SRS-1-12
@@ -171,6 +177,8 @@ static void thread_name_entry(void *p1, void *p2, void *p3)
  * - Both accessors report the name that was set, and the undersized copy
  *   fails rather than truncating.
  *
+ * @testid{TSPEC-THREADS-024}
+ * @draft
  * @see k_thread_name_set()
  * @see k_thread_name_get()
  * @see k_thread_name_copy()
@@ -235,6 +243,8 @@ struct k_sem sem;
  * - The legitimate calls succeed and every invalid pointer or permission is
  *   rejected with an error instead of a fault.
  *
+ * @testid{TSPEC-THREADS-025}
+ * @draft
  * @see k_thread_name_set()
  * @see k_thread_name_copy()
  * @verifies ZEP-SRS-1-17
@@ -323,6 +333,8 @@ ZTEST_USER(threads_lifecycle, test_thread_name_user_get_set)
  * Expected result:
  * - Each read returns the value this thread most recently set.
  *
+ * @testid{TSPEC-THREADS-026}
+ * @draft
  * @see k_thread_custom_data_set()
  * @see k_thread_custom_data_get()
  * @verifies ZEP-SRS-1-12
@@ -390,6 +402,8 @@ static void enter_user_mode_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - The thread continues in user mode and reports unprivileged context.
  *
+ * @testid{TSPEC-THREADS-027}
+ * @draft
  * @see k_thread_user_mode_enter()
  * @see k_is_user_context()
  * @verifies ZEP-SRS-1-9
@@ -433,6 +447,9 @@ static void current_get_entry(void *expected_tid, void *p2, void *p3)
  * - Each thread sees its own thread id from k_current_get().
  *
  * @ingroup kernel_thread_tests
+ *
+ * @testid{TSPEC-THREADS-028}
+ * @draft
  * @see k_current_get()
  * @verifies ZEP-SRS-1-19
  */
@@ -600,6 +617,8 @@ static inline int join_scenario(enum control_method m)
  * Expected result:
  * - Every join returns success only after the target thread has ended.
  *
+ * @testid{TSPEC-THREADS-029}
+ * @draft
  * @see k_thread_join()
  * @verifies ZEP-SRS-1-20
  */
@@ -645,6 +664,8 @@ ZTEST_USER(threads_lifecycle, test_thread_join)
  * - The join of the running thread returns -EBUSY, and the join of the
  *   finished thread succeeds.
  *
+ * @testid{TSPEC-THREADS-030}
+ * @draft
  * @see k_thread_join()
  * @see irq_offload()
  * @verifies ZEP-SRS-1-20
@@ -702,6 +723,8 @@ static void deadlock2_entry(void *p1, void *p2, void *p3)
  * - The self-join is rejected with -EDEADLK, and the two-thread joins all
  *   succeed.
  *
+ * @testid{TSPEC-THREADS-031}
+ * @draft
  * @see k_thread_join()
  * @verifies ZEP-SRS-1-20
  */
@@ -758,6 +781,8 @@ static void user_start_thread(void *p1, void *p2, void *p3)
  * - The expiry tick is no earlier than the deadline set at creation, and each
  *   reading of the remaining ticks is smaller than the one before.
  *
+ * @testid{TSPEC-THREADS-032}
+ * @draft
  * @see k_thread_timeout_remaining_ticks()
  * @see k_thread_timeout_expires_ticks()
  * @verifies ZEP-SRS-1-33
@@ -834,6 +859,8 @@ static void foreach_callback(const struct k_thread *thread, void *user_data)
  * Expected result:
  * - Every thread's execution time is reflected in the system total.
  *
+ * @testid{TSPEC-THREADS-033}
+ * @draft
  * @see k_thread_runtime_stats_get()
  * @see k_thread_runtime_stats_all_get()
  * @verifies ZEP-SRS-1-28
@@ -878,6 +905,8 @@ ZTEST(threads_lifecycle, test_thread_runtime_stats_get)
  * - The thread's execution cycles grow by at least the time spent busy
  *   waiting.
  *
+ * @testid{TSPEC-THREADS-034}
+ * @draft
  * @see k_busy_wait()
  * @see k_thread_runtime_stats_get()
  * @verifies ZEP-SRS-28-13
@@ -940,6 +969,8 @@ static void tp_entry(void *p1, void *p2, void *p3)
  * - The user thread's execution cycles grow by at least the time spent busy
  *   waiting.
  *
+ * @testid{TSPEC-THREADS-035}
+ * @draft
  * @see k_busy_wait()
  * @see k_thread_runtime_stats_get()
  * @verifies ZEP-SRS-28-13
@@ -999,6 +1030,8 @@ static int small_stack(size_t *space)
  * Expected result:
  * - The deeper call reports less unused stack space than the shallow one.
  *
+ * @testid{TSPEC-THREADS-036}
+ * @draft
  * @see k_thread_stack_space_get()
  * @verifies ZEP-SRS-1-8
  * @verifies ZEP-SRS-1-27

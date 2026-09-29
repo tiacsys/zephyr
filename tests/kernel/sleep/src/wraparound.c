@@ -38,6 +38,8 @@ K_TIMER_DEFINE(alarm, alarm_callback, NULL);
  * Expected result:
  * - The sleep is woken early across the tick wraparound with correct accounting.
  *
+ * @testid{TSPEC-SLEEP-005}
+ * @draft
  * @see k_sleep()
  * @see k_wakeup()
  * @verifies ZEP-SRS-28-8

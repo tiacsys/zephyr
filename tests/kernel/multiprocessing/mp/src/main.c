@@ -94,6 +94,8 @@ FUNC_NORETURN void cpu_fn(void *arg)
  * - This test using for the platform that support MP or SMP, in our current
  *   scenario which own over two CPUs.
  *
+ * @testid{TSPEC-MP-020}
+ * @draft
  * @see arch_cpu_start()
  * @verifies ZEP-SRS-34-7
  * @verifies ZEP-SRS-34-8

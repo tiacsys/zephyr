@@ -383,6 +383,9 @@ static void do_test_using(void (*sample_collection_fn)(void), const char *mechan
  * period stay within expected bounds.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-023}
+ * @draft
  * @see k_timer_start()
  * @verifies ZEP-SRS-4-5
  */
@@ -408,6 +411,9 @@ ZTEST(timer_jitter_drift, test_jitter_drift_timer_period)
  * period stay within expected bounds.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-024}
+ * @draft
  * @see k_timer_start()
  * @verifies ZEP-SRS-4-5
  */

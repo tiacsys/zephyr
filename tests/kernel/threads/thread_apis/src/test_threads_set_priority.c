@@ -80,6 +80,8 @@ void thread2_set_prio_test(void *p1, void *p2, void *p3)
  * Expected result:
  * - Both threads report exactly the priorities that were set for them.
  *
+ * @testid{TSPEC-THREADS-052}
+ * @draft
  * @see k_thread_priority_set()
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-2
@@ -168,6 +170,8 @@ ZTEST(threads_lifecycle, test_thread_priority_set)
  * - Both priority changes made from interrupt context take effect and are
  *   reported back.
  *
+ * @testid{TSPEC-THREADS-053}
+ * @draft
  * @see k_thread_priority_set()
  * @see k_thread_priority_get()
  * @see irq_offload()

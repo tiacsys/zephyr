@@ -290,6 +290,8 @@ void task_low(void)
 /**
  * @brief Test pending of workq, fifo and lifo
  *
+ * @testid{TSPEC-PENDING-001}
+ * @draft
  * @see k_sleep(), K_THREAD_DEFINE()
  */
 ZTEST(pending, test_pending_fifo)

@@ -188,6 +188,8 @@ void thread2_entry(void *p1, void *p2, void *p3)
  * system settles on a valid set of highest-priority runnable threads across
  * the CPUs. This exercises the inter-processor reschedule signalling.
  *
+ * @testid{TSPEC-MP-012}
+ * @draft
  * @verifies ZEP-SRS-34-11
  * @verifies ZEP-SRS-34-18
  */

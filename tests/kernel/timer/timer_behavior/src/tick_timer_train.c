@@ -63,6 +63,9 @@ static void tm_fn(struct k_timer *tm)
  * the timer train is late to the station, the test fails.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-026}
+ * @draft
  * @see k_timer_start()
  * @see K_TIMEOUT_ABS_TICKS
  * @verifies ZEP-SRS-4-5

@@ -60,6 +60,8 @@ atomic_t total_atomic;
  * - Each call returns the target's previous value and the target holds the
  *   expected post-operation value.
  *
+ * @testid{TSPEC-COMMON-001}
+ * @draft
  * @see atomic_cas(), atomic_add(), atomic_sub(),
  * atomic_inc(), atomic_dec(), atomic_get(), atomic_set(),
  * atomic_clear(), atomic_or(), atomic_and(), atomic_xor(),
@@ -315,6 +317,8 @@ void atomic_handler(void *p1, void *p2, void *p3)
  * Expected result:
  * - The shared atomic equals TEST_CYCLE * THREADS_NUM.
  *
+ * @testid{TSPEC-COMMON-002}
+ * @draft
  * @see atomic_inc()
  * @verifies ZEP-SRS-19-1
  */
@@ -364,6 +368,8 @@ ZTEST(atomic, test_threads_access_atomic)
  * - After each increment the atomic value matches the plain-increment result and
  *   the expected wrapped boundary value.
  *
+ * @testid{TSPEC-COMMON-003}
+ * @draft
  * @see atomic_inc()
  * @verifies ZEP-SRS-19-1
  */

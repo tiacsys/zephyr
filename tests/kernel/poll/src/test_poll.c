@@ -65,6 +65,8 @@ static volatile bool wake_up_by_poll = true;
  *
  * @ingroup kernel_poll_tests
  *
+ * @testid{TSPEC-POLL-001}
+ * @draft
  * @see K_POLL_EVENT_INITIALIZER(), k_poll_signal_init(),
  * k_poll_signal_raise(), k_poll_signal_check()
  * @verifies ZEP-SRS-33-1
@@ -463,6 +465,8 @@ void check_results(struct k_poll_event *events, uint32_t event_type, bool is_ava
  * Assumptions and Constraints:
  * - N/A
  *
+ * @testid{TSPEC-POLL-002}
+ * @draft
  * @see k_poll_signal_init(), k_poll()
  * @verifies ZEP-SRS-33-1
  * @verifies ZEP-SRS-33-2
@@ -716,6 +720,8 @@ void test_poll_cancel(bool is_main_low_prio)
 /**
  * @brief k_poll() reports cancellation when a polled FIFO is cancelled (low-priority poller)
  *
+ * @testid{TSPEC-POLL-003}
+ * @draft
  * @verifies ZEP-SRS-33-4
  */
 ZTEST(poll_api_1cpu, test_poll_cancel_main_low_prio)
@@ -726,6 +732,8 @@ ZTEST(poll_api_1cpu, test_poll_cancel_main_low_prio)
 /**
  * @brief k_poll() reports cancellation when a polled FIFO is cancelled (high-priority poller)
  *
+ * @testid{TSPEC-POLL-004}
+ * @draft
  * @verifies ZEP-SRS-33-4
  */
 ZTEST(poll_api_1cpu, test_poll_cancel_main_high_prio)
@@ -776,6 +784,8 @@ static K_SEM_DEFINE(multi_ready_sem, 1, 1);
  *
  * @ingroup kernel_poll_tests
  *
+ * @testid{TSPEC-POLL-005}
+ * @draft
  * @see K_POLL_EVENT_INITIALIZER(), k_poll(), k_poll_event_init()
  * @verifies ZEP-SRS-33-1
  * @verifies ZEP-SRS-33-2
@@ -862,6 +872,8 @@ static void threadstate(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_poll_tests
  *
+ * @testid{TSPEC-POLL-006}
+ * @draft
  * @see K_POLL_EVENT_INITIALIZER(), k_poll(), k_poll_signal_init(),
  * k_poll_signal_check(), k_poll_signal_raise()
  * @verifies ZEP-SRS-33-8
@@ -930,6 +942,8 @@ static void high_prio_main(void *param1, void *param2, void *param3)
 /**
  * @brief k_poll() wakes a high-priority thread waiting on a message queue
  *
+ * @testid{TSPEC-POLL-007}
+ * @draft
  * @verifies ZEP-SRS-33-1
  * @verifies ZEP-SRS-33-2
  */
@@ -956,6 +970,8 @@ ZTEST(poll_api_1cpu, test_poll_msgq)
 /**
  * @brief k_poll() with zero events returns -EAGAIN
  *
+ * @testid{TSPEC-POLL-008}
+ * @draft
  * @verifies ZEP-SRS-33-1
  */
 ZTEST(poll_api_1cpu, test_poll_zero_events)
@@ -982,6 +998,8 @@ static struct k_poll_signal lifecycle_signal;
  * put it in the signaled state carrying the caller's result value, as
  * reported by k_poll_signal_check().
  *
+ * @testid{TSPEC-POLL-009}
+ * @draft
  * @see k_poll_signal_init(), k_poll_signal_raise(), k_poll_signal_check()
  * @verifies ZEP-SRS-33-5
  * @verifies ZEP-SRS-33-6
@@ -1013,6 +1031,8 @@ ZTEST(poll_api, test_poll_signal_raise)
  * @details k_poll_signal_reset() must return a raised poll signal to the
  * unsignaled state.
  *
+ * @testid{TSPEC-POLL-010}
+ * @draft
  * @see k_poll_signal_raise(), k_poll_signal_reset(), k_poll_signal_check()
  * @verifies ZEP-SRS-33-9
  */
@@ -1041,6 +1061,8 @@ static struct k_poll_signal persist_signal;
  * consumed by polling it remains ready across repeated k_poll() calls. Only
  * after k_poll_signal_reset() does it return to the unsignaled state.
  *
+ * @testid{TSPEC-POLL-011}
+ * @draft
  * @see k_poll_signal_raise(), k_poll_signal_check(), k_poll_signal_reset()
  * @verifies ZEP-SRS-33-8
  */

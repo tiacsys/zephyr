@@ -57,6 +57,9 @@ DEVICE_DEFINE(foo0, "foo0", foo_single_init, NULL,
  *   dev_data.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-022}
+ * @draft
  */
 ZTEST(device, test_mmio_single)
 {
@@ -154,6 +157,9 @@ DEVICE_DEFINE(foo12, "foo12", foo_mult_init, NULL,
  *   dev_data.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-023}
+ * @draft
  */
 ZTEST(device, test_mmio_multiple)
 {
@@ -217,6 +223,9 @@ DEVICE_MMIO_TOPLEVEL_STATIC(foo4, DT_DRV_INST(4));
  *   point to the same address
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-024}
+ * @draft
  */
 ZTEST(device, test_mmio_toplevel)
 {
@@ -258,6 +267,9 @@ ZTEST(device, test_mmio_toplevel)
  *
  * Show that device_map() populates a memory address. We don't do anything else;
  * tests for k_map() will prove that virtual memory mapping actually works.
+ *
+ * @testid{TSPEC-DEVICE-025}
+ * @draft
  */
 ZTEST(device, test_mmio_device_map)
 {

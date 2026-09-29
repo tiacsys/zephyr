@@ -37,6 +37,8 @@
  * Expected result:
  * - The elapsed time is greater than or equal to the configured boot delay.
  *
+ * @testid{TSPEC-COMMON-014}
+ * @draft
  * @see k_cycle_get_32()
  */
 ZTEST(boot_delay, test_bootdelay)

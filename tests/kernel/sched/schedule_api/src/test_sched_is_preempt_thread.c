@@ -61,6 +61,8 @@ static void tcoop_ctx(void *p1, void *p2, void *p3)
  * thread and lock the scheduler k_is_preempt_thread() and
  * unlock the scheduler and call k_is_preempt_thread().
  *
+ * @testid{TSPEC-SCHED-008}
+ * @draft
  * @see k_is_preempt_thread()
  *
  * @ingroup tests_kernel_sched

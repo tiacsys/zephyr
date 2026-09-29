@@ -65,6 +65,8 @@ static struct k_thread threads[NUM_TIMEOUTS];
  * Expected result:
  * - results[i] equals i for each index, i.e. timers fired in start order.
  *
+ * @testid{TSPEC-COMMON-076}
+ * @draft
  * @see k_timer_start()
  */
 ZTEST(common_1cpu, test_timeout_order)

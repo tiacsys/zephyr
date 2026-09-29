@@ -63,6 +63,8 @@ static void thread_entry(void *p1, void *p2, void *p3)
  * - The flag reads back as set after being set and clear after being cleared,
  *   and the thread aborts without raising a fatal error.
  *
+ * @testid{TSPEC-THREADS-037}
+ * @draft
  * @see k_thread_essential_set()
  * @see k_thread_essential_clear()
  * @see k_is_essential()
@@ -129,6 +131,8 @@ static void abort_thread_self(void *p1, void *p2, void *p3)
  * Expected result:
  * - The kernel raises a fatal error for the aborted essential thread.
  *
+ * @testid{TSPEC-THREADS-038}
+ * @draft
  * @see K_ESSENTIAL
  * @see k_thread_abort()
  * @see k_sys_fatal_error_handler()
@@ -166,6 +170,8 @@ ZTEST(threads_lifecycle, test_thread_essential_abort_panics)
  * Expected result:
  * - The kernel raises a fatal error for the self-terminating essential thread.
  *
+ * @testid{TSPEC-THREADS-039}
+ * @draft
  * @see K_ESSENTIAL
  * @see k_sys_fatal_error_handler()
  * @verifies ZEP-SRS-1-11

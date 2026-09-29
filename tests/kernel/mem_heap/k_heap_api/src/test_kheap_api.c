@@ -81,6 +81,8 @@ volatile uint32_t heap_guard1;
  * works to allocate that byte at runtime and that it doesn't overflow
  * its memory bounds.
  *
+ * @testid{TSPEC-HEAP-001}
+ * @draft
  * @see K_HEAP_DEFINE()
  * @see k_heap_alloc()
  * @verifies ZEP-SRS-9-3
@@ -122,6 +124,8 @@ ZTEST(k_heap_api, test_k_heap_min_size)
  * 4. allocate  memory more than the first allocation.
  * The allocation in the 4th step should succeed if k_heap_free() works as expected
  *
+ * @testid{TSPEC-HEAP-002}
+ * @draft
  * @see k_heap_alloc, k_heap_free()
  * @verifies ZEP-SRS-9-5
  * @verifies ZEP-SRS-9-10
@@ -153,6 +157,8 @@ ZTEST(k_heap_api, test_k_heap_free)
  *
  * @ingroup k_heap_api_tests
  *
+ * @testid{TSPEC-HEAP-003}
+ * @draft
  * @see k_heap_alloc()
  * @see k_heap_free()
  * @verifies ZEP-SRS-9-5
@@ -171,6 +177,8 @@ ZTEST(k_heap_api, test_kheap_alloc_in_isr_nowait)
  *
  * @ingroup k_heap_api_tests
  *
+ * @testid{TSPEC-HEAP-004}
+ * @draft
  * @see k_heap_alloc()
  * @see k_heap_free()
  * @verifies ZEP-SRS-9-5
@@ -213,6 +221,8 @@ ZTEST(k_heap_api, test_k_heap_alloc_pending)
  *
  * @ingroup k_heap_api_tests
  *
+ * @testid{TSPEC-HEAP-005}
+ * @draft
  * @see k_heap_alloc()
  * @see k_heap_free()
  * @verifies ZEP-SRS-9-7
@@ -259,6 +269,8 @@ ZTEST(k_heap_api, test_k_heap_alloc_pending_null)
  * and initialization are successful or not.
  * Also tests k_heap_calloc() overflow and zero-size edge cases
  *
+ * @testid{TSPEC-HEAP-006}
+ * @draft
  * @see k_heap_calloc(), k_heap_free()
  * @verifies ZEP-SRS-9-5
  * @verifies ZEP-SRS-9-10
@@ -291,6 +303,8 @@ ZTEST(k_heap_api, test_k_heap_calloc)
  *
  * @details The test ensures that valid values are returned
  *
+ * @testid{TSPEC-HEAP-007}
+ * @draft
  * @see k_heap_array_get()
  * @verifies ZEP-SRS-9-18
  */
@@ -323,6 +337,8 @@ ZTEST(k_heap_api, test_k_heap_array_get)
  * 2. Reallocating to a smaller size
  * 3. Verifying data integrity after reallocation
  *
+ * @testid{TSPEC-HEAP-008}
+ * @draft
  * @see k_heap_realloc()
  * @verifies ZEP-SRS-9-9
  */
@@ -368,6 +384,8 @@ ZTEST(k_heap_api, test_k_heap_realloc)
  * @details The test validates that k_heap_realloc() behaves like k_heap_alloc()
  * when called with a NULL pointer.
  *
+ * @testid{TSPEC-HEAP-009}
+ * @draft
  * @see k_heap_realloc()
  * @verifies ZEP-SRS-9-9
  */
@@ -388,6 +406,8 @@ ZTEST(k_heap_api, test_k_heap_realloc_null)
  * @details The test validates that k_heap_realloc() behaves like k_heap_free()
  * when called with size 0.
  *
+ * @testid{TSPEC-HEAP-010}
+ * @draft
  * @see k_heap_realloc()
  * @verifies ZEP-SRS-9-9
  * @verifies ZEP-SRS-9-10
@@ -412,6 +432,8 @@ ZTEST(k_heap_api, test_k_heap_realloc_zero)
  * @details The test validates that k_heap_realloc() returns NULL when
  * trying to reallocate to a size larger than the heap.
  *
+ * @testid{TSPEC-HEAP-011}
+ * @draft
  * @see k_heap_realloc()
  * @verifies ZEP-SRS-9-9
  * @verifies ZEP-SRS-9-8
@@ -439,6 +461,8 @@ ZTEST(k_heap_api, test_k_heap_realloc_fail)
  * @details Allocates a block with a specific alignment from the heap
  * and checks alignment, then tries oversize and invalid alignment.
  *
+ * @testid{TSPEC-HEAP-012}
+ * @draft
  * @see k_heap_aligned_alloc()
  * @verifies ZEP-SRS-9-6
  * @verifies ZEP-SRS-9-8
@@ -479,6 +503,8 @@ ZTEST(k_heap_api, test_k_heap_aligned_alloc)
  *
  * @details The test validates that double-freeing a pointer asserts
  *
+ * @testid{TSPEC-HEAP-013}
+ * @draft
  * @see k_heap_alloc, k_heap_free()
  * @verifies ZEP-SRS-9-10
  */
@@ -511,6 +537,8 @@ ZTEST(k_heap_api, test_z_k_heap_double_free)
  * (and the returned memory lies within the provided region and is writable),
  * an allocation larger than the region fails, and the block can be freed.
  *
+ * @testid{TSPEC-HEAP-014}
+ * @draft
  * @see k_heap_init()
  * @verifies ZEP-SRS-9-4
  */
@@ -567,6 +595,8 @@ struct heap_alloc_case {
  * - In-capacity sizes allocate, preserve data, and free cleanly.
  * - Over-capacity sizes return NULL.
  *
+ * @testid{TSPEC-HEAP-015}
+ * @draft
  * @see k_heap_alloc()
  * @see k_heap_free()
  * @verifies ZEP-SRS-9-1

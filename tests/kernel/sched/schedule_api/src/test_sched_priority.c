@@ -43,6 +43,9 @@ static void thread_entry_prio(void *p1, void *p2, void *p3)
  * thread.
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-009}
+ * @draft
  * @verifies ZEP-SRS-2-10
  * @verifies ZEP-SRS-2-14
  */
@@ -81,6 +84,9 @@ ZTEST(threads_scheduling, test_priority_cooperative)
  * thread. Make sure newly created thread is preempted
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-010}
+ * @draft
  * @verifies ZEP-SRS-2-9
  * @verifies ZEP-SRS-2-12
  */
@@ -123,6 +129,9 @@ ZTEST(threads_scheduling, test_priority_preemptible)
  * and longest waiting thread is scheduled first.
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-011}
+ * @draft
  * @verifies ZEP-SRS-2-13
  */
 ZTEST(threads_scheduling_1cpu, test_priority_preemptible_wait_prio)
@@ -195,6 +204,9 @@ extern void idle(void *p1, void *p2, void *p3);
  * - Every case returns its expected validity verdict.
  *
  * @ingroup tests_kernel_sched
+ *
+ * @testid{TSPEC-SCHED-012}
+ * @draft
  * @verifies ZEP-SRS-2-8
  */
 ZTEST(threads_scheduling, test_bad_priorities)

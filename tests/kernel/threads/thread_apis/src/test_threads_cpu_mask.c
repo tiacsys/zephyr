@@ -47,6 +47,8 @@ void child_fn(void *a, void *b, void *c)
  * - Every mask API returns -EINVAL for the running thread.
  * - The thread runs only for the masks that leave it eligible for this CPU.
  *
+ * @testid{TSPEC-THREADS-051}
+ * @draft
  * @see k_thread_cpu_mask_clear()
  * @see k_thread_cpu_mask_enable_all()
  * @see k_thread_cpu_mask_enable()

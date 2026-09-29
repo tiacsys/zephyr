@@ -122,6 +122,8 @@ static void suite_teardown(void *fixture)
  * - Valid percentages return 0 and round-trip to the equivalent byte count.
  * - Percentages of 100% and above return -EINVAL.
  *
+ * @testid{TSPEC-THREADS-015}
+ * @draft
  * @see k_thread_runtime_stack_unused_threshold_pct_set()
  * @see k_thread_runtime_stack_unused_threshold_get()
  * @verifies ZEP-SRS-1-30
@@ -164,6 +166,8 @@ ZTEST(runtime_stack_safety, test_stack_safety_threshold_pct_set_get)
  * - Valid byte thresholds return 0 and round-trip unchanged.
  * - A threshold larger than the stack size returns -EINVAL.
  *
+ * @testid{TSPEC-THREADS-016}
+ * @draft
  * @see k_thread_runtime_stack_unused_threshold_set()
  * @see k_thread_runtime_stack_unused_threshold_get()
  * @verifies ZEP-SRS-1-30
@@ -208,6 +212,8 @@ ZTEST(runtime_stack_safety, test_stack_safety_threshold_bytes_set_get)
  * - The handler fires exactly when unused space is below the threshold and is
  *   passed the correct thread, unused amount and argument.
  *
+ * @testid{TSPEC-THREADS-017}
+ * @draft
  * @see k_thread_runtime_stack_safety_full_check()
  * @verifies ZEP-SRS-1-30
  */
@@ -270,6 +276,8 @@ ZTEST(runtime_stack_safety, test_stack_safety_full_check)
  * Expected result:
  * - The check returns 0, reports a plausible unused value, and does not fault.
  *
+ * @testid{TSPEC-THREADS-018}
+ * @draft
  * @see k_thread_runtime_stack_safety_full_check()
  * @verifies ZEP-SRS-1-30
  */
@@ -305,6 +313,8 @@ ZTEST(runtime_stack_safety, test_stack_safety_full_check_null_handler)
  * - The abbreviated check fires exactly when unused space is below the
  *   threshold and reports the same unused amount as the full check.
  *
+ * @testid{TSPEC-THREADS-019}
+ * @draft
  * @see k_thread_runtime_stack_safety_threshold_check()
  * @see k_thread_runtime_stack_safety_full_check()
  * @verifies ZEP-SRS-1-30
@@ -361,6 +371,8 @@ ZTEST(runtime_stack_safety, test_stack_safety_threshold_check)
  * - The byte threshold round-trips, 0% disables the threshold, and 100%
  *   returns -EINVAL, all through the syscall interface.
  *
+ * @testid{TSPEC-THREADS-020}
+ * @draft
  * @see k_thread_runtime_stack_unused_threshold_set()
  * @see k_thread_runtime_stack_unused_threshold_get()
  * @see k_thread_runtime_stack_unused_threshold_pct_set()

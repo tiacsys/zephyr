@@ -81,6 +81,8 @@ DEVICE_DT_DEFINE(DT_INST(2, fakedeferdriver), fakedeferdriver_init, NULL, NULL, 
  *
  * @ingroup kernel_device_tests
  *
+ * @testid{TSPEC-DEVICE-001}
+ * @draft
  * @see device_get_binding()
  * @see DEVICE_DEFINE()
  */
@@ -112,6 +114,8 @@ ZTEST(device, test_dummy_device)
  *
  * Validates device binding for an existing device object.
  *
+ * @testid{TSPEC-DEVICE-002}
+ * @draft
  * @see device_get_binding()
  * @see DEVICE_DEFINE()
  */
@@ -131,6 +135,8 @@ ZTEST_USER(device, test_dynamic_name)
  * Validates binding of a random device driver(non-defined driver) named
  * "ANOTHER_BOGUS_NAME".
  *
+ * @testid{TSPEC-DEVICE-003}
+ * @draft
  * @see device_get_binding()
  * @see DEVICE_DEFINE()
  */
@@ -149,6 +155,8 @@ ZTEST_USER(device, test_bogus_dynamic_name)
  *
  * Validates device binding for device object when given dynamic name is null.
  *
+ * @testid{TSPEC-DEVICE-004}
+ * @draft
  * @see device_get_binding()
  * @see DEVICE_DEFINE()
  */
@@ -225,6 +233,8 @@ SYS_INIT(null_driver_init, POST_KERNEL, 0);
  *
  * Confirms check is correct.
  *
+ * @testid{TSPEC-DEVICE-005}
+ * @draft
  * @see k_is_pre_kernel()
  * @verifies ZEP-SRS-12-5
  * @verifies ZEP-SRS-12-6
@@ -265,6 +275,8 @@ ZTEST(device, test_pre_kernel_detection)
  * It queries the list of devices in the system, used to suspend or
  * resume the devices in PM applications.
  *
+ * @testid{TSPEC-DEVICE-006}
+ * @draft
  * @see z_device_get_all_static()
  */
 ZTEST(device, test_device_list)
@@ -311,6 +323,8 @@ SYS_INIT_NAMED(init5, init_fn, APPLICATION, 999);
  * different priorities, and verify that every registered entry is invoked
  * during system initialization.
  *
+ * @testid{TSPEC-DEVICE-007}
+ * @draft
  * @see SYS_INIT()
  * @see SYS_INIT_NAMED()
  * @verifies ZEP-SRS-12-1
@@ -337,6 +351,9 @@ extern unsigned int seq_priority_cnt;
  * means assigning the level for driver instance works.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-008}
+ * @draft
  * @verifies ZEP-SRS-12-2
  * @verifies ZEP-SRS-12-3
  * @verifies ZEP-SRS-12-7
@@ -367,6 +384,9 @@ ZTEST(device, test_device_init_level)
  * means assigning the priority for driver instance works.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-009}
+ * @draft
  * @verifies ZEP-SRS-12-4
  * @verifies ZEP-SRS-12-7
  */
@@ -396,6 +416,9 @@ ZTEST(device, test_device_init_priority)
  * means using the devicetree for sub-priority sorting works.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-010}
+ * @draft
  * @verifies ZEP-SRS-12-4
  * @verifies ZEP-SRS-12-7
  */
@@ -423,6 +446,9 @@ ZTEST(device, test_device_init_sub_priority)
  * driver instance will call their own implementations.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-011}
+ * @draft
  */
 ZTEST(device, test_abstraction_driver_common)
 {
@@ -459,6 +485,8 @@ ZTEST(device, test_abstraction_driver_common)
  * @details Verify a device marked for deferred initialization is not ready
  * at boot and becomes ready after an explicit device_init() at runtime.
  *
+ * @testid{TSPEC-DEVICE-012}
+ * @draft
  * @see device_init
  * @ingroup kernel_device_tests
  * @verifies ZEP-SRS-14-7
@@ -488,6 +516,8 @@ static int fakedeferdriver_init(const struct device *dev)
  * - case -errno: if the device initialization fails
  * - case -EALREADY: if the device is already initialized.
  *
+ * @testid{TSPEC-DEVICE-013}
+ * @draft
  * @see device_init
  * @ingroup kernel_device_tests
  * @verifies ZEP-SRS-14-8
@@ -527,6 +557,9 @@ ZTEST(device, test_deferred_init_failure)
  * - DEVICE_API_IS() reflects API class membership for every driver.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-014}
+ * @draft
  * @see DEVICE_API_IS()
  * @see device_get_binding()
  */
@@ -573,6 +606,9 @@ ZTEST(device, test_device_api)
  *   inheritance.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-015}
+ * @draft
  * @see DEVICE_API_IS()
  */
 ZTEST(device, test_device_api_extends)
@@ -618,6 +654,9 @@ ZTEST(device, test_device_api_extends)
  * - The grandchild device is an instance of all three API classes.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-016}
+ * @draft
  * @see DEVICE_API_IS()
  */
 ZTEST(device, test_device_api_extends_grandchild)
@@ -670,6 +709,9 @@ ZTEST(device, test_device_api_extends_grandchild)
  *   extension branch.
  *
  * @ingroup kernel_device_tests
+ *
+ * @testid{TSPEC-DEVICE-017}
+ * @draft
  * @see DEVICE_API_IS()
  */
 ZTEST(device, test_device_api_extends_sibling)
@@ -703,6 +745,8 @@ ZTEST(device, test_device_api_extends_sibling)
 /**
  * @brief Test deferred device initialization from user mode
  *
+ * @testid{TSPEC-DEVICE-018}
+ * @draft
  * @see device_init
  * @ingroup kernel_device_tests
  * @verifies ZEP-SRS-14-7
@@ -725,6 +769,8 @@ ZTEST_USER(device, test_deferred_init_user)
  * @details Verify device_deinit() returns -ENOTSUP for a device that does
  * not provide a de-initialization function.
  *
+ * @testid{TSPEC-DEVICE-019}
+ * @draft
  * @see device_deinit
  * @ingroup kernel_device_tests
  * @verifies ZEP-SRS-14-10
@@ -755,6 +801,8 @@ DEVICE_DEINIT_DEFINE(dummy_deinit, DUMMY_DEINIT, NULL, dummy_deinit, NULL, NULL,
  * @details Verify device_deinit() succeeds for a device that provides a
  * de-initialization function, and that a subsequent de-init is rejected.
  *
+ * @testid{TSPEC-DEVICE-020}
+ * @draft
  * @see device_deinit
  * @ingroup kernel_device_tests
  * @verifies ZEP-SRS-14-9
@@ -783,6 +831,8 @@ DEVICE_DT_DEFINE(FAKEDRIVER0_NODEID, NULL, NULL, NULL, NULL, POST_KERNEL,
  * @details Verify device_get_by_dt_nodelabel() returns the expected device
  * for a valid node label and NULL for an unknown one.
  *
+ * @testid{TSPEC-DEVICE-021}
+ * @draft
  * @see device_get_by_dt_nodelabel
  * @ingroup kernel_device_tests
  * @verifies ZEP-SRS-14-12

@@ -72,6 +72,8 @@ void worker(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-001}
+ * @draft
  * @see k_thread_deadline_set()
  * @verifies ZEP-SRS-2-5
  * @verifies ZEP-SRS-2-17
@@ -175,6 +177,8 @@ void yield_worker(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-002}
+ * @draft
  * @see k_yield()
  * @verifies ZEP-SRS-2-15
  */
@@ -241,6 +245,8 @@ void unqueue_worker(void *p1, void *p2, void *p3)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-003}
+ * @draft
  * @see k_thread_deadline_set()
  * @verifies ZEP-SRS-2-17
  */
@@ -352,6 +358,8 @@ static void thread_offload(void (*f)(const void *p), const void *param)
  *
  * @ingroup tests_kernel_sched
  *
+ * @testid{TSPEC-SCHED-004}
+ * @draft
  * @see k_reschedule()
  * @see k_thread_deadline_set()
  * @verifies ZEP-SRS-2-19

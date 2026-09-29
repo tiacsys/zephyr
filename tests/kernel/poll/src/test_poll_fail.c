@@ -18,6 +18,8 @@ static struct k_poll_signal signal_err;
  * @details Using API k_poll with error number
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-012}
+ * @draft
  * @see k_poll()
  *
  * @ingroup kernel_poll_tests
@@ -37,6 +39,8 @@ ZTEST_USER(poll_api, test_k_poll_user_num_err)
  * @details Using API k_poll with error member
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-013}
+ * @draft
  * @see k_poll()
  *
  * @ingroup kernel_poll_tests
@@ -54,6 +58,8 @@ ZTEST_USER(poll_api, test_k_poll_user_mem_err)
  * @details Define a poll event, and using API k_poll with NULL sem
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-014}
+ * @draft
  * @see k_poll()
  *
  * @ingroup kernel_poll_tests
@@ -77,6 +83,8 @@ ZTEST_USER(poll_api, test_k_poll_user_type_sem_err)
  * @details Define a poll, and using API k_poll with NULL signal
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-015}
+ * @draft
  * @see k_poll()
  *
  * @ingroup kernel_poll_tests
@@ -100,6 +108,8 @@ ZTEST_USER(poll_api, test_k_poll_user_type_signal_err)
  * @details Define a poll, and using API k_poll with NULL fifo
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-016}
+ * @draft
  * @see k_poll()
  *
  * @ingroup kernel_poll_tests
@@ -123,6 +133,8 @@ ZTEST_USER(poll_api, test_k_poll_user_type_fifo_err)
  * @details Define a poll, and using API k_poll with NULL message queue
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-017}
+ * @draft
  * @see k_poll()
  *
  * @ingroup kernel_poll_tests
@@ -147,6 +159,8 @@ ZTEST_USER(poll_api, test_k_poll_user_type_msgq_err)
  * @details Using API k_poll_signal_init with NULL as
  * parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-018}
+ * @draft
  * @see k_poll_signal_init()
  *
  * @ingroup kernel_poll_tests
@@ -164,6 +178,8 @@ ZTEST_USER(poll_api, test_poll_signal_init_null)
  * @details Using API k_poll with NULL object
  * as parameter to check if a error will be met.
  *
+ * @testid{TSPEC-POLL-019}
+ * @draft
  * @see k_poll_signal_check()
  *
  * @ingroup kernel_poll_tests
@@ -185,6 +201,8 @@ ZTEST_USER(poll_api, test_poll_signal_check_obj)
  * unread results as parameter to check if a error
  * will be met.
  *
+ * @testid{TSPEC-POLL-020}
+ * @draft
  * @see k_poll_signal_check()
  *
  * @ingroup kernel_poll_tests
@@ -210,6 +228,8 @@ ZTEST_USER(poll_api, test_poll_signal_check_signal)
  * unread signaled as parameter to check if a error
  * will be met.
  *
+ * @testid{TSPEC-POLL-021}
+ * @draft
  * @see k_poll_signal_check()
  *
  * @ingroup kernel_poll_tests
@@ -233,6 +253,8 @@ ZTEST_USER(poll_api, test_poll_signal_check_result)
  * NULL as parameter to check if a error
  * will be met.
  *
+ * @testid{TSPEC-POLL-022}
+ * @draft
  * @see k_poll_signal_raise()
  *
  * @ingroup kernel_poll_tests
@@ -254,6 +276,8 @@ ZTEST_USER(poll_api, test_poll_signal_raise_null)
  * NULL as parameter to check if a error
  * will be met.
  *
+ * @testid{TSPEC-POLL-023}
+ * @draft
  * @see k_poll_signal_reset()
  *
  * @ingroup kernel_poll_tests

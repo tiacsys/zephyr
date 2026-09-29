@@ -18,6 +18,9 @@ extern struct k_mem_slab kmslab;
  * @code extern struct k_mem_slab <name>; @endcode
  *
  * @ingroup kernel_memory_slab_tests
+ *
+ * @testid{TSPEC-SLAB-011}
+ * @draft
  * @verifies ZEP-SRS-9-12
  * @verifies ZEP-SRS-9-14
  * @verifies ZEP-SRS-9-16

@@ -98,6 +98,8 @@ void validate_bitarray_define(sys_bitarray_t *ba, size_t num_bits)
  * - Each bit array reports the requested num_bits, the expected number of
  *   bundles, and all bundles are zero/free.
  *
+ * @testid{TSPEC-COMMON-004}
+ * @draft
  * @see SYS_BITARRAY_DEFINE()
  */
 ZTEST(bitarray, test_bitarray_declare)
@@ -160,6 +162,8 @@ bool bitarray_bundles_is_zero(sys_bitarray_t *ba)
  * - In-range operations succeed and only the targeted bit changes.
  * - Out-of-range operations return a non-zero error and leave the array unchanged.
  *
+ * @testid{TSPEC-COMMON-005}
+ * @draft
  * @see sys_bitarray_set_bit()
  * @see sys_bitarray_clear_bit()
  * @see sys_bitarray_test_bit()
@@ -573,6 +577,8 @@ void alloc_and_free_interval(void)
  * - Allocations return expected offsets and bit patterns; frees restore the
  *   prior state; invalid frees and exhausted allocations fail without corruption.
  *
+ * @testid{TSPEC-COMMON-006}
+ * @draft
  * @see sys_bitarray_alloc()
  * @see sys_bitarray_free()
  */
@@ -618,6 +624,8 @@ ZTEST(bitarray, test_bitarray_alloc_free)
  * - Allocations and frees succeed (or fail as expected for zero-size requests)
  *   and the bit count tracks the expected value throughout.
  *
+ * @testid{TSPEC-COMMON-007}
+ * @draft
  * @see sys_bitarray_alloc()
  * @see sys_bitarray_free()
  */
@@ -654,6 +662,8 @@ ZTEST_INSTANTIATE_TEST_SUITE_P(loop, bitarray, test_bitarray_alloc_divisor, ba_d
  * Expected result:
  * - Counts match the known patterns; invalid regions return -EINVAL.
  *
+ * @testid{TSPEC-COMMON-008}
+ * @draft
  * @see sys_bitarray_popcount_region()
  */
 ZTEST(bitarray, test_bitarray_popcount_region)
@@ -774,6 +784,8 @@ ZTEST(bitarray, test_bitarray_popcount_region)
  * - Destination bits reflect the XOR, source is unchanged; invalid calls
  *   return -EINVAL.
  *
+ * @testid{TSPEC-COMMON-009}
+ * @draft
  * @see sys_bitarray_xor()
  */
 ZTEST(bitarray, test_bitarray_xor)
@@ -941,6 +953,8 @@ ZTEST(bitarray, test_bitarray_xor)
  * - Found indices match the known pattern; insufficient matches return a
  *   not-found result; invalid arguments return -EINVAL.
  *
+ * @testid{TSPEC-COMMON-010}
+ * @draft
  * @see sys_bitarray_find_nth_set()
  */
 ZTEST(bitarray, test_bitarray_find_nth_set)
@@ -1072,6 +1086,8 @@ ZTEST(bitarray, test_bitarray_find_nth_set)
  * - Predicates match the patterns; set/clear modify only the targeted bits;
  *   out-of-range operations return -EINVAL and leave the array unchanged.
  *
+ * @testid{TSPEC-COMMON-011}
+ * @draft
  * @see sys_bitarray_set_region()
  * @see sys_bitarray_clear_region()
  * @see sys_bitarray_is_region_set()
@@ -1238,6 +1254,8 @@ ZTEST(bitarray, test_bitarray_region_set_clear)
  * - find_msb_set / find_lsb_set return the expected 1-based positions, and 0
  *   for an all-zero input.
  *
+ * @testid{TSPEC-COMMON-012}
+ * @draft
  * @see find_msb_set()
  * @see find_lsb_set()
  */

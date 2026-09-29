@@ -127,6 +127,8 @@ static void partner_fn(void *p1, void *p2, void *p3)
  * - At most JUMPS_ALLOWED pairs show a large uptime jump, and the whole
  *   loop stays under CHURN_UPTIME_BOUND_MS.
  *
+ * @testid{TSPEC-TIMER-001}
+ * @draft
  * @see k_timer_start()
  * @see k_timer_stop()
  * @see k_uptime_get()
@@ -192,6 +194,8 @@ ZTEST(timeout_churn, test_timeout_churn_uptime_bounded)
  * Expected result:
  * - k_sem_take() returns 0 (semaphore given), not -EAGAIN (timeout).
  *
+ * @testid{TSPEC-TIMER-002}
+ * @draft
  * @see k_sem_take()
  * @see k_timer_start()
  * @see k_timer_stop()
@@ -238,6 +242,8 @@ ZTEST(timeout_churn, test_timeout_churn_no_spurious_expiry)
  * Expected result:
  * - Every timer fires, each within SWEEP_FIRE_BOUND_MS.
  *
+ * @testid{TSPEC-TIMER-003}
+ * @draft
  * @see k_timer_start()
  * @see k_timer_status_sync()
  * @see k_busy_wait()

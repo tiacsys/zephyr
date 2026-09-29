@@ -92,6 +92,8 @@ static void reset_state(void)
  * Expected result:
  * - Every cpu_mask API returns -EINVAL.
  *
+ * @testid{TSPEC-MP-001}
+ * @draft
  * @see k_thread_cpu_mask_clear()
  * @see k_thread_cpu_mask_enable_all()
  * @see k_thread_cpu_mask_enable()
@@ -148,6 +150,8 @@ ZTEST(cpu_mask, test_api_rejects_running_thread)
  * Expected result:
  * - The thread never runs (its ran flag stays 0).
  *
+ * @testid{TSPEC-MP-002}
+ * @draft
  * @see k_thread_cpu_mask_clear()
  * @verifies ZEP-SRS-34-2
  */
@@ -203,6 +207,8 @@ ZTEST(cpu_mask, test_mask_clear_prevents_execution)
  * Expected result:
  * - The thread runs: the semaphore take succeeds and the ran flag is set.
  *
+ * @testid{TSPEC-MP-003}
+ * @draft
  * @see k_thread_cpu_mask_enable_all()
  * @verifies ZEP-SRS-34-2
  */
@@ -261,6 +267,8 @@ ZTEST(cpu_mask, test_mask_enable_all_allows_execution)
  * Expected result:
  * - The thread runs, and it runs on a CPU other than the excluded one.
  *
+ * @testid{TSPEC-MP-004}
+ * @draft
  * @see k_thread_cpu_mask_disable()
  * @verifies ZEP-SRS-34-2
  */
@@ -318,6 +326,8 @@ ZTEST(cpu_mask, test_mask_disable_local_cpu)
  * Expected result:
  * - The thread runs on the target CPU.
  *
+ * @testid{TSPEC-MP-005}
+ * @draft
  * @see k_thread_cpu_pin()
  * @verifies ZEP-SRS-34-12
  */
@@ -371,6 +381,8 @@ ZTEST(cpu_mask, test_cpu_pin_runs_on_target)
  * Expected result:
  * - Every thread runs, and thread i runs on CPU i.
  *
+ * @testid{TSPEC-MP-006}
+ * @draft
  * @see k_thread_cpu_pin()
  * @verifies ZEP-SRS-34-12
  */
@@ -437,6 +449,8 @@ ZTEST(cpu_mask, test_pin_each_thread_to_distinct_cpu)
  * - The thread does not run while all CPUs are disabled.
  * - The thread runs after the mask is re-enabled.
  *
+ * @testid{TSPEC-MP-007}
+ * @draft
  * @see k_thread_cpu_mask_enable()
  * @see k_thread_cpu_mask_disable()
  * @verifies ZEP-SRS-34-2
@@ -510,6 +524,8 @@ ZTEST(cpu_mask, test_individual_cpu_enable_disable)
  * Expected result:
  * - The thread runs on the target CPU.
  *
+ * @testid{TSPEC-MP-008}
+ * @draft
  * @see k_thread_cpu_pin()
  * @verifies ZEP-SRS-34-12
  */
@@ -561,6 +577,8 @@ ZTEST(cpu_mask, test_coop_thread_pinned_cpu)
  * Expected result:
  * - The thread runs only on CPU 0.
  *
+ * @testid{TSPEC-MP-009}
+ * @draft
  * @see k_thread_cpu_pin()
  * @verifies ZEP-SRS-34-15
  */
@@ -615,6 +633,8 @@ ZTEST(cpu_mask, test_pin_only_single_cpu)
  * Expected result:
  * - Both threads run; the pinned thread runs on CPU 0.
  *
+ * @testid{TSPEC-MP-010}
+ * @draft
  * @see k_thread_cpu_pin()
  * @see k_thread_cpu_mask_enable_all()
  * @verifies ZEP-SRS-34-12
@@ -708,6 +728,8 @@ static void check_affinity(void *arg0, void *arg1, void *arg2)
  * Expected result:
  * - Every thread observes its pinned CPU after each yield (no migration).
  *
+ * @testid{TSPEC-MP-011}
+ * @draft
  * @see k_thread_cpu_pin()
  * @see k_yield()
  * @verifies ZEP-SRS-34-12

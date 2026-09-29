@@ -79,6 +79,8 @@ static void errno_thread(void *_n, void *_my_errno, void *_unused)
  * Expected result:
  * - Every thread observes its own errno value and the main thread's errno is unchanged.
  *
+ * @testid{TSPEC-COMMON-066}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-18-9
  */
@@ -168,6 +170,8 @@ void thread_entry_user(void *p1, void *p2, void *p3)
  * Expected result:
  * - The value read via the per-thread accessor equals the value assigned to errno.
  *
+ * @testid{TSPEC-COMMON-067}
+ * @draft
  * @see z_errno()
  */
 ZTEST_USER(common_errno, test_errno)

@@ -54,6 +54,8 @@ DEVICE_DEFINE(foo_multireg, "foo_multireg", foo_multireg_init, NULL,
  * This is the same as the test_mmio_multiple test but in this test the
  * memory regions are created by the named DT property 'reg'.
  *
+ * @testid{TSPEC-DEVICE-026}
+ * @draft
  * @see test_mmio_multiple
  *
  * @ingroup kernel_device_tests

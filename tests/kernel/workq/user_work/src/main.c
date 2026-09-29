@@ -187,6 +187,9 @@ void *workq_setup(void)
  *   (already pending, out of memory) refuse the submission.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-002}
+ * @draft
  * @see k_work_user_queue_start()
  * @see k_work_user_init()
  * @see k_work_user_submit_to_queue()

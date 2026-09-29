@@ -41,6 +41,8 @@ static void thread_timer_start_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-027}
+ * @draft
  * @see k_timer_start()
  * @verifies ZEP-SRS-4-5
  */
@@ -80,6 +82,8 @@ static void thread_timer_stop_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-028}
+ * @draft
  * @see k_timer_stop()
  * @verifies ZEP-SRS-4-6
  */
@@ -119,6 +123,8 @@ static void thread_timer_status_get_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-029}
+ * @draft
  * @see k_timer_status_get()
  * @verifies ZEP-SRS-4-7
  */
@@ -158,6 +164,8 @@ static void thread_timer_status_sync_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-030}
+ * @draft
  * @see k_timer_status_sync()
  * @verifies ZEP-SRS-4-9
  */
@@ -197,6 +205,8 @@ static void thread_timer_remaining_ticks_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-031}
+ * @draft
  * @see k_timer_remaining_ticks()
  * @verifies ZEP-SRS-4-11
  */
@@ -236,6 +246,8 @@ static void thread_timer_expires_ticks_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-032}
+ * @draft
  * @see k_timer_expires_ticks()
  * @verifies ZEP-SRS-4-10
  */
@@ -274,6 +286,8 @@ static void thread_timer_user_data_get_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-033}
+ * @draft
  * @see k_timer_user_data_get()
  * @verifies ZEP-SRS-4-14
  */
@@ -314,6 +328,8 @@ static void thread_timer_user_data_set_null(void *p1, void *p2, void *p3)
  *
  * @ingroup kernel_timer_tests
  *
+ * @testid{TSPEC-TIMER-034}
+ * @draft
  * @see k_timer_user_data_set()
  * @verifies ZEP-SRS-4-13
  */

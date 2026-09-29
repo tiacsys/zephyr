@@ -30,6 +30,9 @@ static void work_handler(struct k_work *work)
  * still running).
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-050}
+ * @draft
  * @see k_work_queue_start()
  * @see k_work_queue_stop()
  * @verifies ZEP-SRS-38-8
@@ -86,6 +89,9 @@ ZTEST(workqueue_api, test_k_work_queue_start_stop)
  * - k_work_queue_stop() returns -ENOTSUP.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-051}
+ * @draft
  * @see k_work_queue_start()
  * @see k_work_queue_stop()
  * @verifies ZEP-SRS-38-8
@@ -151,6 +157,9 @@ static void run_q_main(void *workq_ptr, void *sem_ptr, void *p3)
  *   returns -ENODEV, and the server thread releases its completion semaphore.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-052}
+ * @draft
  * @see k_work_queue_run()
  * @see k_work_queue_stop()
  * @see k_work_queue_drain()
@@ -206,6 +215,9 @@ ZTEST(workqueue_api, test_k_work_queue_run_stop)
  * k_thread_priority_get() on the queue's thread.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-053}
+ * @draft
  * @see k_work_queue_start(), k_work_queue_thread_get()
  * @verifies ZEP-SRS-38-2
  */
@@ -241,6 +253,9 @@ static void remaining_noop_handler(struct k_work *work)
  * time.
  *
  * @ingroup kernel_workqueue_tests
+ *
+ * @testid{TSPEC-WORKQ-054}
+ * @draft
  * @see k_work_schedule(), k_work_delayable_remaining_get()
  * @verifies ZEP-SRS-38-25
  */

@@ -71,6 +71,9 @@ static void obs_on_expiry(struct k_timer *timer)
  * initialization, start, stop, and expiry events.
  *
  * @ingroup kernel_timer_tests
+ *
+ * @testid{TSPEC-TIMER-035}
+ * @draft
  * @verifies ZEP-SRS-4-18
  */
 ZTEST(timer_observer, test_periodic_expiry_and_explicit_stop)

@@ -76,6 +76,8 @@ static void thread_tslice(void *p1, void *p2, void *p3)
  * @details Check if system clock recovers and works as expected
  * when tickless idle is enabled and disabled.
  *
+ * @testid{TSPEC-TICKLESS-001}
+ * @draft
  * @verifies ZEP-SRS-28-1
  * @verifies ZEP-SRS-28-8
  * @verifies ZEP-SRS-28-10
@@ -106,6 +108,9 @@ ZTEST(tickless_concept, test_tickless_sysclock)
  *
  * @details Create threads of equal priority and enable time
  * slice. Check if the threads execute more than a tick.
+ *
+ * @testid{TSPEC-TICKLESS-002}
+ * @draft
  */
 ZTEST(tickless_concept, test_tickless_slice)
 {

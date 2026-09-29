@@ -184,6 +184,9 @@ K_THREAD_DEFINE(pi_high, THREAD_STACK_SIZE, calculate_pi_high, NULL, NULL, NULL,
  * switches.
  *
  * @ingroup kernel_fpsharing_tests
+ *
+ * @testid{TSPEC-FPU-005}
+ * @draft
  * @verifies ZEP-SRS-29-1
  * @verifies ZEP-SRS-29-4
  */

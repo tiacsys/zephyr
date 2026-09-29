@@ -59,6 +59,8 @@ static ZTEST_BMEM struct timer_data tdata;
  * Expected result:
  * - The millisecond uptime readings increase over time.
  *
+ * @testid{TSPEC-COMMON-058}
+ * @draft
  * @see k_uptime_get(), k_uptime_get_32()
  * @verifies ZEP-SRS-28-1
  */
@@ -99,6 +101,8 @@ ZTEST_USER(clock, test_clock_uptime)
  * Expected result:
  * - The tick reading increases as wall time elapses.
  *
+ * @testid{TSPEC-COMMON-059}
+ * @draft
  * @see k_uptime_ticks()
  * @verifies ZEP-SRS-28-2
  */
@@ -130,6 +134,8 @@ ZTEST_USER(clock, test_clock_uptime_ticks)
  * - The seconds reading is bounded by the floors of the surrounding
  *   millisecond readings.
  *
+ * @testid{TSPEC-COMMON-060}
+ * @draft
  * @see k_uptime_seconds()
  * @verifies ZEP-SRS-28-3
  */
@@ -163,6 +169,8 @@ ZTEST_USER(clock, test_clock_uptime_seconds)
  * Expected result:
  * - k_uptime_delta() reports a non-zero interval once time has elapsed.
  *
+ * @testid{TSPEC-COMMON-061}
+ * @draft
  * @see k_uptime_delta()
  * @verifies ZEP-SRS-28-4
  */
@@ -201,6 +209,8 @@ ZTEST_USER(clock, test_clock_uptime_delta)
  * - The cycle delta exceeds one millisecond of cycles and, converted via
  *   k_cyc_to_ns_floor64(), exceeds one millisecond in nanoseconds.
  *
+ * @testid{TSPEC-COMMON-062}
+ * @draft
  * @see k_cycle_get_32(), k_uptime_get_32()
  * @verifies ZEP-SRS-28-5
  * @verifies ZEP-SRS-28-7
@@ -258,6 +268,8 @@ ZTEST(clock, test_clock_cycle_32)
  * Expected result:
  * - The 64-bit delta is >= the 32-bit delta and < twice the 32-bit delta.
  *
+ * @testid{TSPEC-COMMON-063}
+ * @draft
  * @see k_cycle_get_64()
  * @verifies ZEP-SRS-28-6
  */
@@ -332,6 +344,8 @@ static void init_data_count(void)
  * - No expiry before the duration elapses; exactly one expiry afterward and no
  *   stop-callback invocation.
  *
+ * @testid{TSPEC-COMMON-064}
+ * @draft
  * @see k_timer_start(), k_timer_stop(), k_busy_wait()
  *
  * @verifies ZEP-SRS-28-13

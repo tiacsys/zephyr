@@ -58,6 +58,8 @@ static void test_thread_entry(void *p1, void *p2, void *p3)
  * Expected result:
  * - Both calls return -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-030}
+ * @draft
  * @see k_obj_core_stats_enable()
  * @verifies ZEP-SRS-35-6
  */
@@ -110,6 +112,8 @@ ZTEST(obj_core_stats_api, test_obj_core_stats_enable)
  * Expected result:
  * - Both calls return -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-031}
+ * @draft
  * @see k_obj_core_stats_disable()
  * @verifies ZEP-SRS-35-6
  */
@@ -162,6 +166,8 @@ ZTEST(obj_core_stats_api, test_obj_core_stats_disable)
  * Expected result:
  * - Both calls return -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-032}
+ * @draft
  * @see k_obj_core_stats_reset()
  * @verifies ZEP-SRS-35-7
  */
@@ -214,6 +220,8 @@ ZTEST(obj_core_stats_api, test_obj_core_stats_reset)
  * Expected result:
  * - Both calls return -ENOTSUP.
  *
+ * @testid{TSPEC-OBJCORE-033}
+ * @draft
  * @see k_obj_core_stats_query()
  * @verifies ZEP-SRS-35-5
  */
@@ -272,6 +280,8 @@ ZTEST(obj_core_stats_api, test_obj_core_stats_query)
  * - The unsupported cases return -ENOTSUP and the invalid-argument cases return
  *   -EINVAL.
  *
+ * @testid{TSPEC-OBJCORE-034}
+ * @draft
  * @see k_obj_core_stats_raw()
  * @verifies ZEP-SRS-35-5
  */
@@ -357,6 +367,8 @@ ZTEST(obj_core_stats_api, test_obj_core_stats_raw)
  * - Deregistration returns -ENOTSUP for the semaphore and 0 for the thread, and
  *   the raw query for the deregistered thread returns -EINVAL.
  *
+ * @testid{TSPEC-OBJCORE-035}
+ * @draft
  * @see k_obj_core_stats_deregister()
  * @see k_obj_core_stats_register()
  * @verifies ZEP-SRS-35-6
@@ -417,6 +429,8 @@ ZTEST(obj_core_stats_api, test_obj_core_stats_dereg)
  * - Registration returns -ENOTSUP for the semaphore, -EINVAL for the wrong size,
  *   and 0 for the valid buffer, after which the raw query reflects that buffer.
  *
+ * @testid{TSPEC-OBJCORE-036}
+ * @draft
  * @see k_obj_core_stats_register()
  * @see k_obj_core_stats_raw()
  * @verifies ZEP-SRS-35-6

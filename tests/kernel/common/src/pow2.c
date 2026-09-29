@@ -76,6 +76,8 @@ static void test_pow2_ceil_x(unsigned long test_value,
  * Expected result:
  * - Every input rounds up to its expected power-of-two ceiling.
  *
+ * @testid{TSPEC-COMMON-074}
+ * @draft
  * @see Z_POW2_CEIL()
  */
 ZTEST(pow2, test_pow2_ceil)

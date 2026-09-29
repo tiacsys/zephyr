@@ -199,6 +199,8 @@ static void create_negative_test_thread(int choice)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-065}
+ * @draft
  * @see k_thread_start()
  * @verifies ZEP-SRS-1-14
  */
@@ -229,6 +231,8 @@ ZTEST_USER(thread_error_case, test_thread_start_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-066}
+ * @draft
  * @see k_float_disable()
  * @verifies ZEP-SRS-29-3
  */
@@ -260,6 +264,8 @@ ZTEST_USER(thread_error_case, test_thread_float_disable_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-067}
+ * @draft
  * @see k_thread_timeout_remaining_ticks()
  * @verifies ZEP-SRS-1-33
  */
@@ -290,6 +296,8 @@ ZTEST_USER(thread_error_case, test_thread_timeout_remaining_ticks_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-068}
+ * @draft
  * @see k_thread_timeout_expires_ticks()
  * @verifies ZEP-SRS-1-33
  */
@@ -320,6 +328,8 @@ ZTEST_USER(thread_error_case, test_thread_timeout_expires_ticks_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-069}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1
  */
@@ -350,6 +360,8 @@ ZTEST_USER(thread_error_case, test_thread_create_null_thread)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-070}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1
  */
@@ -381,6 +393,8 @@ ZTEST_USER(thread_error_case, test_thread_create_null_stack)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-071}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-1-1
  */
@@ -411,6 +425,8 @@ ZTEST_USER(thread_error_case, test_thread_create_stack_size_overflow)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-072}
+ * @draft
  * @see k_thread_suspend()
  * @verifies ZEP-SRS-1-3
  */
@@ -441,6 +457,8 @@ ZTEST_USER(thread_error_case, test_thread_suspend_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-073}
+ * @draft
  * @see k_thread_resume()
  * @verifies ZEP-SRS-1-4
  */
@@ -471,6 +489,8 @@ ZTEST_USER(thread_error_case, test_thread_resume_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-074}
+ * @draft
  * @see k_thread_priority_set()
  * @verifies ZEP-SRS-1-2
  */
@@ -501,6 +521,8 @@ ZTEST_USER(thread_error_case, test_thread_priority_set_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-075}
+ * @draft
  * @see k_thread_priority_get()
  * @verifies ZEP-SRS-1-16
  */
@@ -531,6 +553,8 @@ ZTEST_USER(thread_error_case, test_thread_priority_get_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-076}
+ * @draft
  * @see k_wakeup()
  * @verifies ZEP-SRS-28-11
  */
@@ -562,6 +586,8 @@ ZTEST_USER(thread_error_case, test_thread_wakeup_null)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-077}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-8-8
  */
@@ -592,6 +618,8 @@ ZTEST_USER(thread_error_case, test_thread_create_supervisor_denied)
  * Expected result:
  * - The call raises the expected fatal error and never returns.
  *
+ * @testid{TSPEC-THREADS-078}
+ * @draft
  * @see k_thread_create()
  * @verifies ZEP-SRS-8-8
  */

@@ -203,6 +203,8 @@ void test_slab_free_all_blocks(void **p)
  * to free all memory blocks. It also tries to wait (with and without
  * timeout) for a memory block.
  *
+ * @testid{TSPEC-SLAB-001}
+ * @draft
  * @see k_mem_slab_alloc(), k_mem_slab_num_used_get(),
  * memset(), k_mem_slab_free()
  * @verifies ZEP-SRS-9-12

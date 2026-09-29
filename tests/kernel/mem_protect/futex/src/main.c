@@ -10,9 +10,17 @@
 
 
 /**
+ * @brief Tests for memory protection
+ * @defgroup tests_kernel_mem_protect Memory protection tests
+ * @ingroup all_tests
+ * @{
+ * @}
+ */
+
+/**
  * @brief Tests for Kernel Futex objects
  * @defgroup kernel_futex_tests Futex
- * @ingroup all_tests
+ * @ingroup tests_kernel_mem_protect
  * @{
  * @}
  */

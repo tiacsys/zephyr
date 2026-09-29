@@ -9,7 +9,7 @@
  *
  * @defgroup kernel_xip_tests XIP Tests
  *
- * @ingroup all_tests
+ * @ingroup tests_arch_common
  *
  * @details This module tests that XIP performs as expected. If the first
  * task is even activated that is a good indication that XIP is

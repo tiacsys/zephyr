@@ -421,6 +421,42 @@ void *multi_heap_choice(struct sys_multi_heap *mheap, void *cfg,
 	return sys_heap_aligned_alloc(h, align, size);
 }
 
+/**
+ * @brief Verify that a multi-heap allocates from the heap that the choice
+ * function selects, and that realloc and free work.
+ *
+ * @details
+ * The multi-heap has N_MULTI_HEAPS heaps of MHEAP_BYTES each. The choice
+ * function multi_heap_choice() uses the configuration argument as the index of
+ * the heap.
+ *
+ * Test steps:
+ * - Initialize the multi-heap with sys_multi_heap_init().
+ * - Add N_MULTI_HEAPS heaps with sys_multi_heap_add_heap().
+ * - From each heap, allocate half of the heap. Then realloc the block to the
+ *   same size.
+ * - From each heap, allocate half of the heap again.
+ * - Free all blocks with sys_multi_heap_free().
+ * - From each heap, allocate half of the heap. Then realloc the block to a
+ *   quarter of the heap.
+ * - From each heap, allocate a quarter of the heap.
+ * - Call sys_multi_heap_realloc() with the size 0. Then call it with a NULL
+ *   pointer.
+ *
+ * Expected result:
+ * - Each first allocation is not NULL and is inside the memory of the selected
+ *   heap.
+ * - A realloc to the same or a smaller size returns the same pointer.
+ * - The second allocation of half a heap returns NULL.
+ * - After the free, the allocations of half a heap succeed again.
+ * - The quarter allocation is inside the space that the smaller realloc
+ *   released.
+ * - The realloc with the size 0 returns NULL. The realloc with a NULL pointer
+ *   returns a block that is not NULL.
+ *
+ * @see sys_multi_heap_init(), sys_multi_heap_add_heap(),
+ * sys_multi_heap_alloc(), sys_multi_heap_realloc(), sys_multi_heap_free()
+ */
 ZTEST(mheap_api, test_multi_heap)
 {
 	char *blocks[N_MULTI_HEAPS];

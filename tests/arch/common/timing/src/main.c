@@ -80,6 +80,42 @@ void *timing_setup(void)
 	return NULL;
 }
 
+/**
+ * @brief Verify that the arch timing functions measure two busy waits of 1 ms
+ * with a tolerance of 10 percent.
+ *
+ * @details
+ * The suite setup function calls arch_timing_init(). The test then calls
+ * perform_tests() two times. Thus it also verifies that the timing functions
+ * work again after arch_timing_stop().
+ *
+ * Test steps:
+ * - Call arch_timing_start().
+ * - Call arch_timing_counter_get() before, between and after two k_busy_wait()
+ *   calls of 1000 us.
+ * - Get the cycle counts of the two intervals and of the total with
+ *   arch_timing_cycles_get().
+ * - Get the frequency with arch_timing_freq_get() and
+ *   arch_timing_freq_get_mhz().
+ * - Convert the cycle counts to nanoseconds with arch_timing_cycles_to_ns().
+ * - Get the average of the two intervals with arch_timing_cycles_to_ns_avg().
+ * - Call arch_timing_stop().
+ * - Do all these steps a second time.
+ *
+ * Expected result:
+ * - All cycle counts are more than 0.
+ * - The two intervals are equal within 10 percent. The total is equal to their
+ *   sum within 10 percent.
+ * - arch_timing_freq_get_mhz() returns the value of arch_timing_freq_get()
+ *   divided by 1000000.
+ * - Each interval and the average are 1000000 ns within 10 percent.
+ * - The total is 2000000 ns within 10 percent.
+ *
+ * @see arch_timing_init(), arch_timing_start(), arch_timing_counter_get(),
+ * arch_timing_cycles_get(), arch_timing_freq_get(), arch_timing_freq_get_mhz(),
+ * arch_timing_cycles_to_ns(), arch_timing_cycles_to_ns_avg(),
+ * arch_timing_stop()
+ */
 ZTEST(arch_timing, test_arch_timing)
 {
 	perform_tests();
@@ -99,6 +135,31 @@ static void thread_entry(void *p1, void *p2, void *p3)
 	perform_tests();
 }
 
+/**
+ * @brief Verify that the arch timing functions measure busy waits correctly on
+ * each CPU.
+ *
+ * @details
+ * The test creates one thread for each CPU and uses a CPU mask to keep each
+ * thread on its CPU. Each thread calls perform_tests() two times, as
+ * test_arch_timing does. The build contains this test only if
+ * CONFIG_SCHED_CPU_MASK is enabled and CONFIG_MP_MAX_NUM_CPUS is more than 1.
+ *
+ * Test steps:
+ * - Create one thread for each CPU that arch_num_cpus() gives, with the delay
+ *   K_FOREVER.
+ * - Enable the CPU mask of each thread for its CPU only. Then start the thread.
+ * - Join all the threads.
+ *
+ * Expected result:
+ * - On each CPU, the measurements meet the same limits as in test_arch_timing.
+ * - All threads end.
+ *
+ * @see arch_timing_init(), arch_timing_start(), arch_timing_counter_get(),
+ * arch_timing_cycles_get(), arch_timing_freq_get(), arch_timing_freq_get_mhz(),
+ * arch_timing_cycles_to_ns(), arch_timing_cycles_to_ns_avg(),
+ * arch_timing_stop(), k_thread_cpu_mask_enable()
+ */
 ZTEST(arch_timing, test_arch_timing_smp)
 {
 	int i;

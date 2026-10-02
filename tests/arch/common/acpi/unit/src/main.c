@@ -66,6 +66,19 @@ static void dmar_initialize(struct DMAR *dmar)
 	dmar->unit1.ds1.header.Length = sizeof(dmar->unit1.ds1);
 }
 
+/**
+ * @brief Verify that the lib_acpi test suite builds and runs an empty test.
+ *
+ * @details
+ * The test body is empty and has no assertions. The test passes when the test
+ * image with the mocked ACPI library builds and starts.
+ *
+ * Test steps:
+ * - Run the empty test body.
+ *
+ * Expected result:
+ * - The test passes.
+ */
 ZTEST(lib_acpi, test_nop)
 {
 }
@@ -79,6 +92,24 @@ static void count_subtables(ACPI_DMAR_HEADER *subtable, void *arg)
 
 FAKE_VOID_FUNC(subtable_nop, ACPI_DMAR_HEADER *, void *);
 
+/**
+ * @brief Verify that acpi_dmar_foreach_subtable() calls the callback one time
+ * for each hardware unit.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. The callback counts the subtables that it gets.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Call acpi_dmar_foreach_subtable() with a callback that increments a
+ *   counter.
+ *
+ * Expected result:
+ * - The counter is 2.
+ *
+ * @see acpi_dmar_foreach_subtable()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_subtable)
 {
 	uint8_t count = 0;
@@ -91,6 +122,28 @@ ZTEST(lib_acpi, test_dmar_foreach_subtable)
 	TC_PRINT("Counted %u hardware units\n", count);
 }
 
+/**
+ * @brief Verify that acpi_dmar_foreach_subtable() asserts on a hardware unit
+ * with a length of 0.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. A subtable must be at least as long as its header.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Set the length of the second hardware unit to 0.
+ * - Call expect_assert() to tell the mocked assert handler to expect an
+ *   assertion.
+ * - Call acpi_dmar_foreach_subtable() with a callback that does nothing.
+ *
+ * Expected result:
+ * - An assertion in acpi_dmar_foreach_subtable() fails. The mocked assert
+ *   handler then marks the test as passed and stops it.
+ * - The code after the call does not run.
+ *
+ * @see acpi_dmar_foreach_subtable()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_subtable_invalid_unit_size_zero)
 {
 	ACPI_DMAR_HARDWARE_UNIT *hu = &dmar0.unit1.header;
@@ -108,6 +161,29 @@ ZTEST(lib_acpi, test_dmar_foreach_subtable_invalid_unit_size_zero)
 	zassert_unreachable("Missed assert catch");
 }
 
+/**
+ * @brief Verify that acpi_dmar_foreach_subtable() asserts on a hardware unit
+ * that goes past the end of the DMAR table.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. A subtable must not be longer than the rest of the
+ * DMAR table.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Set the length of the second hardware unit to its size plus 1.
+ * - Call expect_assert() to tell the mocked assert handler to expect an
+ *   assertion.
+ * - Call acpi_dmar_foreach_subtable() with a callback that does nothing.
+ *
+ * Expected result:
+ * - An assertion in acpi_dmar_foreach_subtable() fails. The mocked assert
+ *   handler then marks the test as passed and stops it.
+ * - The code after the call does not run.
+ *
+ * @see acpi_dmar_foreach_subtable()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_subtable_invalid_unit_size_big)
 {
 	ACPI_DMAR_HARDWARE_UNIT *hu = &dmar0.unit1.header;
@@ -134,6 +210,24 @@ static void count_devscopes(ACPI_DMAR_DEVICE_SCOPE *devscope, void *arg)
 
 FAKE_VOID_FUNC(devscope_nop, ACPI_DMAR_DEVICE_SCOPE *, void *);
 
+/**
+ * @brief Verify that acpi_dmar_foreach_devscope() calls the callback one time
+ * for each device scope of a hardware unit.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. The callback counts the device scopes that it gets.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Call acpi_dmar_foreach_devscope() on the first hardware unit, with a
+ *   callback that increments a counter.
+ *
+ * Expected result:
+ * - The counter is 2.
+ *
+ * @see acpi_dmar_foreach_devscope()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_devscope)
 {
 	ACPI_DMAR_HARDWARE_UNIT *hu = &dmar0.unit0.header;
@@ -147,6 +241,29 @@ ZTEST(lib_acpi, test_dmar_foreach_devscope)
 	TC_PRINT("Counted %u device scopes\n", count);
 }
 
+/**
+ * @brief Verify that acpi_dmar_foreach_devscope() asserts on a hardware unit
+ * with a length of 0.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. A hardware unit must be at least as long as its
+ * header.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Set the length of the first hardware unit to 0.
+ * - Call expect_assert() to tell the mocked assert handler to expect an
+ *   assertion.
+ * - Call acpi_dmar_foreach_devscope() with a callback that does nothing.
+ *
+ * Expected result:
+ * - An assertion in acpi_dmar_foreach_devscope() fails. The mocked assert
+ *   handler then marks the test as passed and stops it.
+ * - The code after the call does not run.
+ *
+ * @see acpi_dmar_foreach_devscope()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_unit_size)
 {
 	ACPI_DMAR_HARDWARE_UNIT *hu = &dmar0.unit0.header;
@@ -164,6 +281,28 @@ ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_unit_size)
 	zassert_unreachable("Missed assert catch");
 }
 
+/**
+ * @brief Verify that acpi_dmar_foreach_devscope() asserts on a device scope
+ * with a length of 0.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. A device scope must be at least as long as its header.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Set the length of the first device scope of the first hardware unit to 0.
+ * - Call expect_assert() to tell the mocked assert handler to expect an
+ *   assertion.
+ * - Call acpi_dmar_foreach_devscope() with a callback that does nothing.
+ *
+ * Expected result:
+ * - An assertion in acpi_dmar_foreach_devscope() fails. The mocked assert
+ *   handler then marks the test as passed and stops it.
+ * - The code after the call does not run.
+ *
+ * @see acpi_dmar_foreach_devscope()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_devscope_size_zero)
 {
 	ACPI_DMAR_HARDWARE_UNIT *hu = &dmar0.unit0.header;
@@ -182,6 +321,30 @@ ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_devscope_size_zero)
 	zassert_unreachable("Missed assert catch");
 }
 
+/**
+ * @brief Verify that acpi_dmar_foreach_devscope() asserts on a device scope
+ * that goes past the end of its hardware unit.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. A device scope must not be longer than the rest of its
+ * hardware unit.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Set the length of the last device scope of the second hardware unit to its
+ *   size plus 1.
+ * - Call expect_assert() to tell the mocked assert handler to expect an
+ *   assertion.
+ * - Call acpi_dmar_foreach_devscope() with a callback that does nothing.
+ *
+ * Expected result:
+ * - An assertion in acpi_dmar_foreach_devscope() fails. The mocked assert
+ *   handler then marks the test as passed and stops it.
+ * - The code after the call does not run.
+ *
+ * @see acpi_dmar_foreach_devscope()
+ */
 ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_devscope_size_big)
 {
 	ACPI_DMAR_HARDWARE_UNIT *hu = &dmar0.unit1.header;
@@ -213,6 +376,31 @@ static ACPI_STATUS dmar_custom_get_table(char *Signature, UINT32 Instance,
 	return AE_OK;
 }
 
+/**
+ * @brief Verify that acpi_dmar_ioapic_get() returns the PCI ID of the IOAPIC
+ * device scope in the DMAR table.
+ *
+ * @details
+ * The test uses a static DMAR table with two hardware units. Each hardware unit
+ * has two device scopes. A fake AcpiGetTable() returns this table. The test
+ * makes the last device scope an IOAPIC scope with a known bus, device and
+ * function.
+ *
+ * Test steps:
+ * - Initialize the static DMAR table with the correct lengths.
+ * - Set the type of the last device scope to ACPI_DMAR_SCOPE_TYPE_IOAPIC.
+ * - Set the bus to 0xab, the device to 0xc and the function to 0b101.
+ * - Make the fake AcpiGetTable() return the static DMAR table.
+ * - Call acpi_dmar_ioapic_get().
+ *
+ * Expected result:
+ * - Before the call, the call count of AcpiGetTable() is 0.
+ * - acpi_dmar_ioapic_get() returns 0.
+ * - After the call, the call count of AcpiGetTable() is 1.
+ * - The IOAPIC ID is equal to the raw value of the bus, device and function.
+ *
+ * @see acpi_dmar_ioapic_get()
+ */
 ZTEST(lib_acpi, test_dmar_ioapic_get)
 {
 	union acpi_dmar_id fake_path = {

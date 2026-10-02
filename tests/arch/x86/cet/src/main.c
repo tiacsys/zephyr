@@ -95,6 +95,22 @@ void work_handler(struct k_work *wrk)
 	zassert_true(is_shstk_enabled(), "shadow stack not enabled");
 }
 
+/**
+ * @brief Verify that the hardware shadow stack is enabled when a work item runs
+ * on the system work queue.
+ *
+ * @details
+ * The build contains this test only if CONFIG_HW_SHADOW_STACK is enabled. The
+ * work handler reads X86_S_CET_MSR and asserts that the shadow stack enable bit
+ * is set.
+ *
+ * Test steps:
+ * - Initialize a work item with work_handler().
+ * - Submit the work item with k_work_submit().
+ *
+ * Expected result:
+ * - In work_handler(), the X86_S_CET_MSR_SHSTK_EN bit of X86_S_CET_MSR is set.
+ */
 ZTEST(cet, test_shstk_work_q)
 {
 	k_work_init(&work, work_handler);
@@ -125,6 +141,25 @@ void thread_b_entry(void *p1, void *p2, void *p3)
 	k_sem_take(&thread_b_irq_sem, K_FOREVER);
 }
 
+/**
+ * @brief Verify that an interrupt handler and a nested interrupt handler run
+ * with the hardware shadow stack enabled.
+ *
+ * @details
+ * thread_b calls irq_offload() with intr_handler(). intr_handler() calls
+ * irq_offload() one more time, which gives one nested interrupt level. An
+ * unexpected fatal error stops the system and fails the test.
+ *
+ * Test steps:
+ * - Start thread_b.
+ * - Give thread_b_sem to let thread_b offload the interrupt handler.
+ * - Wait until thread_b ends, with k_thread_join().
+ *
+ * Expected result:
+ * - The interrupt handler and the nested handler run.
+ * - The interrupt handler gives thread_b_irq_sem, and thread_b ends.
+ * - No fatal error occurs.
+ */
 ZTEST(cet, test_shstk_irq)
 {
 	k_thread_start(thread_b);
@@ -143,6 +178,28 @@ void thread_a_entry(void *p1, void *p2, void *p3)
 	zassert_unreachable("should not reach here");
 }
 
+/**
+ * @brief Verify that the hardware shadow stack detects a changed return address
+ * and causes a control protection exception.
+ *
+ * @details
+ * fail() writes the address of foo() past the end of a local array. This write
+ * changes the return address on the normal stack, but not on the shadow stack.
+ * The return from fail() then causes a control protection exception.
+ *
+ * Test steps:
+ * - Start thread_a.
+ * - Set the expected exception to IV_CTRL_PROTECTION_EXCEPTION and
+ *   CTRL_PROTECTION_ERRORCODE_NEAR_RET.
+ * - Give thread_a_sem to let thread_a call fail().
+ * - Wait for error_handler_sem. Then abort thread_a.
+ *
+ * Expected result:
+ * - A fatal error occurs with the vector IV_CTRL_PROTECTION_EXCEPTION and the
+ *   error code CTRL_PROTECTION_ERRORCODE_NEAR_RET.
+ * - The fatal error handler gives error_handler_sem.
+ * - thread_a does not run the code after fail().
+ */
 ZTEST(cet, test_shstk)
 {
 	k_thread_start(thread_a);
@@ -167,6 +224,28 @@ int do_call(int (*func)(int), int a)
 	return func(a);
 }
 
+/**
+ * @brief Verify that indirect branch tracking faults on an indirect call to a
+ * function without an end-branch instruction.
+ *
+ * @details
+ * should_work() starts with an endbr32 or endbr64 instruction, and
+ * should_not_work() does not. do_call() calls each function through a function
+ * pointer. The build contains this test only if CONFIG_X86_CET_IBT is enabled.
+ *
+ * Test steps:
+ * - Call should_work() through do_call() with the argument 1.
+ * - Set the expected exception to IV_CTRL_PROTECTION_EXCEPTION and
+ *   CTRL_PROTECTION_ERRORCODE_ENDBRANCH.
+ * - Call should_not_work() through do_call() with the argument 1.
+ *
+ * Expected result:
+ * - should_work() returns 2.
+ * - The call to should_not_work() causes a fatal error with the vector
+ *   IV_CTRL_PROTECTION_EXCEPTION and the error code
+ *   CTRL_PROTECTION_ERRORCODE_ENDBRANCH.
+ * - The code after the call does not run.
+ */
 ZTEST(cet, test_ibt)
 {
 	zassert_equal(do_call(should_work, 1), 2, "should_work failed");

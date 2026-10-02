@@ -272,6 +272,24 @@ ZTEST_USER(x86_pagetables, test_dump_ptables_user)
 	dump_pagetables();
 }
 
+/**
+ * @brief Verify that a supervisor thread can dump its page tables to the
+ * console without a fatal error.
+ *
+ * @details
+ * dump_my_ptables() prints the page tables of the current thread with
+ * z_x86_dump_page_tables(). The test does not verify the output. If the RAM is
+ * larger than 32 MB, the test skips itself because the dump takes too long.
+ *
+ * Test steps:
+ * - Call dump_my_ptables() from the supervisor test thread.
+ *
+ * Expected result:
+ * - dump_my_ptables() prints the page tables of the test thread on the console.
+ * - No fatal error occurs.
+ *
+ * @see z_x86_dump_page_tables()
+ */
 ZTEST(x86_pagetables, test_dump_ptables)
 {
 	dump_pagetables();

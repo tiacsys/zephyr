@@ -53,6 +53,24 @@ bool z_x86_do_kernel_nmi(const struct arch_esf *esf)
 	return true;
 }
 
+/**
+ * @brief Verify that the NMI handler runs one time on the NMI stack of the
+ * current CPU.
+ *
+ * @details
+ * The test triggers the non-maskable interrupt vector with a software
+ * interrupt. The test replaces z_x86_do_kernel_nmi(), which verifies the stack
+ * pointer and counts its calls.
+ *
+ * Test steps:
+ * - Trigger the IV_NON_MASKABLE_INTERRUPT vector with the int instruction.
+ * - Read the number of handler calls.
+ *
+ * Expected result:
+ * - In the handler, the stack pointer is inside the NMI stack of the current
+ *   CPU.
+ * - The handler runs exactly one time.
+ */
 ZTEST(nmi, test_nmi_handler)
 {
 	TC_PRINT("Testing to see interrupt handler executes properly\n");

@@ -26,6 +26,29 @@ static void user_fault_before(void *data)
 	zassert_equal(k_mem_page_out(user_page, CONFIG_MMU_PAGE_SIZE), 0, "k_mem_page_out failed");
 }
 
+/**
+ * @brief Verify that a user access to a paged-out page pages it in with its
+ * data and write access.
+ *
+ * @details
+ * The before function maps an anonymous page with user access. It fills the
+ * page from kernel mode and then pages it out. The first user access causes a
+ * page fault that pages the page in.
+ *
+ * Test steps:
+ * - Map one page with k_mem_map(), K_MEM_PERM_RW and K_MEM_PERM_USER.
+ * - Fill the page with 0x5a. Then page it out with k_mem_page_out().
+ * - In user mode, read the first byte of the page.
+ * - Write 0xa5 to the second byte. Then read it.
+ *
+ * Expected result:
+ * - k_mem_map() returns a page that is not NULL, and k_mem_page_out() returns
+ *   0.
+ * - The first byte is 0x5a.
+ * - The second byte is 0xa5.
+ *
+ * @see k_mem_map(), k_mem_page_out()
+ */
 ZTEST_USER(demand_paging_user_fault, test_user_touch_after_page_out)
 {
 	/* read of an evicted page must page it back in, contents intact */

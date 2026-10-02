@@ -1459,12 +1459,27 @@ extern uint8_t _thread_idx_map[CONFIG_MAX_THREAD_BYTES];
 #define MAX_THREAD_BITS (CONFIG_MAX_THREAD_BYTES * BITS_PER_BYTE)
 #endif
 
-/* @brief Test alloc thread object until out of idex
+/**
+ * @brief Verify that k_object_alloc() fails for a thread object when all thread
+ * indexes are in use.
  *
- * @details Allocate thread object until it out of index, no more
- * thread can be allocated and report an error.
+ * @details
+ * Each dynamic thread object uses one bit of the thread index map
+ * _thread_idx_map. When no thread index is free, k_object_alloc() cannot
+ * allocate a thread object and returns NULL. Without CONFIG_DYNAMIC_OBJECTS,
+ * the test skips itself.
  *
- * @see k_object_alloc()
+ * Test steps:
+ * - Allocate K_OBJ_THREAD objects with k_object_alloc() until it returns NULL.
+ * - Read each byte of _thread_idx_map.
+ * - Allocate one more K_OBJ_THREAD object.
+ * - Free all allocated thread objects with k_object_free().
+ *
+ * Expected result:
+ * - Each byte of _thread_idx_map is 0. Thus no thread index is free.
+ * - The last k_object_alloc() call returns NULL.
+ *
+ * @see k_object_alloc(), k_object_free()
  *
  * @ingroup kernel_memprotect_tests
  * @verifies ZEP-SRS-8-16

@@ -28,6 +28,33 @@ char __aligned(4) slab_buffer[8 * 4];
 stack_data_t stack_array[8 * 4];
 int msgq_buffer[64];
 
+/**
+ * @brief Verify that the object tracking lists contain static and dynamic
+ * kernel objects, and that a second init is safe.
+ *
+ * @details
+ * The kernel keeps one tracking list for each kernel object type. The test uses
+ * k_timer, k_mem_slab, k_sem, k_mutex, k_stack, k_msgq, k_mbox, k_pipe, k_queue
+ * and k_event. For each type, one object is static and one object is local to
+ * the test.
+ *
+ * Test steps:
+ * - For each type, initialize the local object with its init function.
+ * - Walk the tracking list of the type with SYS_PORT_TRACK_NEXT(). Count the
+ *   static and the local object.
+ * - Count all the entries of _track_list_k_event.
+ * - Initialize the static event double_init_event_s with k_event_init().
+ * - Walk _track_list_k_event for the counted number of entries.
+ *
+ * Expected result:
+ * - Each tracking list contains the static and the local object.
+ * - After the second init, the walk gets to the end of _track_list_k_event.
+ *   Thus the list has no cycle.
+ *
+ * @see k_timer_init(), k_mem_slab_init(), k_sem_init(), k_mutex_init(),
+ * k_stack_init(), k_msgq_init(), k_mbox_init(), k_pipe_init(), k_queue_init(),
+ * k_event_init(), SYS_PORT_TRACK_NEXT()
+ */
 ZTEST(obj_tracking, test_obj_tracking_coherence)
 {
 	struct k_timer timer;

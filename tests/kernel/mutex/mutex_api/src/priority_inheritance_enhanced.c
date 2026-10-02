@@ -803,6 +803,17 @@ ZTEST(mutex_api_1cpu, test_no_false_deadlock_intermediate_hop_finite_timeout)
 	k_thread_priority_set(k_current_get(), saved_prio);
 }
 
+static void t_hop_anchor(void *p1, void *p2, void *p3)
+{
+	struct k_mutex *m = (struct k_mutex *)p1;
+
+	k_mutex_lock(m, K_FOREVER);
+	k_sem_give(&sem_ready);
+	k_sem_take(&sem_low_go, K_FOREVER);
+	k_mutex_unlock(m);
+	k_sem_give(&sem_done);
+}
+
 /**
  * @brief Verify the chain walk hop cap truncates a long equal-priority chain
  *
@@ -815,17 +826,6 @@ ZTEST(mutex_api_1cpu, test_no_false_deadlock_intermediate_hop_finite_timeout)
  * cap from that point must NOT be boosted. This chain does not close back
  * on _current, so no deadlock assertion is expected either way.
  */
-static void t_hop_anchor(void *p1, void *p2, void *p3)
-{
-	struct k_mutex *m = (struct k_mutex *)p1;
-
-	k_mutex_lock(m, K_FOREVER);
-	k_sem_give(&sem_ready);
-	k_sem_take(&sem_low_go, K_FOREVER);
-	k_mutex_unlock(m);
-	k_sem_give(&sem_done);
-}
-
 ZTEST(mutex_api_1cpu, test_chain_walk_hop_cap_truncates)
 {
 	static struct chain_link_args hop_args[NUM_HOP_THREADS];

@@ -361,6 +361,37 @@ ZTEST(pending, test_pending_fifo)
 }
 
 
+/**
+ * @brief Verify that threads pend on an empty LIFO, time out in sequence and
+ * get the data in priority sequence.
+ *
+ * @details
+ * Four threads wait on the same LIFO: coop_high, coop_low, task_high and
+ * task_low. Their timeouts are 1000 ms, 500 ms, 333 ms and 250 ms. A thread
+ * changes its state variable only when its wait ends.
+ *
+ * The test continues the thread sequence of test_pending_fifo. The test thread
+ * runs at the priority 9, which is lower than the priority of the four threads.
+ *
+ * Test steps:
+ * - Set the priority of the test thread to 9.
+ * - Submit work items that give end_test_sem and start_test_sem four times
+ *   each.
+ * - Read the states of the four threads.
+ * - Sleep 2 seconds to let all the LIFO waits time out. Then read the states.
+ * - Submit a work item that gives sync_test_sem four times.
+ * - Put four data items into the LIFO with k_lifo_put(). Then read the states.
+ *
+ * Expected result:
+ * - Before the sleep, all four threads are in the state LIFO_TEST_START. Thus
+ *   they pend and do not busy-wait.
+ * - After the sleep, the threads timed out in the sequence task_low, task_high,
+ *   coop_low, coop_high.
+ * - After the put, the threads got the data in the sequence coop_high,
+ *   coop_low, task_high, task_low.
+ *
+ * @see k_lifo_get(), k_lifo_put()
+ */
 ZTEST(pending, test_pending_lifo)
 {
 	/*
@@ -428,6 +459,33 @@ ZTEST(pending, test_pending_lifo)
 
 }
 
+/**
+ * @brief Verify that a preemptible thread pends in k_timer_status_sync() until
+ * a one-shot timer expires.
+ *
+ * @details
+ * task_high starts a timer of 1 second and calls k_timer_status_sync(). The
+ * timer has the user data NON_NULL_PTR. task_high records the uptime before the
+ * start and after the return. The test thread runs at the priority 9, which is
+ * lower than the priority of task_high.
+ *
+ * Test steps:
+ * - Set the priority of the test thread to 9.
+ * - Submit a work item that gives end_test_sem four times.
+ * - Set timer_end_tick to 0. Then give start_test_sem to start the timer
+ *   sequence in task_high.
+ * - Read timer_end_tick.
+ * - Sleep 2 seconds to let the timer expire.
+ * - Read the end time and the timer data that task_high recorded.
+ * - Give end_test_sem.
+ *
+ * Expected result:
+ * - Before the sleep, timer_end_tick is 0. Thus task_high pends on the timer.
+ * - After the sleep, timer_end_tick is at least 1000 ms after timer_start_tick.
+ * - The timer data is NON_NULL_PTR.
+ *
+ * @see k_timer_start(), k_timer_status_sync()
+ */
 ZTEST(pending, test_pending_timer)
 {
 	/*

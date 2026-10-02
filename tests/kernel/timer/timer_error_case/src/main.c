@@ -356,6 +356,25 @@ static void test_timer_handle(struct _timeout *t)
 	/**do nothing here**/
 }
 
+/**
+ * @brief Verify that z_add_timeout() with K_FOREVER returns and does nothing.
+ *
+ * @details
+ * For K_FOREVER, z_add_timeout() returns at once and does not change the
+ * timeout or the timeout list. The test uses a local struct _timeout that is
+ * not initialized. If CONFIG_USERSPACE is enabled, the test runs in user mode.
+ *
+ * Test steps:
+ * - Call z_add_timeout() with a local struct _timeout, a handler that does
+ *   nothing, and K_FOREVER.
+ * - Call ztest_test_pass().
+ *
+ * Expected result:
+ * - z_add_timeout() returns, and no fault occurs.
+ * - The test passes.
+ *
+ * @see z_add_timeout()
+ */
 ZTEST_USER(timer_api_error, test_timer_add_timeout)
 {
 	struct _timeout tm;

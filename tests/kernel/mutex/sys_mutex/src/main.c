@@ -445,15 +445,35 @@ ZTEST_USER_OR_NOT(mutex_complex, test_mutex)
 	TC_PRINT("Recursive locking tests successful\n");
 }
 
-/* We deliberately disable userspace, even on platforms that
- * support it, so that the alternate implementation of sys_mutex
- * (which is just a very thin wrapper to k_mutex) is exercised.
- * This requires us to not attempt to start the tests in user
- * mode, as this will otherwise fail an assertion in the thread code.
+/**
+ * @brief Verify that sys_mutex_lock() and sys_mutex_unlock() return errors for
+ * bad mutexes in supervisor mode.
+ *
+ * @details
+ * The nouser scenario of this suite disables userspace, also on platforms that
+ * support it. Then sys_mutex is a thin wrapper around k_mutex, and the suite
+ * exercises this alternative implementation. For this reason, this test runs in
+ * supervisor mode. In the nouser scenario, a start in user mode causes an
+ * assertion failure in the thread code.
+ *
+ * Test steps:
+ * - If CONFIG_USERSPACE is enabled, call sys_mutex_lock() and
+ *   sys_mutex_unlock() with NULL.
+ * - If CONFIG_USERSPACE is enabled, call the same functions with a pointer to a
+ *   thread object.
+ * - Call sys_mutex_unlock() on not_my_mutex, which the suite setup function
+ *   locked in a different thread.
+ * - Call sys_mutex_unlock() on bad_count_mutex, which no thread locked.
+ *
+ * Expected result:
+ * - With CONFIG_USERSPACE, each call with NULL or with a thread object returns
+ *   -EINVAL.
+ * - The unlock of not_my_mutex returns -EPERM.
+ * - The unlock of bad_count_mutex returns -EINVAL.
+ *
+ * @see sys_mutex_lock(), sys_mutex_unlock()
  *
  * @ingroup kernel_mutex_tests
- * @see sys_mutex_lock()
- * @see sys_mutex_unlock()
  * @verifies ZEP-SRS-6-4
  */
 ZTEST(mutex_complex, test_supervisor_access)

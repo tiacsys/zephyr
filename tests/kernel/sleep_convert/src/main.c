@@ -61,8 +61,23 @@ static void check(uint32_t ticks)
 		      z_sleep_ticks_to_int32_us(ticks), ref_us(ticks));
 }
 
-/* Every tick count from zero up, where the quotient and the remainder of the
- * split forms both change on every step.
+/**
+ * @brief Verify that the sleep tick conversions are correct for each tick count
+ * from 0 to 10000.
+ *
+ * @details
+ * In this range, the quotient and the remainder of the split conversion forms
+ * both change at each step. check() compares z_sleep_ticks_to_int32_ms() and
+ * z_sleep_ticks_to_int32_us() with a reference. The reference is the 64-bit
+ * ceiling conversion with saturation at INT32_MAX.
+ *
+ * Test steps:
+ * - For each tick count from 0 to 10000, call check().
+ *
+ * Expected result:
+ * - For each tick count, both conversions are equal to the reference.
+ *
+ * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_small_values)
 {
@@ -71,10 +86,28 @@ ZTEST(sleep_convert, test_small_values)
 	}
 }
 
-/* A stride that is coprime with the usual tick rates, so it lands on a varied
- * set of remainders all the way up to the top of the range.  Kept sparse on
- * purpose: this is here for reach, while the cases that actually distinguish
- * the conversion forms are covered densely above and exactly below.
+/**
+ * @brief Verify that the sleep tick conversions are correct at sample points
+ * through the full range of tick counts.
+ *
+ * @details
+ * The stride 1048573 is coprime with the usual tick rates. Thus the samples
+ * give many different remainders up to the top of the range. The samples are
+ * sparse on purpose, because this test covers the full range.
+ *
+ * test_small_values and test_boundaries cover the cases that distinguish the
+ * conversion forms. check() compares z_sleep_ticks_to_int32_ms() and
+ * z_sleep_ticks_to_int32_us() with a reference. The reference is the 64-bit
+ * ceiling conversion with saturation at INT32_MAX.
+ *
+ * Test steps:
+ * - For each tick count from 0 to MAX_SLEEP_TICKS in steps of 1048573, call
+ *   check().
+ *
+ * Expected result:
+ * - For each tick count, both conversions are equal to the reference.
+ *
+ * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_whole_range)
 {
@@ -83,8 +116,29 @@ ZTEST(sleep_convert, test_whole_range)
 	}
 }
 
-/* Where the converters change behaviour: around the tick rate itself, which
- * is where the quotient and remainder split, and around the clamp bounds.
+/**
+ * @brief Verify that the sleep tick conversions are correct at the tick counts
+ * where the converters change behavior.
+ *
+ * @details
+ * The converters change behavior near the tick rate, where the quotient and the
+ * remainder split. They also change near the clamp bounds. check() compares
+ * z_sleep_ticks_to_int32_ms() and z_sleep_ticks_to_int32_us() with a reference.
+ * The reference is the 64-bit ceiling conversion with saturation at INT32_MAX.
+ *
+ * Test steps:
+ * - Calculate the clamp bounds for milliseconds and microseconds from INT32_MAX
+ *   and the tick rate.
+ * - Call check() for 0, 1 and 2.
+ * - Call check() near the tick rate, near two times the tick rate and near each
+ *   clamp bound.
+ * - Call check() for MAX_SLEEP_TICKS - 1 and MAX_SLEEP_TICKS.
+ * - Skip each probe that is more than MAX_SLEEP_TICKS.
+ *
+ * Expected result:
+ * - For each tick count, both conversions are equal to the reference.
+ *
+ * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_boundaries)
 {
@@ -107,8 +161,27 @@ ZTEST(sleep_convert, test_boundaries)
 	}
 }
 
-/* Past the clamp bound the result must saturate rather than wrap, which is
- * the property that lets the conversion itself stay narrow.
+/**
+ * @brief Verify that the sleep tick conversions saturate at INT32_MAX past the
+ * clamp bound and do not wrap.
+ *
+ * @details
+ * The saturation lets the conversion itself use narrow arithmetic. If all tick
+ * counts up to MAX_SLEEP_TICKS fit in the result, no saturation is possible.
+ *
+ * Test steps:
+ * - Calculate the clamp bounds for milliseconds and microseconds.
+ * - If a clamp bound is less than MAX_SLEEP_TICKS, convert MAX_SLEEP_TICKS and
+ *   the clamp bound plus 1.
+ * - If a clamp bound is not less than MAX_SLEEP_TICKS, convert MAX_SLEEP_TICKS
+ *   only.
+ *
+ * Expected result:
+ * - Past a clamp bound, the conversion returns INT32_MAX.
+ * - Without a reachable clamp bound, the conversion of MAX_SLEEP_TICKS is not
+ *   more than INT32_MAX.
+ *
+ * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_saturation)
 {
@@ -135,8 +208,25 @@ ZTEST(sleep_convert, test_saturation)
 	}
 }
 
-/* The conversion must never round down: sleeping for the reported remainder
- * has to cover the time that was actually left.
+/**
+ * @brief Verify that the sleep tick conversions never round down.
+ *
+ * @details
+ * k_sleep() and k_usleep() return the time that is left. A sleep for this time
+ * must cover the ticks that were left. Thus the result, converted back to
+ * ticks, must not be less than the tick count.
+ *
+ * Test steps:
+ * - For each tick count from 1 to 2000, convert the count to milliseconds and
+ *   to microseconds.
+ * - Convert each result back to ticks with k_ms_to_ticks_floor64() and
+ *   k_us_to_ticks_floor64().
+ *
+ * Expected result:
+ * - Each result in ticks is equal to or more than the tick count, or the result
+ *   is INT32_MAX.
+ *
+ * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_rounds_up)
 {
@@ -154,6 +244,28 @@ ZTEST(sleep_convert, test_rounds_up)
 /* Defined in cpp_build.cpp: exists so the header is compiled as C++ too. */
 extern void sleep_convert_cpp_build(void);
 
+/**
+ * @brief Verify that the inline sleep API compiles as C++ with warnings as
+ * errors.
+ *
+ * @details
+ * The sleep API is a set of inline functions in a header. C++ rejects a
+ * narrowing conversion in a braced initializer, such as Z_TIMEOUT_TICKS_INIT(),
+ * that C accepts. The test has no assertions.
+ *
+ * cpp_build.cpp calls the sleep API, and the build compiles it as C++ with
+ * CONFIG_COMPILER_WARNINGS_AS_ERRORS. The function calls k_sleep(), k_msleep(),
+ * k_usleep(), k_sleep_ticks() and the two conversion helpers with zero values.
+ *
+ * Test steps:
+ * - Call sleep_convert_cpp_build().
+ *
+ * Expected result:
+ * - The C++ file compiles without warnings.
+ * - sleep_convert_cpp_build() returns.
+ *
+ * @see k_sleep(), k_msleep(), k_usleep(), k_sleep_ticks()
+ */
 ZTEST(sleep_convert, test_cpp_build)
 {
 	sleep_convert_cpp_build();

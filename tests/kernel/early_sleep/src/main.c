@@ -64,19 +64,36 @@ static int test_early_sleep_app(void)
 
 SYS_INIT(test_early_sleep_app, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEVICE);
 
-/*
- * @brief Test early sleep functionality
+/**
+ * @brief Verify that k_sleep() works during system initialization and after the
+ * system starts.
+ *
+ * @details
+ * Two SYS_INIT() functions call k_sleep() at the POST_KERNEL and the
+ * APPLICATION levels and record the slept ticks. The test cannot call k_sleep()
+ * at the PRE_KERNEL_1 or PRE_KERNEL_2 level. At these levels, the kernel
+ * initializes its core objects and the devices.
+ *
+ * The test also verifies that a thread of lower priority runs while the test
+ * thread sleeps.
+ *
+ * Test steps:
+ * - Set the priority of the test thread to 0.
+ * - Create a helper thread with a priority one level lower than the test
+ *   thread.
+ * - Read the slept ticks of the POST_KERNEL and the APPLICATION levels.
+ * - Call k_sleep() for TEST_TICKS_TO_SLEEP ticks. Measure the slept ticks with
+ *   k_cycle_get_32().
+ * - Read the flag that the helper thread clears.
+ *
+ * Expected result:
+ * - At each level and after the system starts, the slept ticks plus 1 are more
+ *   than TEST_TICKS_TO_SLEEP.
+ * - The helper thread ran.
+ *
+ * @see k_sleep()
  *
  * @ingroup kernel_sleep_tests
- *
- * This test verifies that k_sleep() can be used to put the calling thread to
- * sleep for a specified number of ticks during system initialization.  In this
- * test we are calling k_sleep() at POST_KERNEL and APPLICATION level
- * initialization sequence.
- *
- * Note: We can not call k_sleep() during PRE_KERNEL1 or PRE_KERNEL2 level
- * because the core kernel objects and devices initialization happens at these
- * levels.
  */
 ZTEST(earlysleep, test_early_sleep)
 {

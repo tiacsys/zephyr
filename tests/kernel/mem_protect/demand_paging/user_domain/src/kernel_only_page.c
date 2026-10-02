@@ -36,6 +36,33 @@ static void bad_entry(void *p1, void *p2, void *p3)
 	access_succeeded = true;
 }
 
+/**
+ * @brief Verify that a user access to a paged-out kernel-only page is fatal.
+ *
+ * @details
+ * The demand paging handler must not page in, dirty or refresh a kernel-only
+ * page for a user thread. EL0 is the user mode of arm64. On x86, the kernel
+ * pages the frame in on the first fault and faults on the next access. Thus the
+ * test verifies the page location only on arm64.
+ *
+ * Test steps:
+ * - Map one page with k_mem_map() and K_MEM_PERM_RW, without user access.
+ * - Fill the page with 0x5a. Then page it out with k_mem_page_out().
+ * - Tell the fatal error handler to expect a fault.
+ * - Create a user thread that reads the page and then writes to it.
+ * - Join the user thread with a timeout of 10 seconds.
+ * - On arm64, get the page location with arch_page_location_get().
+ *
+ * Expected result:
+ * - k_mem_map() returns a page that is not NULL, and k_mem_page_out() returns
+ *   0.
+ * - The access causes a fatal error. The kernel aborts the user thread, and
+ *   k_thread_join() returns 0.
+ * - The user thread does not complete the access.
+ * - On arm64, the page location is ARCH_PAGE_LOCATION_PAGED_OUT.
+ *
+ * @see k_mem_map(), k_mem_page_out()
+ */
 ZTEST(demand_paging_kernel_only_page, test_el0_touch_kernel_page_is_fatal)
 {
 	char *page = k_mem_map(CONFIG_MMU_PAGE_SIZE, K_MEM_PERM_RW);

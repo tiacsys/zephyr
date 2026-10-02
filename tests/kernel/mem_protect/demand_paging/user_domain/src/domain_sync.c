@@ -47,6 +47,33 @@ static void domain_sync_before(void *data)
 	k_mem_page_in(part_page, CONFIG_MMU_PAGE_SIZE);
 }
 
+/**
+ * @brief Verify that a user partition of a memory domain stays readable and
+ * writable after a page-out and a page-in.
+ *
+ * @details
+ * Demand paging must keep the mappings of the partitions that are private to a
+ * memory domain. The boot code pins the pages of the boot image. Thus the
+ * before function unpins the page of the partition first.
+ *
+ * Test steps:
+ * - Write the marker 0x5a to the first byte of a page-aligned buffer.
+ * - Add the buffer to the domain of the test thread as a
+ *   K_MEM_PARTITION_P_RW_U_RW partition.
+ * - Unpin the buffer with k_mem_unpin().
+ * - Page out the buffer with k_mem_page_out(). Then page it in with
+ *   k_mem_page_in().
+ * - In user mode, read the first byte. Then write 0xa5 to the second byte and
+ *   read it.
+ *
+ * Expected result:
+ * - k_mem_domain_add_partition() and k_mem_page_out() return 0.
+ * - The first byte is 0x5a.
+ * - The second byte is 0xa5, and no fault occurs.
+ *
+ * @see k_mem_domain_add_partition(), k_mem_unpin(), k_mem_page_out(),
+ * k_mem_page_in()
+ */
 ZTEST_USER(demand_paging_domain_sync, test_partition_perms_after_page_out_in)
 {
 	/* the private U_RW mapping must still be there */
@@ -102,6 +129,35 @@ static void read_only_before(void *data)
 		      "k_mem_domain_add_thread failed");
 }
 
+/**
+ * @brief Verify that a user write to a read-only partition is fatal after a
+ * page-out and a page-in.
+ *
+ * @details
+ * The page-in must not make a K_MEM_PARTITION_P_RO_U_RO partition writable. A
+ * user thread in the same memory domain reads the page and then writes to it.
+ * On arm64, the write must also not mark the page as dirty.
+ *
+ * Test steps:
+ * - Add a K_MEM_PARTITION_P_RO_U_RO partition to the memory domain of the test
+ *   thread.
+ * - Unpin the page of the partition. Then page it out and page it in.
+ * - Create a user thread and add it to the same memory domain.
+ * - Tell the fatal error handler to expect a fault. Then start the user thread.
+ * - Join the user thread with a timeout of 10 seconds.
+ * - On arm64, get the page flags with arch_page_info_get().
+ *
+ * Expected result:
+ * - k_mem_domain_add_partition(), k_mem_page_out() and
+ *   k_mem_domain_add_thread() return 0.
+ * - The write causes a fatal error. The kernel aborts the user thread, and
+ *   k_thread_join() returns 0.
+ * - The user thread does not complete the write.
+ * - On arm64, ARCH_DATA_PAGE_DIRTY is not set for the page.
+ *
+ * @see k_mem_domain_add_partition(), k_mem_domain_add_thread(), k_mem_unpin(),
+ * k_mem_page_out(), k_mem_page_in()
+ */
 ZTEST(demand_paging_read_only, test_user_write_to_read_only_partition_is_fatal)
 {
 	ro_write_succeeded = false;

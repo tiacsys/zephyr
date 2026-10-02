@@ -422,6 +422,12 @@ static void spin_entry(void *p1, void *p2, void *p3)
 	printk("spin thread completed\n");
 }
 
+#if CONFIG_MP_MAX_NUM_CPUS > 1
+#define PRIO	K_PRIO_COOP(0)
+#else
+#define PRIO	K_PRIO_PREEMPT(1)
+#endif
+
 /**
  * @brief Verify that a running thread can be migrated between domains.
  *
@@ -446,13 +452,6 @@ static void spin_entry(void *p1, void *p2, void *p3)
  *
  * @see k_mem_domain_add_thread()
  */
-
-#if CONFIG_MP_MAX_NUM_CPUS > 1
-#define PRIO	K_PRIO_COOP(0)
-#else
-#define PRIO	K_PRIO_PREEMPT(1)
-#endif
-
 ZTEST(mem_protect_domain, test_mem_domain_migration)
 {
 	int ret;

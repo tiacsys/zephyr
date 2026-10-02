@@ -78,6 +78,9 @@ static void dmar_initialize(struct DMAR *dmar)
  *
  * Expected result:
  * - The test passes.
+ *
+ * @testid{TSPEC-ARCHCOMMON-036}
+ * @draft
  */
 ZTEST(lib_acpi, test_nop)
 {
@@ -108,6 +111,8 @@ FAKE_VOID_FUNC(subtable_nop, ACPI_DMAR_HEADER *, void *);
  * Expected result:
  * - The counter is 2.
  *
+ * @testid{TSPEC-ARCHCOMMON-037}
+ * @draft
  * @see acpi_dmar_foreach_subtable()
  */
 ZTEST(lib_acpi, test_dmar_foreach_subtable)
@@ -142,6 +147,8 @@ ZTEST(lib_acpi, test_dmar_foreach_subtable)
  *   handler then marks the test as passed and stops it.
  * - The code after the call does not run.
  *
+ * @testid{TSPEC-ARCHCOMMON-038}
+ * @draft
  * @see acpi_dmar_foreach_subtable()
  */
 ZTEST(lib_acpi, test_dmar_foreach_subtable_invalid_unit_size_zero)
@@ -182,6 +189,8 @@ ZTEST(lib_acpi, test_dmar_foreach_subtable_invalid_unit_size_zero)
  *   handler then marks the test as passed and stops it.
  * - The code after the call does not run.
  *
+ * @testid{TSPEC-ARCHCOMMON-039}
+ * @draft
  * @see acpi_dmar_foreach_subtable()
  */
 ZTEST(lib_acpi, test_dmar_foreach_subtable_invalid_unit_size_big)
@@ -226,6 +235,8 @@ FAKE_VOID_FUNC(devscope_nop, ACPI_DMAR_DEVICE_SCOPE *, void *);
  * Expected result:
  * - The counter is 2.
  *
+ * @testid{TSPEC-ARCHCOMMON-040}
+ * @draft
  * @see acpi_dmar_foreach_devscope()
  */
 ZTEST(lib_acpi, test_dmar_foreach_devscope)
@@ -262,6 +273,8 @@ ZTEST(lib_acpi, test_dmar_foreach_devscope)
  *   handler then marks the test as passed and stops it.
  * - The code after the call does not run.
  *
+ * @testid{TSPEC-ARCHCOMMON-041}
+ * @draft
  * @see acpi_dmar_foreach_devscope()
  */
 ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_unit_size)
@@ -301,6 +314,8 @@ ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_unit_size)
  *   handler then marks the test as passed and stops it.
  * - The code after the call does not run.
  *
+ * @testid{TSPEC-ARCHCOMMON-042}
+ * @draft
  * @see acpi_dmar_foreach_devscope()
  */
 ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_devscope_size_zero)
@@ -343,6 +358,8 @@ ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_devscope_size_zero)
  *   handler then marks the test as passed and stops it.
  * - The code after the call does not run.
  *
+ * @testid{TSPEC-ARCHCOMMON-043}
+ * @draft
  * @see acpi_dmar_foreach_devscope()
  */
 ZTEST(lib_acpi, test_dmar_foreach_devscope_invalid_devscope_size_big)
@@ -399,6 +416,8 @@ static ACPI_STATUS dmar_custom_get_table(char *Signature, UINT32 Instance,
  * - After the call, the call count of AcpiGetTable() is 1.
  * - The IOAPIC ID is equal to the raw value of the bus, device and function.
  *
+ * @testid{TSPEC-ARCHCOMMON-044}
+ * @draft
  * @see acpi_dmar_ioapic_get()
  */
 ZTEST(lib_acpi, test_dmar_ioapic_get)

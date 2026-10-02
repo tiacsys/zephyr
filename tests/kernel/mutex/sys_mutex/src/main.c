@@ -471,6 +471,8 @@ ZTEST_USER_OR_NOT(mutex_complex, test_mutex)
  * - The unlock of not_my_mutex returns -EPERM.
  * - The unlock of bad_count_mutex returns -EINVAL.
  *
+ * @testid{TSPEC-MUTEX-038}
+ * @draft
  * @see sys_mutex_lock(), sys_mutex_unlock()
  *
  * @ingroup kernel_mutex_tests

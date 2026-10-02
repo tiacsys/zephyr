@@ -36,6 +36,8 @@
  * - The other reads return the requested number of bytes and the written data.
  * - semihost_seek() and semihost_close() return 0.
  *
+ * @testid{TSPEC-ARCHCOMMON-059}
+ * @draft
  * @see semihost_open(), semihost_flen(), semihost_write(), semihost_read(),
  * semihost_seek(), semihost_close()
  */

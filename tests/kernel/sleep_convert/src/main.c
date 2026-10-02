@@ -77,6 +77,8 @@ static void check(uint32_t ticks)
  * Expected result:
  * - For each tick count, both conversions are equal to the reference.
  *
+ * @testid{TSPEC-SLEEPCONV-001}
+ * @draft
  * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_small_values)
@@ -107,6 +109,8 @@ ZTEST(sleep_convert, test_small_values)
  * Expected result:
  * - For each tick count, both conversions are equal to the reference.
  *
+ * @testid{TSPEC-SLEEPCONV-002}
+ * @draft
  * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_whole_range)
@@ -138,6 +142,8 @@ ZTEST(sleep_convert, test_whole_range)
  * Expected result:
  * - For each tick count, both conversions are equal to the reference.
  *
+ * @testid{TSPEC-SLEEPCONV-003}
+ * @draft
  * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_boundaries)
@@ -181,6 +187,8 @@ ZTEST(sleep_convert, test_boundaries)
  * - Without a reachable clamp bound, the conversion of MAX_SLEEP_TICKS is not
  *   more than INT32_MAX.
  *
+ * @testid{TSPEC-SLEEPCONV-004}
+ * @draft
  * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_saturation)
@@ -226,6 +234,8 @@ ZTEST(sleep_convert, test_saturation)
  * - Each result in ticks is equal to or more than the tick count, or the result
  *   is INT32_MAX.
  *
+ * @testid{TSPEC-SLEEPCONV-005}
+ * @draft
  * @see z_sleep_ticks_to_int32_ms(), z_sleep_ticks_to_int32_us()
  */
 ZTEST(sleep_convert, test_rounds_up)
@@ -264,6 +274,8 @@ extern void sleep_convert_cpp_build(void);
  * - The C++ file compiles without warnings.
  * - sleep_convert_cpp_build() returns.
  *
+ * @testid{TSPEC-SLEEPCONV-006}
+ * @draft
  * @see k_sleep(), k_msleep(), k_usleep(), k_sleep_ticks()
  */
 ZTEST(sleep_convert, test_cpp_build)

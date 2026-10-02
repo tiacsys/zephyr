@@ -50,6 +50,8 @@ static void cleanup_after(void *fixture)
  * - In the scope, the lock count is 1.
  * - After the scope, the lock count is 0.
  *
+ * @testid{TSPEC-CLEANUP-001}
+ * @draft
  * @see scope_guard(), k_mutex_lock(), k_mutex_unlock()
  */
 ZTEST(cleanup_api, test_guard_k_mutex)
@@ -86,6 +88,8 @@ ZTEST(cleanup_api, test_guard_k_mutex)
  * - In the scope, the lock count is 1.
  * - After the scope, the lock count is 0.
  *
+ * @testid{TSPEC-CLEANUP-002}
+ * @draft
  * @see scope_defer(), k_mutex_unlock()
  */
 ZTEST(cleanup_api, test_defer_k_mutex_unlock)
@@ -126,6 +130,8 @@ ZTEST(cleanup_api, test_defer_k_mutex_unlock)
  * - In the scope, the count is 0.
  * - After the scope, the count is 1.
  *
+ * @testid{TSPEC-CLEANUP-003}
+ * @draft
  * @see scope_guard(), k_sem_take(), k_sem_give()
  */
 ZTEST(cleanup_api, test_guard_k_sem)
@@ -162,6 +168,8 @@ ZTEST(cleanup_api, test_guard_k_sem)
  * - In the scope, the count is 0.
  * - After the scope, the count is 1.
  *
+ * @testid{TSPEC-CLEANUP-004}
+ * @draft
  * @see scope_defer(), k_sem_give()
  */
 ZTEST(cleanup_api, test_defer_k_sem_give)
@@ -201,6 +209,8 @@ ZTEST(cleanup_api, test_defer_k_sem_give)
  * - The block runs one time.
  * - After the block, the lock count is 0.
  *
+ * @testid{TSPEC-CLEANUP-005}
+ * @draft
  * @see scoped_guard(), k_mutex_lock(), k_mutex_unlock()
  */
 ZTEST(cleanup_api, test_scoped_guard_k_mutex)
@@ -236,6 +246,8 @@ ZTEST(cleanup_api, test_scoped_guard_k_mutex)
  * - The block runs one time.
  * - After the block, the count is 1.
  *
+ * @testid{TSPEC-CLEANUP-006}
+ * @draft
  * @see scoped_guard(), k_sem_take(), k_sem_give()
  */
 ZTEST(cleanup_api, test_scoped_guard_k_sem)
@@ -274,6 +286,8 @@ ZTEST(cleanup_api, test_scoped_guard_k_sem)
  * - The block runs one time.
  * - After the block, the lock count is 0.
  *
+ * @testid{TSPEC-CLEANUP-007}
+ * @draft
  * @see scoped_guard()
  */
 ZTEST(cleanup_api, test_scoped_guard_break)
@@ -314,6 +328,8 @@ ZTEST(cleanup_api, test_scoped_guard_break)
  * - The block runs one time.
  * - After the block, the count is 1.
  *
+ * @testid{TSPEC-CLEANUP-008}
+ * @draft
  * @see scoped_cond_guard(), k_sem_take(), k_sem_give()
  */
 ZTEST(cleanup_api, test_scoped_cond_guard_acquired)
@@ -351,6 +367,8 @@ ZTEST(cleanup_api, test_scoped_cond_guard_acquired)
  * - The fail statement runs and sets the flag.
  * - The count stays 0.
  *
+ * @testid{TSPEC-CLEANUP-009}
+ * @draft
  * @see scoped_cond_guard(), k_sem_take()
  */
 ZTEST(cleanup_api, test_scoped_cond_guard_busy)
@@ -389,6 +407,8 @@ ZTEST(cleanup_api, test_scoped_cond_guard_busy)
  * - The block does not run.
  * - The count stays 0.
  *
+ * @testid{TSPEC-CLEANUP-010}
+ * @draft
  * @see scoped_guard(), k_sem_take()
  */
 ZTEST(cleanup_api, test_scoped_guard_cond_busy_skips)
@@ -429,6 +449,8 @@ ZTEST(cleanup_api, test_scoped_guard_cond_busy_skips)
  * - After the test, the system heap has the same number of free bytes as before
  *   the suite.
  *
+ * @testid{TSPEC-CLEANUP-011}
+ * @draft
  * @see scope_defer(), k_malloc(), k_free()
  */
 ZTEST(cleanup_api, test_defer_k_free)
@@ -461,6 +483,8 @@ ZTEST(cleanup_api, test_defer_k_free)
  * - After the test, the system heap has the same number of free bytes as before
  *   the suite.
  *
+ * @testid{TSPEC-CLEANUP-012}
+ * @draft
  * @see scope_defer(), k_heap_alloc(), k_heap_free()
  */
 ZTEST(cleanup_api, test_defer_k_heap_free)
@@ -496,6 +520,8 @@ K_MEM_SLAB_DEFINE_STATIC(test_slabs, 4, 1, 1);
  * - In the scope, 1 block is in use.
  * - After the scope, 0 blocks are in use.
  *
+ * @testid{TSPEC-CLEANUP-013}
+ * @draft
  * @see scope_defer(), k_mem_slab_alloc(), k_mem_slab_free()
  */
 ZTEST(cleanup_api, test_defer_k_mem_slab_free)
@@ -539,6 +565,8 @@ SCOPE_DEFER_DEFINE(void_function);
  * - In the scope, the flag is false.
  * - After the scope, the flag is true.
  *
+ * @testid{TSPEC-CLEANUP-014}
+ * @draft
  * @see scope_defer(), SCOPE_DEFER_DEFINE()
  */
 ZTEST(cleanup_api, test_defer_void_function)
@@ -593,6 +621,8 @@ SCOPE_VAR_DEFINE(foo, struct foo, foo_destructor(_T), foo_constructor(len), size
  * - After the test, the system heap has the same number of free bytes as before
  *   the suite.
  *
+ * @testid{TSPEC-CLEANUP-015}
+ * @draft
  * @see scope_var(), SCOPE_VAR_DEFINE()
  */
 ZTEST(cleanup_api, test_custom_cleanup_helper)

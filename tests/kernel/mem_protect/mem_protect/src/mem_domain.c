@@ -450,6 +450,8 @@ static void spin_entry(void *p1, void *p2, void *p3)
  * - The thread keeps running through the migration and the repeated add
  *   changes nothing.
  *
+ * @testid{TSPEC-MEMPROT-178}
+ * @draft
  * @see k_mem_domain_add_thread()
  */
 ZTEST(mem_protect_domain, test_mem_domain_migration)

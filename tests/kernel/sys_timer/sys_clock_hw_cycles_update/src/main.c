@@ -25,6 +25,8 @@
  * Expected result:
  * - The frequency is the same as before the update.
  *
+ * @testid{TSPEC-SYSTIMER-004}
+ * @draft
  * @see z_sys_clock_hw_cycles_per_sec_update(), sys_clock_hw_cycles_per_sec()
  */
 ZTEST(sys_clock_hw_cycles_update, test_update_no_change_is_noop)
@@ -51,6 +53,8 @@ ZTEST(sys_clock_hw_cycles_update, test_update_no_change_is_noop)
  * Expected result:
  * - The frequency is the same as before the update.
  *
+ * @testid{TSPEC-SYSTIMER-005}
+ * @draft
  * @see z_sys_clock_hw_cycles_per_sec_update(), sys_clock_hw_cycles_per_sec()
  */
 ZTEST(sys_clock_hw_cycles_update, test_update_zero_is_ignored)
@@ -78,6 +82,8 @@ ZTEST(sys_clock_hw_cycles_update, test_update_zero_is_ignored)
  * Expected result:
  * - sys_clock_hw_cycles_per_sec() returns the new frequency.
  *
+ * @testid{TSPEC-SYSTIMER-006}
+ * @draft
  * @see z_sys_clock_hw_cycles_per_sec_update(), sys_clock_hw_cycles_per_sec()
  */
 ZTEST(sys_clock_hw_cycles_update, test_update_changes_value_is_visible_via_getter)

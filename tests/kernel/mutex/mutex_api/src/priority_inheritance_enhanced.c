@@ -825,6 +825,9 @@ static void t_hop_anchor(void *p1, void *p2, void *p3)
  * waiter blocks on the last mutex in the chain; threads beyond the hop
  * cap from that point must NOT be boosted. This chain does not close back
  * on _current, so no deadlock assertion is expected either way.
+ *
+ * @testid{TSPEC-MUTEX-037}
+ * @draft
  */
 ZTEST(mutex_api_1cpu, test_chain_walk_hop_cap_truncates)
 {

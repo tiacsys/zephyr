@@ -51,6 +51,8 @@ int msgq_buffer[64];
  * - After the second init, the walk gets to the end of _track_list_k_event.
  *   Thus the list has no cycle.
  *
+ * @testid{TSPEC-OBJTRACK-001}
+ * @draft
  * @see k_timer_init(), k_mem_slab_init(), k_sem_init(), k_mutex_init(),
  * k_stack_init(), k_msgq_init(), k_mbox_init(), k_pipe_init(), k_queue_init(),
  * k_event_init(), SYS_PORT_TRACK_NEXT()

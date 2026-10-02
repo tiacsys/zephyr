@@ -288,6 +288,8 @@ ZTEST_USER(x86_pagetables, test_dump_ptables_user)
  * - dump_my_ptables() prints the page tables of the test thread on the console.
  * - No fatal error occurs.
  *
+ * @testid{TSPEC-ARCHX86-013}
+ * @draft
  * @see z_x86_dump_page_tables()
  */
 ZTEST(x86_pagetables, test_dump_ptables)

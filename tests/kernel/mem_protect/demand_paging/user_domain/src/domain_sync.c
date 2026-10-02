@@ -71,6 +71,8 @@ static void domain_sync_before(void *data)
  * - The first byte is 0x5a.
  * - The second byte is 0xa5, and no fault occurs.
  *
+ * @testid{TSPEC-MEMPROT-173}
+ * @draft
  * @see k_mem_domain_add_partition(), k_mem_unpin(), k_mem_page_out(),
  * k_mem_page_in()
  */
@@ -155,6 +157,8 @@ static void read_only_before(void *data)
  * - The user thread does not complete the write.
  * - On arm64, ARCH_DATA_PAGE_DIRTY is not set for the page.
  *
+ * @testid{TSPEC-MEMPROT-174}
+ * @draft
  * @see k_mem_domain_add_partition(), k_mem_domain_add_thread(), k_mem_unpin(),
  * k_mem_page_out(), k_mem_page_in()
  */

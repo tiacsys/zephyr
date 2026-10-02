@@ -70,6 +70,9 @@ bool z_x86_do_kernel_nmi(const struct arch_esf *esf)
  * - In the handler, the stack pointer is inside the NMI stack of the current
  *   CPU.
  * - The handler runs exactly one time.
+ *
+ * @testid{TSPEC-ARCHX86-012}
+ * @draft
  */
 ZTEST(nmi, test_nmi_handler)
 {

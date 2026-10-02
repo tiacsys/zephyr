@@ -61,6 +61,8 @@ static void bad_entry(void *p1, void *p2, void *p3)
  * - The user thread does not complete the access.
  * - On arm64, the page location is ARCH_PAGE_LOCATION_PAGED_OUT.
  *
+ * @testid{TSPEC-MEMPROT-175}
+ * @draft
  * @see k_mem_map(), k_mem_page_out()
  */
 ZTEST(demand_paging_kernel_only_page, test_el0_touch_kernel_page_is_fatal)

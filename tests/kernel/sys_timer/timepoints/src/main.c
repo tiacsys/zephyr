@@ -32,6 +32,8 @@
  * - After the sleep, the K_SECONDS(1) timepoint is expired, and its timeout is
  *   K_NO_WAIT.
  *
+ * @testid{TSPEC-SYSTIMER-007}
+ * @draft
  * @see sys_timepoint_calc(), sys_timepoint_expired(), sys_timepoint_timeout()
  */
 ZTEST(timepoints, test_timepoint_api)
@@ -84,6 +86,8 @@ ZTEST(timepoints, test_timepoint_api)
  * - The timepoint of the shorter timeout compares as earlier, and the other one
  *   compares as later.
  *
+ * @testid{TSPEC-SYSTIMER-008}
+ * @draft
  * @see sys_timepoint_calc(), sys_timepoint_cmp()
  */
 ZTEST(timepoints, test_comparison)

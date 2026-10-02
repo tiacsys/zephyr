@@ -41,6 +41,8 @@ __ramfunc static void ram_function(void)
  * - If CONFIG_USERSPACE is enabled, arch_buffer_validate() returns 0.
  * - test_flag is 1 after the call.
  *
+ * @testid{TSPEC-ARCHCOMMON-058}
+ * @draft
  * @see __ramfunc
  */
 ZTEST(ramfunc, test_ramfunc)

@@ -1479,6 +1479,8 @@ extern uint8_t _thread_idx_map[CONFIG_MAX_THREAD_BYTES];
  * - Each byte of _thread_idx_map is 0. Thus no thread index is free.
  * - The last k_object_alloc() call returns NULL.
  *
+ * @testid{TSPEC-MEMPROT-177}
+ * @draft
  * @see k_object_alloc(), k_object_free()
  *
  * @ingroup kernel_memprotect_tests

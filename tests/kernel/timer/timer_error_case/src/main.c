@@ -373,6 +373,8 @@ static void test_timer_handle(struct _timeout *t)
  * - z_add_timeout() returns, and no fault occurs.
  * - The test passes.
  *
+ * @testid{TSPEC-TIMER-037}
+ * @draft
  * @see z_add_timeout()
  */
 ZTEST_USER(timer_api_error, test_timer_add_timeout)

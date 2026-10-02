@@ -32,6 +32,8 @@
  * Expected result:
  * - acpi_table_get() returns a pointer that is not NULL.
  *
+ * @testid{TSPEC-ARCHCOMMON-033}
+ * @draft
  * @see acpi_table_get()
  */
 ZTEST(acpi, test_mcfg_table)
@@ -60,6 +62,8 @@ ZTEST(acpi, test_mcfg_table)
  * - acpi_device_get() returns a device that is not NULL.
  * - acpi_current_resource_get() returns 0.
  *
+ * @testid{TSPEC-ARCHCOMMON-034}
+ * @draft
  * @see acpi_device_get(), acpi_current_resource_get()
  */
 ZTEST(acpi, test_dev_enum)
@@ -100,6 +104,8 @@ ZTEST(acpi, test_dev_enum)
  * - acpi_device_mmio_get() returns 0.
  * - acpi_device_irq_get() returns 0.
  *
+ * @testid{TSPEC-ARCHCOMMON-035}
+ * @draft
  * @see acpi_device_get(), acpi_device_mmio_get(), acpi_device_irq_get()
  */
 ZTEST(acpi, test_resource_enum)

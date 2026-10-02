@@ -47,6 +47,8 @@ static void user_fault_before(void *data)
  * - The first byte is 0x5a.
  * - The second byte is 0xa5.
  *
+ * @testid{TSPEC-MEMPROT-176}
+ * @draft
  * @see k_mem_map(), k_mem_page_out()
  */
 ZTEST_USER(demand_paging_user_fault, test_user_touch_after_page_out)

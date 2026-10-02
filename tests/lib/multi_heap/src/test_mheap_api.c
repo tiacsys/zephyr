@@ -454,6 +454,8 @@ void *multi_heap_choice(struct sys_multi_heap *mheap, void *cfg,
  * - The realloc with the size 0 returns NULL. The realloc with a NULL pointer
  *   returns a block that is not NULL.
  *
+ * @testid{TSPEC-MULTIHEAP-010}
+ * @draft
  * @see sys_multi_heap_init(), sys_multi_heap_add_heap(),
  * sys_multi_heap_alloc(), sys_multi_heap_realloc(), sys_multi_heap_free()
  */

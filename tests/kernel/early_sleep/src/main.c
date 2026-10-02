@@ -91,6 +91,8 @@ SYS_INIT(test_early_sleep_app, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEVICE);
  *   than TEST_TICKS_TO_SLEEP.
  * - The helper thread ran.
  *
+ * @testid{TSPEC-EARLYSLEEP-001}
+ * @draft
  * @see k_sleep()
  *
  * @ingroup kernel_sleep_tests

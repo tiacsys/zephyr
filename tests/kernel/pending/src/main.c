@@ -390,6 +390,8 @@ ZTEST(pending, test_pending_fifo)
  * - After the put, the threads got the data in the sequence coop_high,
  *   coop_low, task_high, task_low.
  *
+ * @testid{TSPEC-PENDING-002}
+ * @draft
  * @see k_lifo_get(), k_lifo_put()
  */
 ZTEST(pending, test_pending_lifo)
@@ -484,6 +486,8 @@ ZTEST(pending, test_pending_lifo)
  * - After the sleep, timer_end_tick is at least 1000 ms after timer_start_tick.
  * - The timer data is NON_NULL_PTR.
  *
+ * @testid{TSPEC-PENDING-003}
+ * @draft
  * @see k_timer_start(), k_timer_status_sync()
  */
 ZTEST(pending, test_pending_timer)

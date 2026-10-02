@@ -111,6 +111,8 @@ void *timing_setup(void)
  * - Each interval and the average are 1000000 ns within 10 percent.
  * - The total is 2000000 ns within 10 percent.
  *
+ * @testid{TSPEC-ARCHCOMMON-060}
+ * @draft
  * @see arch_timing_init(), arch_timing_start(), arch_timing_counter_get(),
  * arch_timing_cycles_get(), arch_timing_freq_get(), arch_timing_freq_get_mhz(),
  * arch_timing_cycles_to_ns(), arch_timing_cycles_to_ns_avg(),
@@ -155,6 +157,8 @@ static void thread_entry(void *p1, void *p2, void *p3)
  * - On each CPU, the measurements meet the same limits as in test_arch_timing.
  * - All threads end.
  *
+ * @testid{TSPEC-ARCHCOMMON-061}
+ * @draft
  * @see arch_timing_init(), arch_timing_start(), arch_timing_counter_get(),
  * arch_timing_cycles_get(), arch_timing_freq_get(), arch_timing_freq_get_mhz(),
  * arch_timing_cycles_to_ns(), arch_timing_cycles_to_ns_avg(),

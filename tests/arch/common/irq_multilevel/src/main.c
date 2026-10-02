@@ -24,6 +24,8 @@
  * Expected result:
  * - irq_increment() returns 4.
  *
+ * @testid{TSPEC-ARCHCOMMON-045}
+ * @draft
  * @see irq_increment()
  */
 ZTEST(irq_multilevel, test_level_1_increment)
@@ -51,6 +53,8 @@ ZTEST(irq_multilevel, test_level_1_increment)
  * Expected result:
  * - The two values are equal.
  *
+ * @testid{TSPEC-ARCHCOMMON-046}
+ * @draft
  * @see irq_to_level_2(), IRQ_TO_L2()
  */
 ZTEST(irq_multilevel, test_level_2_encoding_matches_macro)
@@ -78,6 +82,8 @@ ZTEST(irq_multilevel, test_level_2_encoding_matches_macro)
  * Expected result:
  * - irq_get_level() returns 2.
  *
+ * @testid{TSPEC-ARCHCOMMON-047}
+ * @draft
  * @see irq_get_level()
  */
 ZTEST(irq_multilevel, test_level_2_get_level)
@@ -102,6 +108,8 @@ ZTEST(irq_multilevel, test_level_2_get_level)
  * Expected result:
  * - irq_from_level_2() returns 5.
  *
+ * @testid{TSPEC-ARCHCOMMON-048}
+ * @draft
  * @see irq_from_level_2()
  */
 ZTEST(irq_multilevel, test_level_2_decode)
@@ -126,6 +134,8 @@ ZTEST(irq_multilevel, test_level_2_decode)
  * Expected result:
  * - irq_parent_level_2() returns 3.
  *
+ * @testid{TSPEC-ARCHCOMMON-049}
+ * @draft
  * @see irq_parent_level_2()
  */
 ZTEST(irq_multilevel, test_level_2_parent)
@@ -151,6 +161,8 @@ ZTEST(irq_multilevel, test_level_2_parent)
  * Expected result:
  * - irq_get_intc_irq() returns 3.
  *
+ * @testid{TSPEC-ARCHCOMMON-050}
+ * @draft
  * @see irq_get_intc_irq()
  */
 ZTEST(irq_multilevel, test_level_2_intc_irq)
@@ -176,6 +188,8 @@ ZTEST(irq_multilevel, test_level_2_intc_irq)
  * Expected result:
  * - The result contains the level 1 IRQ number 3 and the level 2 IRQ number 6.
  *
+ * @testid{TSPEC-ARCHCOMMON-051}
+ * @draft
  * @see irq_increment()
  */
 ZTEST(irq_multilevel, test_level_2_increment)
@@ -211,6 +225,8 @@ ZTEST(irq_multilevel, test_level_2_increment)
  * Expected result:
  * - The two values are equal.
  *
+ * @testid{TSPEC-ARCHCOMMON-052}
+ * @draft
  * @see irq_to_level_3(), IRQ_TO_L3()
  */
 ZTEST(irq_multilevel, test_level_3_encoding_matches_macro)
@@ -239,6 +255,8 @@ ZTEST(irq_multilevel, test_level_3_encoding_matches_macro)
  * Expected result:
  * - irq_get_level() returns 3.
  *
+ * @testid{TSPEC-ARCHCOMMON-053}
+ * @draft
  * @see irq_get_level()
  */
 ZTEST(irq_multilevel, test_level_3_get_level)
@@ -264,6 +282,8 @@ ZTEST(irq_multilevel, test_level_3_get_level)
  * Expected result:
  * - irq_from_level_3() returns 7.
  *
+ * @testid{TSPEC-ARCHCOMMON-054}
+ * @draft
  * @see irq_from_level_3()
  */
 ZTEST(irq_multilevel, test_level_3_decode)
@@ -289,6 +309,8 @@ ZTEST(irq_multilevel, test_level_3_decode)
  * Expected result:
  * - irq_parent_level_3() returns 5.
  *
+ * @testid{TSPEC-ARCHCOMMON-055}
+ * @draft
  * @see irq_parent_level_3()
  */
 ZTEST(irq_multilevel, test_level_3_parent)
@@ -316,6 +338,8 @@ ZTEST(irq_multilevel, test_level_3_parent)
  * - irq_get_intc_irq() returns the encoded IRQ number with the level 1 IRQ
  *   number 3 and the level 2 IRQ number 5.
  *
+ * @testid{TSPEC-ARCHCOMMON-056}
+ * @draft
  * @see irq_get_intc_irq()
  */
 ZTEST(irq_multilevel, test_level_3_intc_irq)
@@ -344,6 +368,8 @@ ZTEST(irq_multilevel, test_level_3_intc_irq)
  * - The result contains the level 1 IRQ number 3, the level 2 IRQ number 5 and
  *   the level 3 IRQ number 8.
  *
+ * @testid{TSPEC-ARCHCOMMON-057}
+ * @draft
  * @see irq_increment()
  */
 ZTEST(irq_multilevel, test_level_3_increment)

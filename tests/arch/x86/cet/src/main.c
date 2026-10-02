@@ -110,6 +110,9 @@ void work_handler(struct k_work *wrk)
  *
  * Expected result:
  * - In work_handler(), the X86_S_CET_MSR_SHSTK_EN bit of X86_S_CET_MSR is set.
+ *
+ * @testid{TSPEC-ARCHX86-008}
+ * @draft
  */
 ZTEST(cet, test_shstk_work_q)
 {
@@ -159,6 +162,9 @@ void thread_b_entry(void *p1, void *p2, void *p3)
  * - The interrupt handler and the nested handler run.
  * - The interrupt handler gives thread_b_irq_sem, and thread_b ends.
  * - No fatal error occurs.
+ *
+ * @testid{TSPEC-ARCHX86-009}
+ * @draft
  */
 ZTEST(cet, test_shstk_irq)
 {
@@ -199,6 +205,9 @@ void thread_a_entry(void *p1, void *p2, void *p3)
  *   error code CTRL_PROTECTION_ERRORCODE_NEAR_RET.
  * - The fatal error handler gives error_handler_sem.
  * - thread_a does not run the code after fail().
+ *
+ * @testid{TSPEC-ARCHX86-010}
+ * @draft
  */
 ZTEST(cet, test_shstk)
 {
@@ -245,6 +254,9 @@ int do_call(int (*func)(int), int a)
  *   IV_CTRL_PROTECTION_EXCEPTION and the error code
  *   CTRL_PROTECTION_ERRORCODE_ENDBRANCH.
  * - The code after the call does not run.
+ *
+ * @testid{TSPEC-ARCHX86-011}
+ * @draft
  */
 ZTEST(cet, test_ibt)
 {

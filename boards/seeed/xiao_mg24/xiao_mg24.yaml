@@ -10,6 +10,7 @@ toolchain:
 supported:
   - bluetooth
   - gpio
+  - spi
   - uart
   - dma
   - watchdog

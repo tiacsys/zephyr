@@ -9,6 +9,7 @@ toolchain:
   - gnuarmemb
 supported:
   - gpio
+  - spi
   - uart
   - watchdog
 vendor: renesas
